@@ -35,19 +35,21 @@ import org.openqa.selenium.By;
 public class Generator {
 	private Multigraph<GraphNode, DefaultWeightedEdge> tgraph;
 	private static Map<GraphNode, JDefinedClass> nodeClassMap = new HashMap<>();
+	private String outputDir;
 
-	public Generator(Multigraph<GraphNode, DefaultWeightedEdge> tgraph) {
+	public Generator(Multigraph<GraphNode, DefaultWeightedEdge> tgraph, String outputDir) {
 		this.tgraph = tgraph;
+		this.outputDir = outputDir;
 	}
 
-	public void generateClasses(String outputDir) throws IOException, JClassAlreadyExistsException {
+	public void generateClasses() throws IOException, JClassAlreadyExistsException {
 
 		if (tgraph == null) {
 			System.out.println("Cannot proceed with a null graph");
 			System.exit(0);
 		}
 
-		copyBaseClasses(outputDir);
+		copyBaseClasses();
 
 		// get all the nodes
 		System.out.println("Generating classes : ");
@@ -87,7 +89,7 @@ public class Generator {
 
 	}
 
-	private void copyBaseClasses(String outputDir) throws IOException {
+	private void copyBaseClasses() throws IOException {
 		// clean the output directory
 		try {
 			FileUtils.deleteDirectory(new File(outputDir));
@@ -104,7 +106,7 @@ public class Generator {
 		System.out.println("===| Generated class for " + gnode);
 		JCodeModel cm = new JCodeModel();
 		String packageName = "model" + "." + gnode.getNodeType() + "s";
-		String className = packageName + "." + gnode.getName();
+		String className = packageName + "." + firstLetterCaptial(gnode.getName());
 
 		JDefinedClass definedClass = cm._class(className);
 		// add a name
@@ -138,46 +140,51 @@ public class Generator {
 			block._return(propertyField);
 		}
 
-		// controls, widgets, apps and screens
-		Set<DefaultWeightedEdge> edges = tgraph.edgesOf(gnode);
-		for (DefaultWeightedEdge edge : edges) {
-			GraphNode targetNode = tgraph.getEdgeTarget(edge);
-
-			if (targetNode == gnode) {
-				// self loop
-				continue;
-			}
-
-			System.out.println("target node " + targetNode);
-			JDefinedClass exitingClassNode = nodeClassMap.get(targetNode);
-			JFieldVar field = definedClass.field(JMod.PRIVATE, exitingClassNode, "var" + targetNode.getName());
-			JExpression init = JExpr._new(exitingClassNode);
-			field.init(init);
-			JMethod getterMethod = definedClass.method(JMod.PUBLIC, exitingClassNode, "get" + targetNode.getName());
-			JBlock block = getterMethod.body();
-			block._return(field);
-			
-		}
-		
 		if (gnode.getNodeType() == NodeType.CONTROL) {
-			JFieldVar field = definedClass.field(JMod.PRIVATE, org.openqa.selenium.By.class,
-					"id");
+			JFieldVar field = definedClass.field(JMod.PRIVATE, org.openqa.selenium.By.class, "id");
 			JExpression init = cm.ref(org.openqa.selenium.By.class).staticInvoke(gnode.getId().get("by"))
 					.arg(JExpr.lit(gnode.getId().get("locator")));
 			field.init(init);
-			JMethod getterMethod = definedClass.method(JMod.PUBLIC, org.openqa.selenium.By.class,
-					"getId");
+			JMethod getterMethod = definedClass.method(JMod.PUBLIC, org.openqa.selenium.By.class, "getId");
 			JBlock block = getterMethod.body();
 			block._return(field);
+		} else {
+			Set<DefaultWeightedEdge> edges = tgraph.edgesOf(gnode);
+			for (DefaultWeightedEdge edge : edges) {
+				GraphNode targetNode = tgraph.getEdgeTarget(edge);
+
+				if (targetNode == gnode) {
+					// self loop
+					continue;
+				}
+
+				System.out.println("target node " + targetNode);
+				JDefinedClass exitingClassNode = nodeClassMap.get(targetNode);
+				JFieldVar field = definedClass.field(JMod.PRIVATE, exitingClassNode, "var" + targetNode.getName());
+				JExpression init = JExpr._new(exitingClassNode);
+				field.init(init);
+				JMethod getterMethod = definedClass.method(JMod.PUBLIC, exitingClassNode, "get" + targetNode.getName());
+				JBlock block = getterMethod.body();
+				block._return(field);
+
+			}
 		}
+
 		// add it to pool of defined classes
 		nodeClassMap.put(gnode, definedClass);
 
-		String filepath = "output" + File.separator + "FlyPaper";
-		System.out.println("writing file");
+		String filepath = outputDir + File.separator + "FlyPaper" + File.separator + "src" + File.separator + "main" + File.separator + "java" ;
+		//System.out.println("writing file to "+filepath);
 		File file = new File(filepath);
 		file.mkdirs();
 		cm.build(file);
+	}
+
+	private String firstLetterCaptial(String name) {
+		
+		
+		
+		return name;
 	}
 
 }

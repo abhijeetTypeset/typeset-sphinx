@@ -45,8 +45,8 @@ public class Main {
 		// 3. Nodes must have respective properties initialized
 
 		// convert the model to Java classes
-		Generator generator = new Generator(tgraph);
-		generator.generateClasses(paramerets.get("output"));
+		Generator generator = new Generator(tgraph, paramerets.get("output"));
+		generator.generateClasses();
 
 	}
 
