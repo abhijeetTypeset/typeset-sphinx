@@ -10,6 +10,7 @@ import org.apache.commons.io.FileUtils;
 import org.jgrapht.graph.DefaultWeightedEdge;
 import org.jgrapht.graph.Multigraph;
 
+import com.sun.codemodel.ClassType;
 import com.sun.codemodel.JArray;
 import com.sun.codemodel.JBlock;
 import com.sun.codemodel.JClassAlreadyExistsException;
@@ -36,10 +37,13 @@ public class Generator {
 	private Multigraph<GraphNode, DefaultWeightedEdge> tgraph;
 	private static Map<GraphNode, JDefinedClass> nodeClassMap = new HashMap<>();
 	private String outputDir;
+	private JDefinedClass definedAbstractNode;
+
 
 	public Generator(Multigraph<GraphNode, DefaultWeightedEdge> tgraph, String outputDir) {
 		this.tgraph = tgraph;
 		this.outputDir = outputDir;
+		
 	}
 
 	public void generateClasses() throws IOException, JClassAlreadyExistsException {
@@ -50,6 +54,8 @@ public class Generator {
 		}
 
 		copyBaseClasses();
+
+		generateAbstractClasses();
 
 		// get all the nodes
 		System.out.println("Generating classes : ");
@@ -89,6 +95,25 @@ public class Generator {
 
 	}
 
+	private void generateAbstractClasses() throws JClassAlreadyExistsException, IOException {
+		JCodeModel cm = new JCodeModel();
+		String packageName = "model";
+		String className = packageName + "." + "Node";
+		
+
+		ClassType t = ClassType.CLASS;
+		definedAbstractNode = cm._class(JMod.PUBLIC|JMod.ABSTRACT, className, t );
+		
+		definedAbstractNode.method(JMod.PUBLIC|JMod.ABSTRACT, org.openqa.selenium.By.class, "getId");
+		definedAbstractNode.method(JMod.PUBLIC|JMod.ABSTRACT, String.class, "getName");
+		
+		String filepath = outputDir + File.separator + "FlyPaper" + File.separator + "src" + File.separator + "main"
+				+ File.separator + "java";
+		File file = new File(filepath);
+		file.mkdirs();
+		cm.build(file);
+	}
+
 	private void copyBaseClasses() throws IOException {
 		// clean the output directory
 		try {
@@ -109,6 +134,8 @@ public class Generator {
 		String className = packageName + "." + firstLetterCaptial(gnode.getName());
 
 		JDefinedClass definedClass = cm._class(className);
+		definedClass._extends(definedAbstractNode);
+
 		// add a name
 		if (gnode.getName() != null) {
 			JFieldVar propertyField = definedClass.field(JMod.PRIVATE, String.class, "name");
@@ -127,6 +154,7 @@ public class Generator {
 			JBlock block = getterMethod.body();
 			block._return(propertyField);
 		}
+		// add actions
 		if (gnode.getActions() != null) {
 			JFieldVar propertyField = definedClass.field(JMod.PRIVATE, cm.ref(String.class).array(),
 					"permissibleActions");
@@ -139,7 +167,8 @@ public class Generator {
 			JBlock block = getterMethod.body();
 			block._return(propertyField);
 		}
-
+		
+	
 		if (gnode.getNodeType() == NodeType.CONTROL) {
 			JFieldVar field = definedClass.field(JMod.PRIVATE, org.openqa.selenium.By.class, "id");
 			JExpression init = cm.ref(org.openqa.selenium.By.class).staticInvoke(gnode.getId().get("by"))
@@ -163,7 +192,7 @@ public class Generator {
 				JFieldVar field = definedClass.field(JMod.PRIVATE, exitingClassNode, "var" + targetNode.getName());
 				JExpression init = JExpr._new(exitingClassNode);
 				field.init(init);
-				JMethod getterMethod = definedClass.method(JMod.PUBLIC, exitingClassNode, "get" + targetNode.getName());
+				JMethod getterMethod = definedClass.method(JMod.PUBLIC, exitingClassNode, "get" + firstLetterCaptial(targetNode.getName()));
 				JBlock block = getterMethod.body();
 				block._return(field);
 
@@ -173,18 +202,20 @@ public class Generator {
 		// add it to pool of defined classes
 		nodeClassMap.put(gnode, definedClass);
 
-		String filepath = outputDir + File.separator + "FlyPaper" + File.separator + "src" + File.separator + "main" + File.separator + "java" ;
-		//System.out.println("writing file to "+filepath);
+		String filepath = outputDir + File.separator + "FlyPaper" + File.separator + "src" + File.separator + "main"
+				+ File.separator + "java";
+		// System.out.println("writing file to "+filepath);
 		File file = new File(filepath);
 		file.mkdirs();
 		cm.build(file);
 	}
 
 	private String firstLetterCaptial(String name) {
-		
-		
-		
-		return name;
+		if (name.length() <= 1) {
+			return name.toUpperCase();
+		} else {
+			return name.substring(0, 1).toUpperCase() + name.substring(1);
+		}
 	}
 
 }
