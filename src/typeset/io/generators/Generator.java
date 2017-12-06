@@ -145,7 +145,7 @@ public class Generator {
 			JBlock block = getterMethod.body();
 			block._return(propertyField);
 		}
-		// add a url
+		// add an url
 		if (gnode.getUrl() != null) {
 			JFieldVar propertyField = definedClass.field(JMod.PRIVATE, String.class, "url");
 			JExpression init = JExpr.lit(gnode.getUrl());
@@ -153,6 +153,16 @@ public class Generator {
 			JMethod getterMethod = definedClass.method(JMod.PUBLIC, String.class, "getUrl");
 			JBlock block = getterMethod.body();
 			block._return(propertyField);
+		}
+		// add an id
+		if (gnode.getId() != null) {
+			JFieldVar field = definedClass.field(JMod.PRIVATE, org.openqa.selenium.By.class, "id");
+			JExpression init = cm.ref(org.openqa.selenium.By.class).staticInvoke(gnode.getId().get("by"))
+					.arg(JExpr.lit(gnode.getId().get("locator")));
+			field.init(init);
+			JMethod getterMethod = definedClass.method(JMod.PUBLIC, org.openqa.selenium.By.class, "getId");
+			JBlock block = getterMethod.body();
+			block._return(field);
 		}
 		// add actions
 		if (gnode.getActions() != null) {
@@ -169,15 +179,7 @@ public class Generator {
 		}
 		
 	
-		if (gnode.getNodeType() == NodeType.CONTROL) {
-			JFieldVar field = definedClass.field(JMod.PRIVATE, org.openqa.selenium.By.class, "id");
-			JExpression init = cm.ref(org.openqa.selenium.By.class).staticInvoke(gnode.getId().get("by"))
-					.arg(JExpr.lit(gnode.getId().get("locator")));
-			field.init(init);
-			JMethod getterMethod = definedClass.method(JMod.PUBLIC, org.openqa.selenium.By.class, "getId");
-			JBlock block = getterMethod.body();
-			block._return(field);
-		} else {
+		if (gnode.getNodeType() != NodeType.CONTROL) {
 			Set<DefaultWeightedEdge> edges = tgraph.edgesOf(gnode);
 			for (DefaultWeightedEdge edge : edges) {
 				GraphNode targetNode = tgraph.getEdgeTarget(edge);
