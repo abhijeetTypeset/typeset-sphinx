@@ -10,6 +10,7 @@ import org.apache.commons.io.FileUtils;
 import org.jgrapht.graph.DefaultWeightedEdge;
 import org.jgrapht.graph.Multigraph;
 
+import com.sun.codemodel.JArray;
 import com.sun.codemodel.JBlock;
 import com.sun.codemodel.JClassAlreadyExistsException;
 import com.sun.codemodel.JCodeModel;
@@ -19,6 +20,7 @@ import com.sun.codemodel.JExpression;
 import com.sun.codemodel.JFieldVar;
 import com.sun.codemodel.JMethod;
 import com.sun.codemodel.JMod;
+import com.sun.codemodel.JType;
 
 import typeset.io.models.App;
 import typeset.io.models.GraphNode;
@@ -57,7 +59,11 @@ public class Generator {
 		// dependency graph and then generate the class using the
 		// dependency graph. However, currently we shall improvise
 
-		// first go through all the widgets
+		for (GraphNode gnode : allNodes) {
+			if (gnode.getNodeType() == NodeType.CONTROL) {
+				generateClassFile(gnode);
+			}
+		}
 		for (GraphNode gnode : allNodes) {
 			if (gnode.getNodeType() == NodeType.WIDGET) {
 				generateClassFile(gnode);
@@ -106,12 +112,30 @@ public class Generator {
 			JFieldVar propertyField = definedClass.field(JMod.PRIVATE, String.class, "name");
 			JExpression init = JExpr.lit(gnode.getName());
 			propertyField.init(init);
+			JMethod getterMethod = definedClass.method(JMod.PUBLIC, String.class, "getName");
+			JBlock block = getterMethod.body();
+			block._return(propertyField);
 		}
 		// add a url
 		if (gnode.getUrl() != null) {
 			JFieldVar propertyField = definedClass.field(JMod.PRIVATE, String.class, "url");
 			JExpression init = JExpr.lit(gnode.getUrl());
 			propertyField.init(init);
+			JMethod getterMethod = definedClass.method(JMod.PUBLIC, String.class, "getUrl");
+			JBlock block = getterMethod.body();
+			block._return(propertyField);
+		}
+		if (gnode.getActions() != null) {
+			JFieldVar propertyField = definedClass.field(JMod.PRIVATE, cm.ref(String.class).array(),
+					"permissibleActions");
+			JArray array = JExpr.newArray(cm.ref(String.class));
+			for (String action : gnode.getActions()) {
+				array.add(JExpr.lit(action));
+			}
+			propertyField.init(array);
+			JMethod getterMethod = definedClass.method(JMod.PUBLIC, cm.ref(String.class).array(), "getActions");
+			JBlock block = getterMethod.body();
+			block._return(propertyField);
 		}
 
 		// controls, widgets, apps and screens
@@ -125,56 +149,35 @@ public class Generator {
 			}
 
 			System.out.println("target node " + targetNode);
-			if (targetNode.getNodeType() == NodeType.SCREEN) {
-
-				JDefinedClass exitingClassNode = nodeClassMap.get(targetNode);
-				JFieldVar field = definedClass.field(JMod.PRIVATE, exitingClassNode, "var" + targetNode.getName());
-				JExpression init = JExpr._new(exitingClassNode);
-				field.init(init);
-				JMethod getterMethod = definedClass.method(JMod.PUBLIC, exitingClassNode, "get" + targetNode.getName());
-				JBlock block = getterMethod.body();
-				block._return(field);
-			} else if (targetNode.getNodeType() == NodeType.APP) {
-
-				JDefinedClass exitingClassNode = nodeClassMap.get(targetNode);
-				JFieldVar field = definedClass.field(JMod.PRIVATE, exitingClassNode, "var" + targetNode.getName());
-				JExpression init = JExpr._new(exitingClassNode);
-				field.init(init);
-				JMethod getterMethod = definedClass.method(JMod.PUBLIC, exitingClassNode, "get" + targetNode.getName());
-				JBlock block = getterMethod.body();
-				block._return(field);
-			} else if (targetNode.getNodeType() == NodeType.WIDGET) {
-
-				JDefinedClass exitingClassNode = nodeClassMap.get(targetNode);
-				JFieldVar field = definedClass.field(JMod.PRIVATE, exitingClassNode, "var" + targetNode.getName());
-				JExpression init = JExpr._new(exitingClassNode);
-				field.init(init);
-				JMethod getterMethod = definedClass.method(JMod.PUBLIC, exitingClassNode, "get" + targetNode.getName());
-				JBlock block = getterMethod.body();
-				block._return(field);
-			} else {
-
-				JFieldVar field = definedClass.field(JMod.PRIVATE, org.openqa.selenium.By.class,
-						"var" + targetNode.getName());
-				JExpression init = cm.ref(org.openqa.selenium.By.class).staticInvoke(targetNode.getId().get("by"))
-						.arg(JExpr.lit(targetNode.getId().get("locator")));
-				field.init(init);
-				JMethod getterMethod = definedClass.method(JMod.PUBLIC, org.openqa.selenium.By.class,
-						"get" + targetNode.getName());
-				JBlock block = getterMethod.body();
-				block._return(field);
-			}
-
-			// add it to pool of defined classes
-			nodeClassMap.put(gnode, definedClass);
-
-			String filepath = "output" + File.separator + "FlyPaper";
-			System.out.println("writing file");
-			File file = new File(filepath);
-			file.mkdirs();
-			cm.build(file);
-
+			JDefinedClass exitingClassNode = nodeClassMap.get(targetNode);
+			JFieldVar field = definedClass.field(JMod.PRIVATE, exitingClassNode, "var" + targetNode.getName());
+			JExpression init = JExpr._new(exitingClassNode);
+			field.init(init);
+			JMethod getterMethod = definedClass.method(JMod.PUBLIC, exitingClassNode, "get" + targetNode.getName());
+			JBlock block = getterMethod.body();
+			block._return(field);
+			
 		}
+		
+		if (gnode.getNodeType() == NodeType.CONTROL) {
+			JFieldVar field = definedClass.field(JMod.PRIVATE, org.openqa.selenium.By.class,
+					"id");
+			JExpression init = cm.ref(org.openqa.selenium.By.class).staticInvoke(gnode.getId().get("by"))
+					.arg(JExpr.lit(gnode.getId().get("locator")));
+			field.init(init);
+			JMethod getterMethod = definedClass.method(JMod.PUBLIC, org.openqa.selenium.By.class,
+					"getId");
+			JBlock block = getterMethod.body();
+			block._return(field);
+		}
+		// add it to pool of defined classes
+		nodeClassMap.put(gnode, definedClass);
+
+		String filepath = "output" + File.separator + "FlyPaper";
+		System.out.println("writing file");
+		File file = new File(filepath);
+		file.mkdirs();
+		cm.build(file);
 	}
 
 }
