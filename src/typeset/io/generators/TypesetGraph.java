@@ -259,7 +259,6 @@ public class TypesetGraph {
 				node.addImplicitAssertion("startsWith");
 				node.addImplicitAssertion("endsWith");
 				node.addImplicitAssertion("empty");
-				node.addImplicitAssertion("notEmpty");
 			}
 			System.out.println("Node "+node+" has assertions : "+node.getImplictAssertions());
 		}
