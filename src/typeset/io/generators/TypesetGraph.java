@@ -4,6 +4,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.commons.beanutils.BeanUtils;
 import org.jgrapht.graph.DefaultWeightedEdge;
@@ -240,6 +241,29 @@ public class TypesetGraph {
 		BeanUtils.copyProperties(graphNode, page);
 		graphNode.setNodeType(nodeType);
 		return graphNode;
+	}
+
+	public void addImplicitAssertions() {
+		// get all the nodes
+		Set<GraphNode> allNodes = multiGraph.vertexSet();
+		for (GraphNode node : allNodes) {
+			if(node.getNodeType() == NodeType.PAGE) {
+				node.addImplicitAssertion("atPage");
+			}else {
+				node.addImplicitAssertion("canSee");
+			}
+
+			if(node.getNodeType() == NodeType.CONTROL && node.getActions().contains("type")) {
+				node.addImplicitAssertion("contains");
+				node.addImplicitAssertion("equals");
+				node.addImplicitAssertion("startsWith");
+				node.addImplicitAssertion("endsWith");
+				node.addImplicitAssertion("empty");
+				node.addImplicitAssertion("notEmpty");
+			}
+			System.out.println("Node "+node+" has assertions : "+node.getImplictAssertions());
+		}
+		
 	}
 
 }

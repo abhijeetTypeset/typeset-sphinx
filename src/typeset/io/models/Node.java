@@ -1,6 +1,9 @@
 package typeset.io.models;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
 
 import javax.xml.xpath.XPath;
 
@@ -11,7 +14,16 @@ public class Node {
 	private List<String> actions;
 	private List<String> assertions;
 	private Map<String, String> precondition;
+	private List<String> implictAssertions = new ArrayList<>();
 
+	public List<String> getImplictAssertions() {
+		return implictAssertions;
+	}
+	
+	public void addImplicitAssertion(String assertion) {
+		implictAssertions.add(assertion);
+	}
+	
 	public String getName() {
 		return name;
 	}
