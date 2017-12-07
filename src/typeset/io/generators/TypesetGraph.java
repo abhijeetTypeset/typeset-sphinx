@@ -10,6 +10,7 @@ import org.apache.commons.beanutils.BeanUtils;
 import org.jgrapht.graph.DefaultWeightedEdge;
 import org.jgrapht.graph.Multigraph;
 
+import typeset.io.exceptions.InvalidLiteralException;
 import typeset.io.models.App;
 import typeset.io.models.Control;
 import typeset.io.models.GraphNode;
@@ -28,11 +29,16 @@ public class TypesetGraph {
 	public TypesetGraph(Model model) {
 		this.model = model;
 	}
-
-	private Map<String, GraphNode> getNameNodeMap() {
-		return nameNodeMap;
+	
+	private GraphNode getNodeByKey(String key) {
+		GraphNode node = nameNodeMap.get(key);
+		if (node != null) {
+			return node; 
+		}
+		
+		throw new InvalidLiteralException();
 	}
-
+	
 	public Multigraph<GraphNode, DefaultWeightedEdge> initialize()
 			throws IllegalAccessException, InvocationTargetException {
 		if (model == null) {
@@ -79,35 +85,35 @@ public class TypesetGraph {
 		// add the edges
 		for (String c : model.getControls().keySet()) {
 
-			GraphNode controlNode = nameNodeMap.get(c);
+			GraphNode controlNode = getNodeByKey(c);
 			String leadsto = controlNode.getLeadsto();
 			if (leadsto != null) {
-				GraphNode screenNode = nameNodeMap.get(leadsto);
+				GraphNode screenNode = getNodeByKey(leadsto);
 				System.out.println("Adding edge from control " + c + " to screen " + screenNode);
 				multiGraph.addEdge(controlNode, screenNode);
 			}
 		}
 
 		for (String w : model.getWidgets().keySet()) {
-			GraphNode widgetNode = nameNodeMap.get(w);
+			GraphNode widgetNode = getNodeByKey(w);
 			List<String> controlList = widgetNode.getControls();
 			System.out.println("Widget " + w + " ; " + controlList);
 			if (controlList != null) {
 				for (String c : controlList) {
-					GraphNode controlNode = nameNodeMap.get(c);
+					GraphNode controlNode = getNodeByKey(c);
 					System.out.println("Adding edge from widget " + w + " to control " + c);
 					multiGraph.addEdge(widgetNode, controlNode);
 				}
 			}
 		}
 		for (String a : model.getApps().keySet()) {
-			GraphNode appNode = nameNodeMap.get(a);
+			GraphNode appNode = getNodeByKey(a);
 			List<String> controlList = appNode.getControls();
 			List<String> widgetList = appNode.getWidgets();
 
 			if (widgetList != null) {
 				for (String w : widgetList) {
-					GraphNode widgetNode = nameNodeMap.get(w);
+					GraphNode widgetNode = getNodeByKey(w);
 					System.out.println("Adding edge from app " + a + " to widget " + w);
 					multiGraph.addEdge(appNode, widgetNode);
 				}
@@ -115,14 +121,14 @@ public class TypesetGraph {
 
 			if (controlList != null) {
 				for (String c : controlList) {
-					GraphNode controlNode = nameNodeMap.get(c);
+					GraphNode controlNode = getNodeByKey(c);
 					System.out.println("Adding edge from app " + a + " to control " + c);
 					multiGraph.addEdge(appNode, controlNode);
 				}
 			}
 		}
 		for (String s : model.getScreens().keySet()) {
-			GraphNode screenNode = nameNodeMap.get(s);
+			GraphNode screenNode = getNodeByKey(s);
 
 			List<String> controlList = screenNode.getControls();
 			List<String> widgetList = screenNode.getWidgets();
@@ -130,7 +136,7 @@ public class TypesetGraph {
 
 			if (appList != null) {
 				for (String a : appList) {
-					GraphNode appNode = nameNodeMap.get(a);
+					GraphNode appNode = getNodeByKey(a);
 					System.out.println("Adding edge from app " + s + " to app " + a);
 					multiGraph.addEdge(screenNode, appNode);
 				}
@@ -138,7 +144,7 @@ public class TypesetGraph {
 
 			if (widgetList != null) {
 				for (String w : widgetList) {
-					GraphNode widgetNode = nameNodeMap.get(w);
+					GraphNode widgetNode = getNodeByKey(w);
 					System.out.println("Adding edge from app " + s + " to widget " + w);
 					multiGraph.addEdge(screenNode, widgetNode);
 				}
@@ -146,7 +152,7 @@ public class TypesetGraph {
 
 			if (controlList != null) {
 				for (String c : controlList) {
-					GraphNode controlNode = nameNodeMap.get(c);
+					GraphNode controlNode = getNodeByKey(c);
 					System.out.println("Adding edge from app " + s + " to control " + c);
 					multiGraph.addEdge(screenNode, controlNode);
 				}
@@ -154,7 +160,7 @@ public class TypesetGraph {
 		}
 
 		for (String p : model.getPages().keySet()) {
-			GraphNode pageNode = nameNodeMap.get(p);
+			GraphNode pageNode = getNodeByKey(p);
 			if (pageNode.getRoot()) {
 				rootNode = pageNode;
 			}
@@ -166,7 +172,7 @@ public class TypesetGraph {
 
 			if (screenList != null) {
 				for (String s : screenList) {
-					GraphNode screenNode = nameNodeMap.get(s);
+					GraphNode screenNode = getNodeByKey(s);
 					System.out.println("Adding edge from app " + p + " to app " + s);
 					multiGraph.addEdge(pageNode, screenNode);
 				}
@@ -174,7 +180,7 @@ public class TypesetGraph {
 
 			if (appList != null) {
 				for (String a : appList) {
-					GraphNode appNode = nameNodeMap.get(a);
+					GraphNode appNode = getNodeByKey(a);
 					System.out.println("Adding edge from app " + p + " to app " + a);
 					multiGraph.addEdge(pageNode, appNode);
 				}
@@ -182,7 +188,7 @@ public class TypesetGraph {
 
 			if (widgetList != null) {
 				for (String w : widgetList) {
-					GraphNode widgetNode = nameNodeMap.get(w);
+					GraphNode widgetNode = getNodeByKey(w);
 					System.out.println("Adding edge from app " + p + " to widget " + w);
 					multiGraph.addEdge(pageNode, widgetNode);
 				}
@@ -190,7 +196,7 @@ public class TypesetGraph {
 
 			if (controlList != null) {
 				for (String c : controlList) {
-					GraphNode controlNode = nameNodeMap.get(c);
+					GraphNode controlNode = getNodeByKey(c);
 					System.out.println("Adding edge from app " + p + " to control " + c);
 					multiGraph.addEdge(pageNode, controlNode);
 				}
