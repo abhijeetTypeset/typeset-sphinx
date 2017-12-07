@@ -27,12 +27,13 @@ public class TypesetGraph {
 	public TypesetGraph(Model model) {
 		this.model = model;
 	}
-	
+
 	private Map<String, GraphNode> getNameNodeMap() {
 		return nameNodeMap;
 	}
 
-	public Multigraph<GraphNode, DefaultWeightedEdge> initialize() throws IllegalAccessException, InvocationTargetException {
+	public Multigraph<GraphNode, DefaultWeightedEdge> initialize()
+			throws IllegalAccessException, InvocationTargetException {
 		if (model == null) {
 			System.out.println("model cannot be null");
 			System.exit(0);
@@ -76,8 +77,14 @@ public class TypesetGraph {
 
 		// add the edges
 		for (String c : model.getControls().keySet()) {
-			// System.out.println("Control " + c);
-			// TODO: leads to
+
+			GraphNode controlNode = nameNodeMap.get(c);
+			String leadsto = controlNode.getLeadsto();
+			if (leadsto != null) {
+				GraphNode screenNode = nameNodeMap.get(leadsto);
+				System.out.println("Adding edge from control " + c + " to screen " + screenNode);
+				multiGraph.addEdge(controlNode, screenNode);
+			}
 		}
 
 		for (String w : model.getWidgets().keySet()) {
@@ -190,7 +197,7 @@ public class TypesetGraph {
 		}
 
 		// TODO: store the preconditions
-		
+
 		return multiGraph;
 
 	}
