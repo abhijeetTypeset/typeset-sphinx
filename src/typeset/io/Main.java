@@ -38,7 +38,11 @@ public class Main {
 		// initialize the graph
 		TypesetGraph typesetGraph = new TypesetGraph(model);
 		Multigraph<GraphNode, DefaultWeightedEdge> tgraph = typesetGraph.initialize();
+		
+		
+		typesetGraph.consistencyCheck();
 		typesetGraph.addImplicitAssertions();
+		
 		
 		// TODO: check if it is consistent
 		// 1. Isolated nodes not allowed

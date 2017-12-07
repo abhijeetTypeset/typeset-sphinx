@@ -7,6 +7,9 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.beanutils.BeanUtils;
+import org.jgrapht.GraphPath;
+import org.jgrapht.alg.interfaces.ShortestPathAlgorithm;
+import org.jgrapht.alg.shortestpath.DijkstraShortestPath;
 import org.jgrapht.graph.DefaultWeightedEdge;
 import org.jgrapht.graph.Multigraph;
 
@@ -29,16 +32,16 @@ public class TypesetGraph {
 	public TypesetGraph(Model model) {
 		this.model = model;
 	}
-	
+
 	private GraphNode getNodeByKey(String key) {
 		GraphNode node = nameNodeMap.get(key);
 		if (node != null) {
-			return node; 
+			return node;
 		}
-		
+
 		throw new InvalidLiteralException();
 	}
-	
+
 	public Multigraph<GraphNode, DefaultWeightedEdge> initialize()
 			throws IllegalAccessException, InvocationTargetException {
 		if (model == null) {
@@ -253,22 +256,34 @@ public class TypesetGraph {
 		// get all the nodes
 		Set<GraphNode> allNodes = multiGraph.vertexSet();
 		for (GraphNode node : allNodes) {
-			if(node.getNodeType() == NodeType.PAGE) {
+			if (node.getNodeType() == NodeType.PAGE) {
 				node.addImplicitAssertion("atPage");
-			}else {
+			} else {
 				node.addImplicitAssertion("canSee");
 			}
 
-			if(node.getNodeType() == NodeType.CONTROL && node.getActions().contains("type")) {
+			if (node.getNodeType() == NodeType.CONTROL && node.getActions().contains("type")) {
 				node.addImplicitAssertion("contains");
 				node.addImplicitAssertion("equals");
 				node.addImplicitAssertion("startsWith");
 				node.addImplicitAssertion("endsWith");
 				node.addImplicitAssertion("empty");
 			}
-			System.out.println("Node "+node+" has assertions : "+node.getImplictAssertions());
+			System.out.println("Node " + node + " has assertions : " + node.getImplictAssertions());
 		}
-		
+
+	}
+
+	public void consistencyCheck() {
+		Set<GraphNode> allNodes = multiGraph.vertexSet();
+		for (GraphNode node : allNodes) {
+
+			GraphPath<GraphNode, DefaultWeightedEdge> path = DijkstraShortestPath.findPathBetween(multiGraph, rootNode,
+					node);
+			System.out.println("path between " + rootNode + " and " + node + " is " + path);
+
+		}
+
 	}
 
 }
