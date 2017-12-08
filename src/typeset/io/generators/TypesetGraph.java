@@ -154,24 +154,30 @@ public class TypesetGraph {
 			if (appList != null) {
 				for (String a : appList) {
 					GraphNode appNode = getNodeByKey(a);
-					System.out.println("Adding edge from app " + screenNode + " to app " + appNode);
-					graph.addEdge(screenNode, appNode);
+					if (doesNotHaveIncomingEdges(appNode)) {
+						System.out.println("Adding edge from screen " + screenNode + " to app " + appNode);
+						graph.addEdge(screenNode, appNode);
+					}
 				}
 			}
 
 			if (widgetList != null) {
 				for (String w : widgetList) {
 					GraphNode widgetNode = getNodeByKey(w);
-					System.out.println("Adding edge from app " + screenNode + " to widget " + widgetNode);
-					graph.addEdge(screenNode, widgetNode);
+					if (doesNotHaveIncomingEdges(widgetNode)) {
+						System.out.println("Adding edge from screen " + screenNode + " to widget " + widgetNode);
+						graph.addEdge(screenNode, widgetNode);
+					}
 				}
 			}
 
 			if (controlList != null) {
 				for (String c : controlList) {
 					GraphNode controlNode = getNodeByKey(c);
-					System.out.println("Adding edge from app " + screenNode + " to control " + controlNode);
-					graph.addEdge(screenNode, controlNode);
+					if (doesNotHaveIncomingEdges(controlNode)) {
+						System.out.println("Adding edge from screen " + screenNode + " to control " + controlNode);
+						graph.addEdge(screenNode, controlNode);
+					}
 				}
 			}
 		}
@@ -190,32 +196,40 @@ public class TypesetGraph {
 			if (screenList != null) {
 				for (String s : screenList) {
 					GraphNode screenNode = getNodeByKey(s);
-					System.out.println("Adding edge from app " + pageNode + " to app " + pageNode);
-					graph.addEdge(pageNode, screenNode);
+					if (doesNotHaveIncomingEdges(screenNode)) {
+						System.out.println("Adding edge from page " + pageNode + " to screen " + screenNode);
+						graph.addEdge(pageNode, screenNode);
+					}
 				}
 			}
 
 			if (appList != null) {
 				for (String a : appList) {
 					GraphNode appNode = getNodeByKey(a);
-					System.out.println("Adding edge from app " + pageNode + " to app " + appNode);
-					graph.addEdge(pageNode, appNode);
+					if (doesNotHaveIncomingEdges(appNode)) {
+						System.out.println("Adding edge from page " + pageNode + " to app " + appNode);
+						graph.addEdge(pageNode, appNode);
+					}
 				}
 			}
 
 			if (widgetList != null) {
 				for (String w : widgetList) {
 					GraphNode widgetNode = getNodeByKey(w);
-					System.out.println("Adding edge from app " + pageNode + " to widget " + widgetNode);
-					graph.addEdge(pageNode, widgetNode);
+					if (doesNotHaveIncomingEdges(widgetNode)) {
+						System.out.println("Adding edge from page " + pageNode + " to widget " + widgetNode);
+						graph.addEdge(pageNode, widgetNode);
+					}
 				}
 			}
 
 			if (controlList != null) {
 				for (String c : controlList) {
 					GraphNode controlNode = getNodeByKey(c);
-					System.out.println("Adding edge from app " + pageNode + " to control " + controlNode);
-					graph.addEdge(pageNode, controlNode);
+					if (doesNotHaveIncomingEdges(controlNode)) {
+						System.out.println("Adding edge from page " + pageNode + " to control " + controlNode);
+						graph.addEdge(pageNode, controlNode);
+					}
 				}
 			}
 		}
@@ -224,6 +238,16 @@ public class TypesetGraph {
 
 		return graph;
 
+	}
+
+	private boolean doesNotHaveIncomingEdges(GraphNode node) {
+		Set<DefaultEdge> edges = graph.incomingEdgesOf(node);
+
+		if (edges.size() > 0) {
+			return false;
+		} else {
+			return true;
+		}
 	}
 
 	private GraphNode createNewVertex(Control control, NodeType nodeType)
@@ -316,9 +340,9 @@ public class TypesetGraph {
 		exporter.exportGraph(graph, new FileWriter(graphFilePath));
 
 		try {
-			//String pngFilePath = graphOutputDir + file.separator + "graph.png";
+			// String pngFilePath = graphOutputDir + file.separator + "graph.png";
 			String pngFilePath = "/home/ub16/share" + file.separator + "graph.png";
-			
+
 			String[] command = { "dot", "-Tpng", graphFilePath, "-o", pngFilePath };
 			System.out.println("Png conversion  : " + Arrays.toString(command));
 			ProcessBuilder probuilder = new ProcessBuilder(command);
