@@ -12,8 +12,7 @@ public class Node {
 	private String url;
 	private Map<String, String> id;
 	private List<String> actions;
-	private List<String> assertions;
-	private Map<String, String> precondition;
+	private List<String> precondition;
 	private List<String> implictAssertions = new ArrayList<>();
 
 	public List<String> getImplictAssertions() {
@@ -40,22 +39,6 @@ public class Node {
 		this.actions = actions;
 	}
 
-	public List<String> getAssertions() {
-		return assertions;
-	}
-
-	public void setAssertions(List<String> assertions) {
-		this.assertions = assertions;
-	}
-
-	public Map<String, String> getPrecondition() {
-		return precondition;
-	}
-
-	public void setPrecondition(Map<String, String> precondition) {
-		this.precondition = precondition;
-	}
-
 	public Map<String, String> getId() {
 		return id;
 	}
@@ -75,6 +58,14 @@ public class Node {
 	@Override
 	public String toString() {
 		return name;
+	}
+
+	public List<String> getPrecondition() {
+		return precondition;
+	}
+
+	public void setPrecondition(List<String> precondition) {
+		this.precondition = precondition;
 	}
 
 }
