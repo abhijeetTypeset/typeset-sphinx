@@ -6,15 +6,18 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeSet;
 
 import org.apache.commons.beanutils.BeanUtils;
 import org.jgrapht.GraphPath;
 import org.jgrapht.alg.interfaces.ShortestPathAlgorithm;
+import org.jgrapht.alg.shortestpath.AllDirectedPaths;
 import org.jgrapht.alg.shortestpath.DijkstraShortestPath;
 import org.jgrapht.graph.DefaultDirectedGraph;
 import org.jgrapht.graph.DefaultEdge;
@@ -34,6 +37,9 @@ import typeset.io.models.NodeType;
 import typeset.io.models.Page;
 import typeset.io.models.Screen;
 import typeset.io.models.Widget;
+import typeset.io.models.assertions.Clause;
+import typeset.io.models.assertions.ExplicitAssertion;
+import typeset.io.models.assertions.Literal;
 
 public class TypesetGraph {
 	private Model model;
@@ -41,6 +47,7 @@ public class TypesetGraph {
 	private DefaultDirectedGraph<GraphNode, DefaultEdge> graph;
 	private GraphNode rootNode;
 	private String targetDir;
+	private List<GraphNode> nodesWithPrecondition;
 
 	public TypesetGraph(Model model, String targetDir) {
 		this.model = model;
@@ -64,8 +71,10 @@ public class TypesetGraph {
 		}
 		graph = new DefaultDirectedGraph<>(DefaultEdge.class);
 		nameNodeMap = new HashMap<>();
+		nodesWithPrecondition = new ArrayList<>();
 
 		// add all the vertices
+
 		for (String c : model.getControls().keySet()) {
 			System.out.println("Adding control " + c);
 			GraphNode v = createNewVertex(model.getControls().get(c), NodeType.CONTROL);
@@ -100,6 +109,9 @@ public class TypesetGraph {
 		System.out.println("number of vertices : " + graph.vertexSet().size());
 
 		// add the edges
+
+		List<GraphNode> controlsThatLeadToParent = new ArrayList<>();
+
 		for (String c : model.getControls().keySet()) {
 
 			GraphNode controlNode = getNodeByKey(c);
@@ -108,6 +120,9 @@ public class TypesetGraph {
 				GraphNode screenNode = getNodeByKey(leadsto);
 				System.out.println("Adding edge from control " + controlNode + " to screen " + screenNode);
 				graph.addEdge(controlNode, screenNode);
+			} else {
+				// add edge back to parent
+				controlsThatLeadToParent.add(controlNode);
 			}
 		}
 
@@ -234,9 +249,71 @@ public class TypesetGraph {
 			}
 		}
 
-		// TODO: store the preconditions
+		// add edges to controls that haven't been assigned to any edges
+
+		for (GraphNode controlNode : controlsThatLeadToParent) {
+			// get incoming edges
+			Set<DefaultEdge> edges = graph.incomingEdgesOf(controlNode);
+
+			// note that the edges here should not be more that one
+
+			for (DefaultEdge edge : edges) {
+				System.out.println("Incoming edges to control " + controlNode + " from " + graph.getEdgeSource(edge));
+				graph.addEdge(controlNode, graph.getEdgeSource(edge));
+			}
+
+		}
+
+		// resolve preconditions
+
+		resolvePreconditons();
 
 		return graph;
+
+	}
+
+	private Literal parseLiteral(String literalString) {
+		String[] parts = literalString.split("%");
+		
+		if (parts.length != 3) {
+			throw new InvalidLiteralException(literalString);
+		}
+
+		Literal literal = new Literal(parts[0], parts[2], parts[1].toLowerCase().equals("not"));
+		return literal;
+	}
+
+	private Clause parseClasuse(String clauseString) {
+		Clause clause = new Clause();
+		String[] literals = clauseString.split(",");
+		for (String literalString : literals) {
+			Literal literal = parseLiteral(literalString);
+			clause.addLiterals(literal);
+		}
+		
+		return clause;	
+	}
+
+	private ExplicitAssertion parsePrecondtion(List<String> precodtionString) {
+		System.out.println("pre-condition " + precodtionString);
+		ExplicitAssertion explicitAssertion = new ExplicitAssertion();
+		for (String precs : precodtionString) {
+			Clause clause = parseClasuse(precs);
+			explicitAssertion.addclauses(clause);
+		}
+		
+		return explicitAssertion;
+
+	}
+
+	private void resolvePreconditons() {
+		for (GraphNode node : nodesWithPrecondition) {
+			List<String> precondtionString = node.getPrecondition();
+
+			ExplicitAssertion precondition = parsePrecondtion(precondtionString);
+			System.out.println(precondition);
+		}
+		System.exit(0);
 
 	}
 
@@ -255,6 +332,9 @@ public class TypesetGraph {
 		GraphNode graphNode = new GraphNode();
 		BeanUtils.copyProperties(graphNode, control);
 		graphNode.setNodeType(nodeType);
+		if (graphNode.getPrecondition() != null) {
+			nodesWithPrecondition.add(graphNode);
+		}
 		return graphNode;
 	}
 
@@ -263,6 +343,9 @@ public class TypesetGraph {
 		GraphNode graphNode = new GraphNode();
 		BeanUtils.copyProperties(graphNode, widget);
 		graphNode.setNodeType(nodeType);
+		if (graphNode.getPrecondition() != null) {
+			nodesWithPrecondition.add(graphNode);
+		}
 		return graphNode;
 	}
 
@@ -271,6 +354,9 @@ public class TypesetGraph {
 		GraphNode graphNode = new GraphNode();
 		BeanUtils.copyProperties(graphNode, app);
 		graphNode.setNodeType(nodeType);
+		if (graphNode.getPrecondition() != null) {
+			nodesWithPrecondition.add(graphNode);
+		}
 		return graphNode;
 	}
 
@@ -279,6 +365,9 @@ public class TypesetGraph {
 		GraphNode graphNode = new GraphNode();
 		BeanUtils.copyProperties(graphNode, screen);
 		graphNode.setNodeType(nodeType);
+		if (graphNode.getPrecondition() != null) {
+			nodesWithPrecondition.add(graphNode);
+		}
 		return graphNode;
 	}
 
@@ -287,6 +376,9 @@ public class TypesetGraph {
 		GraphNode graphNode = new GraphNode();
 		BeanUtils.copyProperties(graphNode, page);
 		graphNode.setNodeType(nodeType);
+		if (graphNode.getPrecondition() != null) {
+			nodesWithPrecondition.add(graphNode);
+		}
 		return graphNode;
 	}
 
@@ -321,6 +413,29 @@ public class TypesetGraph {
 
 		}
 
+	}
+
+	public void testPath() {
+		String srcNode = "page_1";
+		String destNode = "page_5";
+
+		GraphNode sNode = nameNodeMap.get(srcNode);
+		GraphNode dNode = nameNodeMap.get(destNode);
+
+		System.out.println("sNode " + sNode);
+		System.out.println("dNode " + dNode);
+
+		if (sNode == null || dNode == null) {
+			System.out.println("node null cannot proceed");
+			System.exit(0);
+		}
+
+		AllDirectedPaths<GraphNode, DefaultEdge> allDirectedPath = new AllDirectedPaths<>(graph);
+
+		List<GraphPath<GraphNode, DefaultEdge>> paths = allDirectedPath.getAllPaths(sNode, dNode, false, 12);
+		for (GraphPath<GraphNode, DefaultEdge> path : paths) {
+			System.out.println(path.getLength() + ":::" + path);
+		}
 	}
 
 	public void toDot() throws IOException {

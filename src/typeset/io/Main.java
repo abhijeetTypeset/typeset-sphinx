@@ -47,6 +47,10 @@ public class Main {
 		TypesetGraph typesetGraph = new TypesetGraph(model, paramerets.get("output"));
 		DefaultDirectedGraph<GraphNode, DefaultEdge> tgraph = typesetGraph.initialize();
 		typesetGraph.toDot();
+		
+		typesetGraph.testPath();
+		
+		System.exit(0);
 
 
 		typesetGraph.consistencyCheck();
@@ -56,6 +60,8 @@ public class Main {
 		// 1. Isolated nodes not allowed
 		// 2. Referencing of non-existing nodes not allowed
 		// 3. Nodes must have respective properties initialized
+		// 4. A control can have only one parent
+		// 5. A control can only lead to one location
 
 		// convert the model to Java classes
 		Generator generator = new Generator(tgraph, paramerets.get("output"));
