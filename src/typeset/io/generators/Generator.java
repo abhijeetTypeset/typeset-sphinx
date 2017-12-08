@@ -2,11 +2,15 @@ package typeset.io.generators;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.io.FileUtils;
+import org.jgrapht.graph.DefaultDirectedGraph;
+import org.jgrapht.graph.DefaultEdge;
 import org.jgrapht.graph.DefaultWeightedEdge;
 import org.jgrapht.graph.Multigraph;
 
@@ -34,13 +38,13 @@ import typeset.io.models.Widget;
 import org.openqa.selenium.By;
 
 public class Generator {
-	private Multigraph<GraphNode, DefaultWeightedEdge> tgraph;
+	private DefaultDirectedGraph<GraphNode, DefaultEdge> tgraph;
 	private static Map<GraphNode, JDefinedClass> nodeClassMap = new HashMap<>();
 	private String outputDir;
 	private JDefinedClass definedAbstractNode;
 
 
-	public Generator(Multigraph<GraphNode, DefaultWeightedEdge> tgraph, String outputDir) {
+	public Generator(DefaultDirectedGraph<GraphNode, DefaultEdge> tgraph, String outputDir) {
 		this.tgraph = tgraph;
 		this.outputDir = outputDir;
 		
@@ -115,12 +119,7 @@ public class Generator {
 	}
 
 	private void copyBaseClasses() throws IOException {
-		// clean the output directory
-		try {
-			FileUtils.deleteDirectory(new File(outputDir));
-		} catch (Exception e) {
-
-		}
+		
 		String baseDirStructure = "res/baseDirStructure";
 
 		FileUtils.copyDirectory(new File(baseDirStructure), new File(outputDir));
@@ -180,8 +179,8 @@ public class Generator {
 		
 	
 		if (gnode.getNodeType() != NodeType.CONTROL) {
-			Set<DefaultWeightedEdge> edges = tgraph.edgesOf(gnode);
-			for (DefaultWeightedEdge edge : edges) {
+			Set<DefaultEdge> edges = tgraph.edgesOf(gnode);
+			for (DefaultEdge edge : edges) {
 				GraphNode targetNode = tgraph.getEdgeTarget(edge);
 
 				if (targetNode == gnode) {
@@ -219,5 +218,6 @@ public class Generator {
 			return name.substring(0, 1).toUpperCase() + name.substring(1);
 		}
 	}
+
 
 }

@@ -1,5 +1,6 @@
 package typeset.io;
 
+import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
@@ -12,6 +13,9 @@ import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
+import org.apache.commons.io.FileUtils;
+import org.jgrapht.graph.DefaultDirectedGraph;
+import org.jgrapht.graph.DefaultEdge;
 import org.jgrapht.graph.DefaultWeightedEdge;
 import org.jgrapht.graph.Multigraph;
 
@@ -24,26 +28,30 @@ import typeset.io.models.NodeType;
 import typeset.io.generators.TypesetGraph;
 
 public class Main {
-	
+
 	private final static Map<String, String> paramerets = new HashMap<String, String>();
 
-	public static void main(String[] args) throws IOException, IllegalAccessException, InvocationTargetException, JClassAlreadyExistsException {
-	
+	public static void main(String[] args)
+			throws IOException, IllegalAccessException, InvocationTargetException, JClassAlreadyExistsException {
+
 		// get parameters
 		getParameters(args);
+		
+		// clean the output directory
+		cleanOutputDir(paramerets.get("output"));
 
 		// read the model
 		Model model = YamlReader.readModel(paramerets.get("input"));
 
 		// initialize the graph
-		TypesetGraph typesetGraph = new TypesetGraph(model);
-		Multigraph<GraphNode, DefaultWeightedEdge> tgraph = typesetGraph.initialize();
-		
-		
+		TypesetGraph typesetGraph = new TypesetGraph(model, paramerets.get("output"));
+		DefaultDirectedGraph<GraphNode, DefaultEdge> tgraph = typesetGraph.initialize();
+		typesetGraph.toDot();
+
+
 		typesetGraph.consistencyCheck();
 		typesetGraph.addImplicitAssertions();
-		
-		
+
 		// TODO: check if it is consistent
 		// 1. Isolated nodes not allowed
 		// 2. Referencing of non-existing nodes not allowed
@@ -80,18 +88,26 @@ public class Main {
 			return;
 		}
 
-		
 		String inputFilePath = cmd.getOptionValue("input");
 		String outputFilePath = cmd.getOptionValue("output");
-		
+
 		paramerets.put("input", cmd.getOptionValue("input"));
 		paramerets.put("output", cmd.getOptionValue("output"));
-		
-		//TODO : do sanity test of parameters here
+
+		// TODO : do sanity test of parameters here
 
 		System.out.println(inputFilePath);
 		System.out.println(outputFilePath);
 
+	}
+
+	public static void cleanOutputDir(String outputDir) {
+		// clean the output directory
+		try {
+			FileUtils.deleteDirectory(new File(outputDir));
+		} catch (Exception e) {
+
+		}
 	}
 
 }

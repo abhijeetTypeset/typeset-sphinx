@@ -1,6 +1,12 @@
 package typeset.io.generators;
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.lang.reflect.InvocationTargetException;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -10,8 +16,14 @@ import org.apache.commons.beanutils.BeanUtils;
 import org.jgrapht.GraphPath;
 import org.jgrapht.alg.interfaces.ShortestPathAlgorithm;
 import org.jgrapht.alg.shortestpath.DijkstraShortestPath;
+import org.jgrapht.graph.DefaultDirectedGraph;
+import org.jgrapht.graph.DefaultEdge;
 import org.jgrapht.graph.DefaultWeightedEdge;
 import org.jgrapht.graph.Multigraph;
+import org.jgrapht.io.ComponentNameProvider;
+import org.jgrapht.io.DOTExporter;
+import org.jgrapht.io.IntegerComponentNameProvider;
+import org.jgrapht.io.StringComponentNameProvider;
 
 import typeset.io.exceptions.InvalidLiteralException;
 import typeset.io.models.App;
@@ -26,11 +38,13 @@ import typeset.io.models.Widget;
 public class TypesetGraph {
 	private Model model;
 	private Map<String, GraphNode> nameNodeMap;
-	private Multigraph<GraphNode, DefaultWeightedEdge> multiGraph;
+	private DefaultDirectedGraph<GraphNode, DefaultEdge> graph;
 	private GraphNode rootNode;
+	private String targetDir;
 
-	public TypesetGraph(Model model) {
+	public TypesetGraph(Model model, String targetDir) {
 		this.model = model;
+		this.targetDir = targetDir;
 	}
 
 	private GraphNode getNodeByKey(String key) {
@@ -42,48 +56,48 @@ public class TypesetGraph {
 		throw new InvalidLiteralException();
 	}
 
-	public Multigraph<GraphNode, DefaultWeightedEdge> initialize()
+	public DefaultDirectedGraph<GraphNode, DefaultEdge> initialize()
 			throws IllegalAccessException, InvocationTargetException {
 		if (model == null) {
 			System.out.println("model cannot be null");
 			System.exit(0);
 		}
-		multiGraph = new Multigraph<>(DefaultWeightedEdge.class);
+		graph = new DefaultDirectedGraph<>(DefaultEdge.class);
 		nameNodeMap = new HashMap<>();
 
 		// add all the vertices
 		for (String c : model.getControls().keySet()) {
 			System.out.println("Adding control " + c);
 			GraphNode v = createNewVertex(model.getControls().get(c), NodeType.CONTROL);
-			multiGraph.addVertex(v);
+			graph.addVertex(v);
 			nameNodeMap.put(c, v);
 		}
 		for (String w : model.getWidgets().keySet()) {
 			System.out.println("Adding widget " + w);
 			GraphNode v = createNewVertex(model.getWidgets().get(w), NodeType.WIDGET);
-			multiGraph.addVertex(v);
+			graph.addVertex(v);
 			nameNodeMap.put(w, v);
 		}
 		for (String a : model.getApps().keySet()) {
 			System.out.println("Adding app " + a);
 			GraphNode v = createNewVertex(model.getApps().get(a), NodeType.APP);
-			multiGraph.addVertex(v);
+			graph.addVertex(v);
 			nameNodeMap.put(a, v);
 		}
 		for (String s : model.getScreens().keySet()) {
 			System.out.println("Adding screen " + s);
 			GraphNode v = createNewVertex(model.getScreens().get(s), NodeType.SCREEN);
-			multiGraph.addVertex(v);
+			graph.addVertex(v);
 			nameNodeMap.put(s, v);
 		}
 		for (String p : model.getPages().keySet()) {
 			System.out.println("Adding page " + p);
 			GraphNode v = createNewVertex(model.getPages().get(p), NodeType.PAGE);
-			multiGraph.addVertex(v);
+			graph.addVertex(v);
 			nameNodeMap.put(p, v);
 		}
 
-		System.out.println("number of vertices : " + multiGraph.vertexSet().size());
+		System.out.println("number of vertices : " + graph.vertexSet().size());
 
 		// add the edges
 		for (String c : model.getControls().keySet()) {
@@ -92,8 +106,8 @@ public class TypesetGraph {
 			String leadsto = controlNode.getLeadsto();
 			if (leadsto != null) {
 				GraphNode screenNode = getNodeByKey(leadsto);
-				System.out.println("Adding edge from control " + c + " to screen " + screenNode);
-				multiGraph.addEdge(controlNode, screenNode);
+				System.out.println("Adding edge from control " + controlNode + " to screen " + screenNode);
+				graph.addEdge(controlNode, screenNode);
 			}
 		}
 
@@ -104,8 +118,8 @@ public class TypesetGraph {
 			if (controlList != null) {
 				for (String c : controlList) {
 					GraphNode controlNode = getNodeByKey(c);
-					System.out.println("Adding edge from widget " + w + " to control " + c);
-					multiGraph.addEdge(widgetNode, controlNode);
+					System.out.println("Adding edge from widget " + widgetNode + " to control " + controlNode);
+					graph.addEdge(widgetNode, controlNode);
 				}
 			}
 		}
@@ -117,16 +131,16 @@ public class TypesetGraph {
 			if (widgetList != null) {
 				for (String w : widgetList) {
 					GraphNode widgetNode = getNodeByKey(w);
-					System.out.println("Adding edge from app " + a + " to widget " + w);
-					multiGraph.addEdge(appNode, widgetNode);
+					System.out.println("Adding edge from app " + appNode + " to widget " + appNode);
+					graph.addEdge(appNode, widgetNode);
 				}
 			}
 
 			if (controlList != null) {
 				for (String c : controlList) {
 					GraphNode controlNode = getNodeByKey(c);
-					System.out.println("Adding edge from app " + a + " to control " + c);
-					multiGraph.addEdge(appNode, controlNode);
+					System.out.println("Adding edge from app " + appNode + " to control " + controlNode);
+					graph.addEdge(appNode, controlNode);
 				}
 			}
 		}
@@ -140,24 +154,24 @@ public class TypesetGraph {
 			if (appList != null) {
 				for (String a : appList) {
 					GraphNode appNode = getNodeByKey(a);
-					System.out.println("Adding edge from app " + s + " to app " + a);
-					multiGraph.addEdge(screenNode, appNode);
+					System.out.println("Adding edge from app " + screenNode + " to app " + appNode);
+					graph.addEdge(screenNode, appNode);
 				}
 			}
 
 			if (widgetList != null) {
 				for (String w : widgetList) {
 					GraphNode widgetNode = getNodeByKey(w);
-					System.out.println("Adding edge from app " + s + " to widget " + w);
-					multiGraph.addEdge(screenNode, widgetNode);
+					System.out.println("Adding edge from app " + screenNode + " to widget " + widgetNode);
+					graph.addEdge(screenNode, widgetNode);
 				}
 			}
 
 			if (controlList != null) {
 				for (String c : controlList) {
 					GraphNode controlNode = getNodeByKey(c);
-					System.out.println("Adding edge from app " + s + " to control " + c);
-					multiGraph.addEdge(screenNode, controlNode);
+					System.out.println("Adding edge from app " + screenNode + " to control " + controlNode);
+					graph.addEdge(screenNode, controlNode);
 				}
 			}
 		}
@@ -176,39 +190,39 @@ public class TypesetGraph {
 			if (screenList != null) {
 				for (String s : screenList) {
 					GraphNode screenNode = getNodeByKey(s);
-					System.out.println("Adding edge from app " + p + " to app " + s);
-					multiGraph.addEdge(pageNode, screenNode);
+					System.out.println("Adding edge from app " + pageNode + " to app " + pageNode);
+					graph.addEdge(pageNode, screenNode);
 				}
 			}
 
 			if (appList != null) {
 				for (String a : appList) {
 					GraphNode appNode = getNodeByKey(a);
-					System.out.println("Adding edge from app " + p + " to app " + a);
-					multiGraph.addEdge(pageNode, appNode);
+					System.out.println("Adding edge from app " + pageNode + " to app " + appNode);
+					graph.addEdge(pageNode, appNode);
 				}
 			}
 
 			if (widgetList != null) {
 				for (String w : widgetList) {
 					GraphNode widgetNode = getNodeByKey(w);
-					System.out.println("Adding edge from app " + p + " to widget " + w);
-					multiGraph.addEdge(pageNode, widgetNode);
+					System.out.println("Adding edge from app " + pageNode + " to widget " + widgetNode);
+					graph.addEdge(pageNode, widgetNode);
 				}
 			}
 
 			if (controlList != null) {
 				for (String c : controlList) {
 					GraphNode controlNode = getNodeByKey(c);
-					System.out.println("Adding edge from app " + p + " to control " + c);
-					multiGraph.addEdge(pageNode, controlNode);
+					System.out.println("Adding edge from app " + pageNode + " to control " + controlNode);
+					graph.addEdge(pageNode, controlNode);
 				}
 			}
 		}
 
 		// TODO: store the preconditions
 
-		return multiGraph;
+		return graph;
 
 	}
 
@@ -254,7 +268,7 @@ public class TypesetGraph {
 
 	public void addImplicitAssertions() {
 		// get all the nodes
-		Set<GraphNode> allNodes = multiGraph.vertexSet();
+		Set<GraphNode> allNodes = graph.vertexSet();
 		for (GraphNode node : allNodes) {
 			if (node.getNodeType() == NodeType.PAGE) {
 				node.addImplicitAssertion("atPage");
@@ -275,13 +289,42 @@ public class TypesetGraph {
 	}
 
 	public void consistencyCheck() {
-		Set<GraphNode> allNodes = multiGraph.vertexSet();
+		Set<GraphNode> allNodes = graph.vertexSet();
 		for (GraphNode node : allNodes) {
 
-			GraphPath<GraphNode, DefaultWeightedEdge> path = DijkstraShortestPath.findPathBetween(multiGraph, rootNode,
-					node);
+			GraphPath<GraphNode, DefaultEdge> path = DijkstraShortestPath.findPathBetween(graph, rootNode, node);
 			System.out.println("path between " + rootNode + " and " + node + " is " + path);
 
+		}
+
+	}
+
+	public void toDot() throws IOException {
+
+		String graphOutputDir = targetDir + File.separator + "graphs";
+		File file = new File(graphOutputDir);
+		file.mkdirs();
+
+		String graphFilePath = graphOutputDir + file.separator + "graph.dot";
+		ComponentNameProvider<GraphNode> vertexIDProvider = new IntegerComponentNameProvider<GraphNode>();
+		ComponentNameProvider<GraphNode> vertexLabelProvider = new StringComponentNameProvider<GraphNode>();
+
+		DOTExporter<GraphNode, DefaultEdge> exporter = new DOTExporter<GraphNode, DefaultEdge>(vertexIDProvider,
+				vertexLabelProvider, null);
+
+		System.out.println("Writing graph to file " + graphFilePath);
+		exporter.exportGraph(graph, new FileWriter(graphFilePath));
+
+		try {
+			//String pngFilePath = graphOutputDir + file.separator + "graph.png";
+			String pngFilePath = "/home/ub16/share" + file.separator + "graph.png";
+			
+			String[] command = { "dot", "-Tpng", graphFilePath, "-o", pngFilePath };
+			System.out.println("Png conversion  : " + Arrays.toString(command));
+			ProcessBuilder probuilder = new ProcessBuilder(command);
+			Process process = probuilder.start();
+		} catch (Exception e) {
+			System.out.println("Error while generating the graph png");
 		}
 
 	}
