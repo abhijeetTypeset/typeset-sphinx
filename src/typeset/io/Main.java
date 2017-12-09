@@ -6,6 +6,8 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.swing.plaf.synth.SynthSplitPaneUI;
+
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.DefaultParser;
@@ -48,17 +50,14 @@ public class Main {
 		DefaultDirectedGraph<GraphNode, DefaultEdge> tgraph = typesetGraph.initialize();
 		typesetGraph.toDot();
 		
-		typesetGraph.testPath();
-		
+		typesetGraph.testPath();		
 		typesetGraph.consistencyCheck();
 		typesetGraph.addImplicitAssertions();
-
-		// TODO: check if it is consistent
-		// 1. Isolated nodes not allowed
-		// 2. Referencing of non-existing nodes not allowed
-		// 3. Nodes must have respective properties initialized
-		// 4. A control can have only one parent
-		// 5. A control can only lead to one location
+		
+		if (!paramerets.get("generate").toLowerCase().equals("true")){
+			System.out.println("Stopping after graph generation. Classes will be not generated");
+			System.exit(0);
+		}
 
 		// convert the model to Java classes
 		Generator generator = new Generator(tgraph, paramerets.get("output"));
@@ -76,6 +75,10 @@ public class Main {
 		Option output = new Option("o", "output", true, "output file");
 		output.setRequired(true);
 		options.addOption(output);
+		
+		Option generateClasses = new Option("g", "generate", false, "generate classes");
+		generateClasses.setRequired(false);
+		options.addOption(generateClasses);
 
 		CommandLineParser parser = new DefaultParser();
 		HelpFormatter formatter = new HelpFormatter();
@@ -85,17 +88,22 @@ public class Main {
 			cmd = parser.parse(options, args);
 		} catch (ParseException e) {
 			System.out.println(e.getMessage());
-			formatter.printHelp("Model-Generator", options);
-
+			formatter.printHelp("Sphinx", options);
 			System.exit(0);
 			return;
 		}
 
 		String inputFilePath = cmd.getOptionValue("input");
 		String outputFilePath = cmd.getOptionValue("output");
-
-		paramerets.put("input", cmd.getOptionValue("input"));
-		paramerets.put("output", cmd.getOptionValue("output"));
+		
+		paramerets.put("input", inputFilePath);
+		paramerets.put("output", outputFilePath);
+		if (cmd.hasOption("g")){
+			paramerets.put("generate", "true");
+		}else {
+			paramerets.put("generate", "false");
+		}
+		
 
 		// TODO : do sanity test of parameters here
 

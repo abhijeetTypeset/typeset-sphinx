@@ -406,6 +406,14 @@ public class TypesetGraph {
 	}
 
 	public void consistencyCheck() {
+		
+		// TODO: check if it is consistent
+		// 1. Isolated nodes not allowed
+		// 2. Referencing of non-existing nodes not allowed
+		// 3. Nodes must have respective properties initialized
+		// 4. A control can have only one parent
+		// 5. A control can only lead to one location
+		
 		Set<GraphNode> allNodes = graph.vertexSet();
 		for (GraphNode node : allNodes) {
 
