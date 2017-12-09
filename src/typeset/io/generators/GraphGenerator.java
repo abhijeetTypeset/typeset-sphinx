@@ -44,7 +44,7 @@ import typeset.io.models.assertions.Clause;
 import typeset.io.models.assertions.ExplicitAssertion;
 import typeset.io.models.assertions.Literal;
 
-public class TypesetGraph {
+public class GraphGenerator {
 	private Model model;
 	private Map<String, GraphNode> nameNodeMap;
 	private DefaultDirectedGraph<GraphNode, DefaultEdge> graph;
@@ -52,12 +52,12 @@ public class TypesetGraph {
 	private String targetDir;
 	private List<GraphNode> nodesWithPrecondition;
 
-	public TypesetGraph(Model model, String targetDir) {
+	public GraphGenerator(Model model, String targetDir) {
 		this.model = model;
 		this.targetDir = targetDir;
 	}
 
-	private GraphNode getNodeByKey(String key) {
+	public GraphNode getNodeByKey(String key) {
 		GraphNode node = nameNodeMap.get(key);
 		if (node != null) {
 			return node;
@@ -424,27 +424,6 @@ public class TypesetGraph {
 
 	}
 
-	public void testPath() {
-		String srcNode = "page_1";
-		String destNode = "page_5";
-
-		GraphNode sNode = nameNodeMap.get(srcNode);
-		GraphNode dNode = nameNodeMap.get(destNode);
-
-		System.out.println("sNode " + sNode);
-		System.out.println("dNode " + dNode);
-
-		if (sNode == null || dNode == null) {
-			throw new InvalidNodeException("node null cannot proceed");
-		}
-
-		AllDirectedPaths<GraphNode, DefaultEdge> allDirectedPath = new AllDirectedPaths<>(graph);
-
-		List<GraphPath<GraphNode, DefaultEdge>> paths = allDirectedPath.getAllPaths(sNode, dNode, false, 12);
-		for (GraphPath<GraphNode, DefaultEdge> path : paths) {
-			System.out.println(path.getLength() + ":::" + path);
-		}
-	}
 
 	public void toDot() throws IOException {
 
@@ -474,6 +453,10 @@ public class TypesetGraph {
 			System.out.println("Error while generating the graph png");
 		}
 
+	}
+
+	public Map<String, GraphNode> getNameNodeMap() {
+		return nameNodeMap;
 	}
 
 }

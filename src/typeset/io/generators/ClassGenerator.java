@@ -38,14 +38,14 @@ import typeset.io.models.Widget;
 
 import org.openqa.selenium.By;
 
-public class Generator {
+public class ClassGenerator {
 	private DefaultDirectedGraph<GraphNode, DefaultEdge> tgraph;
 	private static Map<GraphNode, JDefinedClass> nodeClassMap = new HashMap<>();
 	private String outputDir;
 	private JDefinedClass definedAbstractNode;
 
 
-	public Generator(DefaultDirectedGraph<GraphNode, DefaultEdge> tgraph, String outputDir) {
+	public ClassGenerator(DefaultDirectedGraph<GraphNode, DefaultEdge> tgraph, String outputDir) {
 		this.tgraph = tgraph;
 		this.outputDir = outputDir;
 		

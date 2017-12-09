@@ -23,11 +23,12 @@ import org.jgrapht.graph.Multigraph;
 
 import com.sun.codemodel.JClassAlreadyExistsException;
 
-import typeset.io.generators.Generator;
+import typeset.io.generators.ClassGenerator;
+import typeset.io.generators.GraphGenerator;
+import typeset.io.generators.TestGenerator;
 import typeset.io.models.GraphNode;
 import typeset.io.models.Model;
 import typeset.io.models.NodeType;
-import typeset.io.generators.TypesetGraph;
 
 public class Main {
 
@@ -38,7 +39,7 @@ public class Main {
 
 		// get parameters
 		getParameters(args);
-		
+
 		// clean the output directory
 		cleanOutputDir(paramerets.get("output"));
 
@@ -46,22 +47,25 @@ public class Main {
 		Model model = YamlReader.readModel(paramerets.get("input"));
 
 		// initialize the graph
-		TypesetGraph typesetGraph = new TypesetGraph(model, paramerets.get("output"));
-		DefaultDirectedGraph<GraphNode, DefaultEdge> tgraph = typesetGraph.initialize();
-		typesetGraph.toDot();
-		
-		typesetGraph.testPath();		
-		typesetGraph.consistencyCheck();
-		typesetGraph.addImplicitAssertions();
-		
-		if (!paramerets.get("generate").toLowerCase().equals("true")){
+		GraphGenerator graphGenerator = new GraphGenerator(model, paramerets.get("output"));
+		DefaultDirectedGraph<GraphNode, DefaultEdge> tgraph = graphGenerator.initialize();
+		graphGenerator.toDot();
+
+		graphGenerator.consistencyCheck();
+		graphGenerator.addImplicitAssertions();
+
+		if (!paramerets.get("generate").toLowerCase().equals("true")) {
 			System.out.println("Stopping after graph generation. Classes will be not generated");
 			System.exit(0);
 		}
 
 		// convert the model to Java classes
-		Generator generator = new Generator(tgraph, paramerets.get("output"));
-		generator.generateClasses();
+		ClassGenerator classGenerator = new ClassGenerator(tgraph, paramerets.get("output"));
+		classGenerator.generateClasses();
+
+		// covert specification to fesible paths; and then eventually into classes
+		TestGenerator testGenerator = new TestGenerator(tgraph, graphGenerator, paramerets.get("output"));
+		testGenerator.testPath();
 
 	}
 
@@ -75,7 +79,7 @@ public class Main {
 		Option output = new Option("o", "output", true, "output file");
 		output.setRequired(true);
 		options.addOption(output);
-		
+
 		Option generateClasses = new Option("g", "generate", false, "generate classes");
 		generateClasses.setRequired(false);
 		options.addOption(generateClasses);
@@ -95,15 +99,14 @@ public class Main {
 
 		String inputFilePath = cmd.getOptionValue("input");
 		String outputFilePath = cmd.getOptionValue("output");
-		
+
 		paramerets.put("input", inputFilePath);
 		paramerets.put("output", outputFilePath);
-		if (cmd.hasOption("g")){
+		if (cmd.hasOption("g")) {
 			paramerets.put("generate", "true");
-		}else {
+		} else {
 			paramerets.put("generate", "false");
 		}
-		
 
 		// TODO : do sanity test of parameters here
 
