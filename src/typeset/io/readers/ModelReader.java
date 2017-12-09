@@ -1,4 +1,4 @@
-package typeset.io;
+package typeset.io.readers;
 
 import java.io.File;
 import java.io.IOException;
@@ -12,7 +12,7 @@ import typeset.io.models.Model;
 
 public class ModelReader {
 
-	public static Model readModel(String inputDir) throws IOException {
+	public static Model read(String inputDir) throws IOException {
 
 		String modelFile = inputDir + File.separator + "model.yml";
 		Yaml yaml = new Yaml();

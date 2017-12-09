@@ -29,6 +29,8 @@ import typeset.io.generators.TestGenerator;
 import typeset.io.models.GraphNode;
 import typeset.io.models.Model;
 import typeset.io.models.NodeType;
+import typeset.io.readers.ModelReader;
+import typeset.io.readers.SpecReader;
 
 public class Main {
 
@@ -36,7 +38,7 @@ public class Main {
 
 	public static void main(String[] args)
 			throws IOException, IllegalAccessException, InvocationTargetException, JClassAlreadyExistsException {
-
+		
 		// get parameters
 		getParameters(args);
 
@@ -44,7 +46,7 @@ public class Main {
 		cleanOutputDir(paramerets.get("output"));
 
 		// read the model
-		Model model = ModelReader.readModel(paramerets.get("input"));
+		Model model = ModelReader.read(paramerets.get("input"));
 
 		// initialize the graph
 		GraphGenerator graphGenerator = new GraphGenerator(model, paramerets.get("output"));
@@ -66,7 +68,7 @@ public class Main {
 		// covert specification to feasible paths; and then eventually into classes
 		TestGenerator testGenerator = new TestGenerator(tgraph, graphGenerator, paramerets.get("input"), paramerets.get("output"));
 		testGenerator.getSpecs();
-		testGenerator.testPath();
+		// testGenerator.testPath();
 
 	}
 

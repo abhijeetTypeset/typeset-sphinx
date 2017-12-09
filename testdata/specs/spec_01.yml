@@ -1,0 +1,10 @@
+given: 
+ screen: screen_2
+ assertions: 
+when: 
+ control: control_4
+ func: click
+wait: short
+then:
+ screen: screen_8
+ assertions: 
