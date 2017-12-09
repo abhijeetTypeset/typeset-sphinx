@@ -465,4 +465,8 @@ public class GraphGenerator {
 		return nameNodeMap;
 	}
 
+	public  GraphNode getRootNode() {
+		return rootNode;
+	}
+
 }

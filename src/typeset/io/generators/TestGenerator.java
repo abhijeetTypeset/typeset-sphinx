@@ -3,6 +3,7 @@ package typeset.io.generators;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -24,6 +25,7 @@ public class TestGenerator {
 	private DefaultDirectedGraph<GraphNode, DefaultEdge> graph;
 	private String inputDir;
 	private Set<String> specFiles;
+	private List<Spec> specList;
 
 	public TestGenerator(DefaultDirectedGraph<GraphNode, DefaultEdge> graph, GraphGenerator graphGenerator,
 			String inputDir, String outputDir) {
@@ -32,6 +34,7 @@ public class TestGenerator {
 		this.inputDir = inputDir;
 		this.outputDir = outputDir;
 		this.specFiles = new TreeSet<String>();
+		this.specList = new ArrayList<Spec>();
 	}
 
 	public void parseSpecFile(String filename) {
@@ -58,12 +61,7 @@ public class TestGenerator {
 		System.out.println("Found " + specFiles.size() + " spec files");
 	}
 
-	public List<GraphPath<GraphNode, DefaultEdge>> getPaths(String srcNode, String dstNode, int maxLength) {
-		GraphNode sNode = graphGenerator.getNodeByKey(srcNode);
-		GraphNode dNode = graphGenerator.getNodeByKey(dstNode);
-
-		System.out.println("sNode " + sNode);
-		System.out.println("dNode " + dNode);
+	public List<GraphPath<GraphNode, DefaultEdge>> getPaths(GraphNode sNode, GraphNode dNode, int maxLength) {
 
 		if (sNode == null || dNode == null) {
 			throw new InvalidNodeException("node null cannot proceed");
@@ -80,12 +78,13 @@ public class TestGenerator {
 		String srcNode = "page_1";
 		String dstNode = "page_5";
 		int maxLength = 12;
+		GraphNode sNode = graphGenerator.getNodeByKey(srcNode);
+		GraphNode dNode = graphGenerator.getNodeByKey(dstNode);
 
-		List<GraphPath<GraphNode, DefaultEdge>> paths = getPaths(srcNode, dstNode, maxLength);
+		List<GraphPath<GraphNode, DefaultEdge>> paths = getPaths(sNode, dNode, maxLength);
 		for (GraphPath<GraphNode, DefaultEdge> path : paths) {
 			System.out.println(path.getLength() + ":::" + path);
 		}
-
 	}
 
 	public void getSpecs() {
@@ -93,12 +92,28 @@ public class TestGenerator {
 		for (String sf : specFiles) {
 			try {
 				Spec spec = SpecReader.read(sf);
-				System.out.println("Found spec : "+spec);
+				specList.add(spec);
+				System.out.println("Found spec : " + spec);
 			} catch (IOException e) {
-				System.out.println("Error parsing spec file : "+sf);
+				System.out.println("Error parsing spec file : " + sf);
 			}
 		}
-		
+	}
+
+	public void generateClasses() {
+		for (Spec spec : specList) {
+			String startScreen = spec.getGiven().getScreen();
+			GraphNode rootNode = graphGenerator.getRootNode();
+			GraphNode startNode = graphGenerator.getNodeByKey(startScreen);
+
+			int maxLength = 10;
+			List<GraphPath<GraphNode, DefaultEdge>> paths = getPaths(rootNode, startNode, maxLength);
+			System.out.println("Paths from " + rootNode + " to " + startNode);
+			for (GraphPath<GraphNode, DefaultEdge> path : paths) {
+				System.out.println(path.getLength() + ":::" + path);
+			}
+		}
+
 	}
 
 }
