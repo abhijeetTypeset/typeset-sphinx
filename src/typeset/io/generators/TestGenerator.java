@@ -23,12 +23,10 @@ public class TestGenerator {
 		this.outputDir = outputDir;
 	}
 
-	public void testPath() {
-		String srcNode = "page_1";
-		String destNode = "page_5";
-
+	
+	public List<GraphPath<GraphNode, DefaultEdge>> getPaths(String srcNode, String dstNode, int maxLength) {
 		GraphNode sNode = graphGenerator.getNodeByKey(srcNode);
-		GraphNode dNode = graphGenerator.getNodeByKey(destNode);
+		GraphNode dNode = graphGenerator.getNodeByKey(dstNode);
 
 		System.out.println("sNode " + sNode);
 		System.out.println("dNode " + dNode);
@@ -39,10 +37,23 @@ public class TestGenerator {
 
 		AllDirectedPaths<GraphNode, DefaultEdge> allDirectedPath = new AllDirectedPaths<>(graph);
 
-		List<GraphPath<GraphNode, DefaultEdge>> paths = allDirectedPath.getAllPaths(sNode, dNode, false, 12);
+		List<GraphPath<GraphNode, DefaultEdge>> paths = allDirectedPath.getAllPaths(sNode, dNode, false, maxLength);
+		return paths;
+		
+		
+	}
+	
+	public void testPath() {
+		String srcNode = "page_1";
+		String dstNode = "page_5";
+		int maxLength = 12;
+
+		List<GraphPath<GraphNode, DefaultEdge>> paths = getPaths(srcNode, dstNode, maxLength);
 		for (GraphPath<GraphNode, DefaultEdge> path : paths) {
 			System.out.println(path.getLength() + ":::" + path);
 		}
+		
+		
 	}
 
 }
