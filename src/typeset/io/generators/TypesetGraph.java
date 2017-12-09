@@ -28,6 +28,7 @@ import org.jgrapht.io.DOTExporter;
 import org.jgrapht.io.IntegerComponentNameProvider;
 import org.jgrapht.io.StringComponentNameProvider;
 
+import typeset.io.exceptions.InvalidClauseException;
 import typeset.io.exceptions.InvalidLiteralException;
 import typeset.io.models.App;
 import typeset.io.models.Control;
@@ -60,7 +61,7 @@ public class TypesetGraph {
 			return node;
 		}
 
-		throw new InvalidLiteralException();
+		throw new InvalidLiteralException("No such symbol as " + key);
 	}
 
 	public DefaultDirectedGraph<GraphNode, DefaultEdge> initialize()
@@ -274,12 +275,13 @@ public class TypesetGraph {
 
 	private Literal parseLiteral(String literalString) {
 		String[] parts = literalString.split("%");
-		
+
 		if (parts.length != 3) {
-			throw new InvalidLiteralException(literalString);
+			throw new InvalidClauseException(literalString);
 		}
 
-		Literal literal = new Literal(parts[0], parts[2], parts[1].toLowerCase().equals("not"));
+		GraphNode node = getNodeByKey(parts[0]);
+		Literal literal = new Literal(node, parts[2], parts[1].toLowerCase().equals("not"));
 		return literal;
 	}
 
@@ -290,18 +292,18 @@ public class TypesetGraph {
 			Literal literal = parseLiteral(literalString);
 			clause.addLiterals(literal);
 		}
-		
-		return clause;	
+
+		return clause;
 	}
 
 	private ExplicitAssertion parsePrecondtion(List<String> precodtionString) {
-		System.out.println("pre-condition " + precodtionString);
+		// System.out.println("pre-condition " + precodtionString);
 		ExplicitAssertion explicitAssertion = new ExplicitAssertion();
 		for (String precs : precodtionString) {
 			Clause clause = parseClasuse(precs);
 			explicitAssertion.addclauses(clause);
 		}
-		
+
 		return explicitAssertion;
 
 	}

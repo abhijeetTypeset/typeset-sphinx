@@ -1,20 +1,22 @@
 package typeset.io.models.assertions;
 
+import typeset.io.models.GraphNode;
+
 public class Literal {
 
-	private String symbol;
+	private GraphNode node;
 	private String action;
 	private boolean isNegation;
 
-	public Literal(String symbol, String action, boolean isNegation) {
+	public Literal(GraphNode node, String action, boolean isNegation) {
 		super();
-		this.symbol = symbol;
+		this.node = node;
 		this.action = action;
 		this.isNegation = isNegation;
 	}
 
-	public String getSymbol() {
-		return symbol;
+	public GraphNode getNode() {
+		return node;
 	}
 
 	public String getAction() {
@@ -28,7 +30,7 @@ public class Literal {
 	@Override
 	public String toString() {
 
-		String lit = action + "(" + symbol + ")";
+		String lit = action + "(" + node + ")";
 		if (isNegation) {
 			lit = "~" + lit;
 		}
