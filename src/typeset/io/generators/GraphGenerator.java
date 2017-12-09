@@ -66,6 +66,7 @@ public class GraphGenerator {
 		throw new InvalidLiteralException("No such symbol as " + key);
 	}
 
+	
 	public DefaultDirectedGraph<GraphNode, DefaultEdge> initialize()
 			throws IllegalAccessException, InvocationTargetException {
 		if (model == null) {
@@ -81,7 +82,7 @@ public class GraphGenerator {
 			System.out.println("Adding control " + c);
 			GraphNode v = createNewVertex(model.getControls().get(c), NodeType.CONTROL);
 			graph.addVertex(v);
-			nameNodeMap.put(c, v);
+			addToMap(c, v);
 		}
 		for (String w : model.getWidgets().keySet()) {
 			System.out.println("Adding widget " + w);
@@ -93,19 +94,19 @@ public class GraphGenerator {
 			System.out.println("Adding app " + a);
 			GraphNode v = createNewVertex(model.getApps().get(a), NodeType.APP);
 			graph.addVertex(v);
-			nameNodeMap.put(a, v);
+			addToMap(a, v);
 		}
 		for (String s : model.getScreens().keySet()) {
 			System.out.println("Adding screen " + s);
 			GraphNode v = createNewVertex(model.getScreens().get(s), NodeType.SCREEN);
 			graph.addVertex(v);
-			nameNodeMap.put(s, v);
+			addToMap(s, v);
 		}
 		for (String p : model.getPages().keySet()) {
 			System.out.println("Adding page " + p);
 			GraphNode v = createNewVertex(model.getPages().get(p), NodeType.PAGE);
 			graph.addVertex(v);
-			nameNodeMap.put(p, v);
+			addToMap(p, v);
 		}
 
 		System.out.println("number of vertices : " + graph.vertexSet().size());
@@ -274,6 +275,11 @@ public class GraphGenerator {
 
 	}
 
+	private void addToMap(String c, GraphNode v) {
+		nameNodeMap.put(c, v);
+		
+	}
+
 	private Literal parseLiteral(String literalString) {
 		String[] parts = literalString.split("%");
 
@@ -281,8 +287,8 @@ public class GraphGenerator {
 			throw new InvalidClauseException(literalString);
 		}
 
-		GraphNode node = getNodeByKey(parts[0]);
-		Literal literal = new Literal(node, parts[2], parts[1].toLowerCase().equals("not"));
+		GraphNode node = getNodeByKey(parts[0].trim());
+		Literal literal = new Literal(node, parts[2].trim(), parts[1].toLowerCase().trim().equals("not"));
 		return literal;
 	}
 

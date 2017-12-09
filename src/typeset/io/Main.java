@@ -44,7 +44,7 @@ public class Main {
 		cleanOutputDir(paramerets.get("output"));
 
 		// read the model
-		Model model = YamlReader.readModel(paramerets.get("input"));
+		Model model = ModelReader.readModel(paramerets.get("input"));
 
 		// initialize the graph
 		GraphGenerator graphGenerator = new GraphGenerator(model, paramerets.get("output"));
@@ -63,8 +63,9 @@ public class Main {
 		ClassGenerator classGenerator = new ClassGenerator(tgraph, paramerets.get("output"));
 		classGenerator.generateClasses();
 
-		// covert specification to fesible paths; and then eventually into classes
-		TestGenerator testGenerator = new TestGenerator(tgraph, graphGenerator, paramerets.get("output"));
+		// covert specification to feasible paths; and then eventually into classes
+		TestGenerator testGenerator = new TestGenerator(tgraph, graphGenerator, paramerets.get("input"), paramerets.get("output"));
+		testGenerator.getSpecs();
 		testGenerator.testPath();
 
 	}
@@ -72,11 +73,11 @@ public class Main {
 	private static void getParameters(String[] args) {
 		Options options = new Options();
 
-		Option input = new Option("i", "input", true, "input file path");
+		Option input = new Option("i", "input", true, "input directory");
 		input.setRequired(true);
 		options.addOption(input);
 
-		Option output = new Option("o", "output", true, "output file");
+		Option output = new Option("o", "output", true, "output directory");
 		output.setRequired(true);
 		options.addOption(output);
 

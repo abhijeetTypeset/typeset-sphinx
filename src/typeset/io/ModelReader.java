@@ -1,5 +1,6 @@
 package typeset.io;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
@@ -9,14 +10,14 @@ import org.yaml.snakeyaml.Yaml;
 
 import typeset.io.models.Model;
 
-public class YamlReader {
+public class ModelReader {
 
-	public static Model readModel(String filename) throws IOException {
+	public static Model readModel(String inputDir) throws IOException {
 
+		String modelFile = inputDir + File.separator + "model.yml";
 		Yaml yaml = new Yaml();
-		try (InputStream in = Files.newInputStream(Paths.get(filename))) {
+		try (InputStream in = Files.newInputStream(Paths.get(modelFile))) {
 			Model model = yaml.loadAs(in, Model.class);
-			System.out.println(model.toString());
 			return model;
 
 		}

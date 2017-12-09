@@ -1,5 +1,7 @@
 package typeset.io.generators;
 
+import java.io.File;
+import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
 
@@ -15,12 +17,25 @@ public class TestGenerator {
 	private String outputDir;
 	private GraphGenerator graphGenerator;
 	private DefaultDirectedGraph<GraphNode, DefaultEdge> graph;
+	private String inputDir;
 
 	public TestGenerator(DefaultDirectedGraph<GraphNode, DefaultEdge> graph, GraphGenerator graphGenerator,
-			String outputDir) {
+			String inputDir, String outputDir) {
 		this.graph = graph;
 		this.graphGenerator = graphGenerator;
+		this.inputDir = inputDir;
 		this.outputDir = outputDir;
+	}
+	
+	public void getSpecs() {
+		String specDir = inputDir + File.separator + "specs";
+		System.out.println(specDir);
+		 File folder = new File(specDir);
+		for (final File file : folder.listFiles()) {
+	        if (file.isFile()){
+	            System.out.println(file.getName() + " : "+file.getAbsolutePath() );
+	        }
+	    }
 	}
 
 	
