@@ -30,6 +30,8 @@ import org.jgrapht.io.StringComponentNameProvider;
 
 import typeset.io.exceptions.InvalidClauseException;
 import typeset.io.exceptions.InvalidLiteralException;
+import typeset.io.exceptions.InvalidModelException;
+import typeset.io.exceptions.InvalidNodeException;
 import typeset.io.models.App;
 import typeset.io.models.Control;
 import typeset.io.models.GraphNode;
@@ -67,8 +69,7 @@ public class TypesetGraph {
 	public DefaultDirectedGraph<GraphNode, DefaultEdge> initialize()
 			throws IllegalAccessException, InvocationTargetException {
 		if (model == null) {
-			System.out.println("model cannot be null");
-			System.exit(0);
+			throw new InvalidModelException("model cannot be null");
 		}
 		graph = new DefaultDirectedGraph<>(DefaultEdge.class);
 		nameNodeMap = new HashMap<>();
@@ -426,8 +427,7 @@ public class TypesetGraph {
 		System.out.println("dNode " + dNode);
 
 		if (sNode == null || dNode == null) {
-			System.out.println("node null cannot proceed");
-			System.exit(0);
+			throw new InvalidNodeException("node null cannot proceed");
 		}
 
 		AllDirectedPaths<GraphNode, DefaultEdge> allDirectedPath = new AllDirectedPaths<>(graph);

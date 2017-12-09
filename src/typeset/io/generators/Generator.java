@@ -27,6 +27,7 @@ import com.sun.codemodel.JMethod;
 import com.sun.codemodel.JMod;
 import com.sun.codemodel.JType;
 
+import typeset.io.exceptions.InconsistentGraphException;
 import typeset.io.models.App;
 import typeset.io.models.GraphNode;
 import typeset.io.models.Model;
@@ -53,8 +54,7 @@ public class Generator {
 	public void generateClasses() throws IOException, JClassAlreadyExistsException {
 
 		if (tgraph == null) {
-			System.out.println("Cannot proceed with a null graph");
-			System.exit(0);
+			throw new InconsistentGraphException("Cannot proceed with a null graph");
 		}
 
 		copyBaseClasses();

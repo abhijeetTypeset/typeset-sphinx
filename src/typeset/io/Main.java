@@ -87,7 +87,7 @@ public class Main {
 			System.out.println(e.getMessage());
 			formatter.printHelp("Model-Generator", options);
 
-			System.exit(1);
+			System.exit(0);
 			return;
 		}
 
