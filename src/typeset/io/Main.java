@@ -50,9 +50,6 @@ public class Main {
 		
 		typesetGraph.testPath();
 		
-		System.exit(0);
-
-
 		typesetGraph.consistencyCheck();
 		typesetGraph.addImplicitAssertions();
 

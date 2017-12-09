@@ -315,8 +315,6 @@ public class TypesetGraph {
 			ExplicitAssertion precondition = parsePrecondtion(precondtionString);
 			System.out.println(precondition);
 		}
-		System.exit(0);
-
 	}
 
 	private boolean doesNotHaveIncomingEdges(GraphNode node) {
