@@ -23,7 +23,7 @@ import org.jgrapht.graph.Multigraph;
 
 import com.sun.codemodel.JClassAlreadyExistsException;
 
-import typeset.io.generators.ClassGenerator;
+import typeset.io.generators.ModelGenerator;
 import typeset.io.generators.GraphGenerator;
 import typeset.io.generators.TestGenerator;
 import typeset.io.models.GraphNode;
@@ -62,13 +62,13 @@ public class Main {
 		}
 
 		// convert the model to Java classes
-		ClassGenerator classGenerator = new ClassGenerator(tgraph, paramerets.get("output"));
+		ModelGenerator classGenerator = new ModelGenerator(tgraph, paramerets.get("output"));
 		classGenerator.generateClasses();
 
 		// covert specification to feasible paths; and then eventually into classes
 		TestGenerator testGenerator = new TestGenerator(tgraph, graphGenerator, paramerets.get("input"), paramerets.get("output"));
 		testGenerator.getSpecs();
-		testGenerator.generateClasses();
+		testGenerator.generateTest();
 		// testGenerator.testPath();
 
 	}

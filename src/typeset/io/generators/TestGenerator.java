@@ -15,6 +15,7 @@ import org.jgrapht.graph.DefaultDirectedGraph;
 import org.jgrapht.graph.DefaultEdge;
 
 import typeset.io.exceptions.InvalidNodeException;
+import typeset.io.exceptions.InvalidPathException;
 import typeset.io.models.GraphNode;
 import typeset.io.models.Spec;
 import typeset.io.readers.SpecReader;
@@ -100,20 +101,52 @@ public class TestGenerator {
 		}
 	}
 
-	public void generateClasses() {
-		for (Spec spec : specList) {
-			String startScreen = spec.getGiven().getScreen();
-			GraphNode rootNode = graphGenerator.getRootNode();
-			GraphNode startNode = graphGenerator.getNodeByKey(startScreen);
+	public GraphPath<GraphNode, DefaultEdge> getFeasiblePath(Spec spec) {
+		String startScreen = spec.getGiven().getScreen();
+		GraphNode rootNode = graphGenerator.getRootNode();
+		GraphNode startNode = graphGenerator.getNodeByKey(startScreen);
+		int minLength = 3;
+		int maxLength = 15;
 
-			int maxLength = 10;
-			List<GraphPath<GraphNode, DefaultEdge>> paths = getPaths(rootNode, startNode, maxLength);
-			System.out.println("Paths from " + rootNode + " to " + startNode);
+		for (int pathLength = minLength; pathLength <= maxLength; pathLength++) {
+			List<GraphPath<GraphNode, DefaultEdge>> paths = getPaths(rootNode, startNode, pathLength);
 			for (GraphPath<GraphNode, DefaultEdge> path : paths) {
-				System.out.println(path.getLength() + ":::" + path);
+				if(isPathViable(path, spec.getGiven().getAssertions())) {
+					return path;
+				}
 			}
 		}
+		return null;
+	}
 
+	private boolean isPathViable(GraphPath<GraphNode, DefaultEdge> path, List<String> assertions) {
+		
+		return true;
+	}
+
+	public void generateTest() {
+		for (Spec spec : specList) {
+			GraphPath<GraphNode, DefaultEdge> path = getFeasiblePath(spec);
+			System.out.println("Resolving spec "+spec);
+			if(path != null) {
+				generateClasses(path, spec.getName());
+				System.out.println("Feasible path found "+path);
+				
+			}else {
+				System.out.println("No feasibel path found");
+			}
+			
+		}
+
+	}
+
+	private void generateClasses(GraphPath<GraphNode, DefaultEdge> path, String testName) {
+		if (path == null) {
+			throw new InvalidPathException();
+		}
+		
+		
+		
 	}
 
 }

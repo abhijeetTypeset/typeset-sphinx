@@ -10,7 +10,8 @@ public class Spec {
 	private String wait;
 	private Action when ;
 	private State then;
-
+	private String name;
+	
 	public State getGiven() {
 		return given;
 	}
@@ -46,10 +47,19 @@ public class Spec {
 	@Override
 	public String toString() {
 		String spec = "";
+		spec += "\nName : " + name + "\n";
 		spec += "\n\tGiven "+given+"\n";
 		spec += "\tWhen "+when +"\n";
 		spec += "\tWait "+wait+"\n";
 		spec += "\tThen "+then+"\n";
 		return spec;
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
 	}
 }
