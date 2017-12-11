@@ -28,13 +28,13 @@ import com.sun.codemodel.JMod;
 import com.sun.codemodel.JType;
 
 import typeset.io.exceptions.InconsistentGraphException;
-import typeset.io.models.App;
-import typeset.io.models.GraphNode;
-import typeset.io.models.Model;
-import typeset.io.models.NodeType;
-import typeset.io.models.Page;
-import typeset.io.models.Screen;
-import typeset.io.models.Widget;
+import typeset.io.model.App;
+import typeset.io.model.GraphNode;
+import typeset.io.model.Model;
+import typeset.io.model.NodeType;
+import typeset.io.model.Page;
+import typeset.io.model.Screen;
+import typeset.io.model.Widget;
 
 import org.openqa.selenium.By;
 

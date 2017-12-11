@@ -8,7 +8,7 @@ import java.nio.file.Paths;
 
 import org.yaml.snakeyaml.Yaml;
 
-import typeset.io.models.Model;
+import typeset.io.model.Model;
 
 public class ModelReader {
 

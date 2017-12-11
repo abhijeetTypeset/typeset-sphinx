@@ -26,9 +26,9 @@ import com.sun.codemodel.JClassAlreadyExistsException;
 import typeset.io.generators.ModelGenerator;
 import typeset.io.generators.GraphGenerator;
 import typeset.io.generators.TestGenerator;
-import typeset.io.models.GraphNode;
-import typeset.io.models.Model;
-import typeset.io.models.NodeType;
+import typeset.io.model.GraphNode;
+import typeset.io.model.Model;
+import typeset.io.model.NodeType;
 import typeset.io.readers.ModelReader;
 import typeset.io.readers.SpecReader;
 

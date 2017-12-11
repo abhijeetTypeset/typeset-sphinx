@@ -1,26 +1,26 @@
-package typeset.io.models;
+package typeset.io.model.spec;
 
 import java.util.Map;
 
 public class Action {
-	private String control;
+	private String action_type;
 	private String action_name;
 	private String action_data;
 
 
 	@Override
 	public String toString() {
-		return "[" + action_name + " " + control + "]";
+		return "[" + action_name + " " + action_type + "]";
 	}
 
 
-	public String getControl() {
-		return control;
+	public String getAction_type() {
+		return action_type;
 	}
 
 
-	public void setControl(String control) {
-		this.control = control;
+	public void setAction_type(String action_type) {
+		this.action_type = action_type;
 	}
 
 

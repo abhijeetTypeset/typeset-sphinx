@@ -20,9 +20,9 @@ import com.sun.codemodel.JDefinedClass;
 
 import typeset.io.exceptions.InvalidNodeException;
 import typeset.io.exceptions.InvalidPathException;
-import typeset.io.models.GraphNode;
-import typeset.io.models.NodeType;
-import typeset.io.models.Spec;
+import typeset.io.model.GraphNode;
+import typeset.io.model.NodeType;
+import typeset.io.model.spec.*;
 import typeset.io.readers.SpecReader;
 
 public class TestGenerator {

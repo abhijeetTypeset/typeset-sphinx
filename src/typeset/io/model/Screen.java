@@ -1,4 +1,4 @@
-package typeset.io.models;
+package typeset.io.model;
 import java.util.List;
 
 public class Screen extends App{

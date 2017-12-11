@@ -1,4 +1,4 @@
-package typeset.io.models.assertions;
+package typeset.io.model.assertions;
 
 import java.util.ArrayList;
 import java.util.List;

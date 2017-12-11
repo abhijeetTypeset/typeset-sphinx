@@ -32,17 +32,17 @@ import typeset.io.exceptions.InvalidClauseException;
 import typeset.io.exceptions.InvalidLiteralException;
 import typeset.io.exceptions.InvalidModelException;
 import typeset.io.exceptions.InvalidNodeException;
-import typeset.io.models.App;
-import typeset.io.models.Control;
-import typeset.io.models.GraphNode;
-import typeset.io.models.Model;
-import typeset.io.models.NodeType;
-import typeset.io.models.Page;
-import typeset.io.models.Screen;
-import typeset.io.models.Widget;
-import typeset.io.models.assertions.Clause;
-import typeset.io.models.assertions.ExplicitAssertion;
-import typeset.io.models.assertions.Literal;
+import typeset.io.model.App;
+import typeset.io.model.Control;
+import typeset.io.model.GraphNode;
+import typeset.io.model.Model;
+import typeset.io.model.NodeType;
+import typeset.io.model.Page;
+import typeset.io.model.Screen;
+import typeset.io.model.Widget;
+import typeset.io.model.assertions.Clause;
+import typeset.io.model.assertions.ExplicitAssertion;
+import typeset.io.model.assertions.Literal;
 
 public class GraphGenerator {
 	private Model model;

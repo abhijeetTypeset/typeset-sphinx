@@ -1,4 +1,4 @@
-package typeset.io.models;
+package typeset.io.model.spec;
 
 import java.util.ArrayList;
 import java.util.List;

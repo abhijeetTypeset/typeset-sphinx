@@ -1,4 +1,4 @@
-package typeset.io.models;
+package typeset.io.model;
 
 public enum NodeType {
 	CONTROL ("control"), 

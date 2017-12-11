@@ -1,4 +1,4 @@
-package typeset.io.models;
+package typeset.io.model;
 
 public class GraphNode extends Page{
 	

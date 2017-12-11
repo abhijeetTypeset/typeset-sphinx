@@ -8,7 +8,7 @@ import java.nio.file.Paths;
 
 import org.yaml.snakeyaml.Yaml;
 
-import typeset.io.models.Spec;
+import typeset.io.model.spec.Spec;
 
 public class SpecReader {
 

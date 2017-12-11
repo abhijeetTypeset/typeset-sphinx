@@ -1,6 +1,6 @@
-package typeset.io.models.assertions;
+package typeset.io.model.assertions;
 
-import typeset.io.models.GraphNode;
+import typeset.io.model.GraphNode;
 
 public class Literal {
 
