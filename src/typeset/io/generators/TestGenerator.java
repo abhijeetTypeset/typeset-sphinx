@@ -98,25 +98,36 @@ public class TestGenerator {
 		for (String sf : specFiles) {
 			try {
 				Spec spec = SpecReader.read(sf);
-				specList.add(spec);
-				System.out.println("Found spec : " + spec);
+
+				if (isValidSpec(spec)) {
+					System.out.println("Added spec : " + spec);
+					specList.add(spec);
+				} else {
+					System.out.println("Invalid spec " + spec);
+				}
+
 			} catch (IOException e) {
 				System.out.println("Error parsing spec file : " + sf);
 			}
 		}
 	}
 
+	private boolean isValidSpec(Spec spec) {
+		// TODO implement spec validity checking here
+		return true;
+	}
+
 	public GraphPath<GraphNode, DefaultEdge> getFeasiblePath(Spec spec) {
 		String startScreen = spec.getGiven().getScreen();
 		GraphNode rootNode = graphGenerator.getRootNode();
 		GraphNode startNode = graphGenerator.getNodeByKey(startScreen);
-		int minLength = 10;
+		int minLength = 3;
 		int maxLength = 15;
 
 		for (int pathLength = minLength; pathLength <= maxLength; pathLength++) {
 			List<GraphPath<GraphNode, DefaultEdge>> paths = getPaths(rootNode, startNode, pathLength);
 			for (GraphPath<GraphNode, DefaultEdge> path : paths) {
-				if(isPathViable(path, spec.getGiven().getAssertions())) {
+				if (isPathViable(path, spec)) {
 					return path;
 				}
 			}
@@ -124,32 +135,50 @@ public class TestGenerator {
 		return null;
 	}
 
-	private boolean isPathViable(GraphPath<GraphNode, DefaultEdge> path, List<String> assertions) {
-		System.out.println("Received path "+path.getLength()+" "+path);
-		// DUMMY
-		if(path.getLength()<12) {
+	private boolean isPathViable(GraphPath<GraphNode, DefaultEdge> path, Spec spec) {
+		System.out.println("Received path " + path.getLength() + " " + path);
+
+		// TODO: get this some other way
+		int MAX_LENGTH = 12;
+
+		List<String> assertions = spec.getGiven().getAssertions();
+		Map<String, Action> actions = spec.getWhen();
+
+		// condition for viability of a path
+		// it should be of less than or equal to max length
+		// it should invoke all assertions
+
+		// path length check
+		if (path.getLength() > MAX_LENGTH) {
 			return false;
 		}
+
+		// invoke assertion check
+		if (assertions != null) {
+			// TODO: implement assertion checking here
+		}
+
 		return true;
 	}
 
 	public void generateTest() throws IOException, JClassAlreadyExistsException {
 		for (Spec spec : specList) {
 			GraphPath<GraphNode, DefaultEdge> path = getFeasiblePath(spec);
-			System.out.println("Resolving spec "+spec);
-			if(path != null) {
-				System.out.println("Feasible path found "+path);
-				generateClasses(path, spec.getName());
-				
-			}else {
+			System.out.println("Resolving spec " + spec);
+			if (path != null) {
+				System.out.println("Feasible path found " + path);
+				generateClasses(spec, path, spec.getName());
+
+			} else {
 				System.out.println("No feasible path found");
 			}
-			
+
 		}
 
 	}
 
-	private void generateClasses(GraphPath<GraphNode, DefaultEdge> path, String testName) throws IOException, JClassAlreadyExistsException {
+	private void generateClasses(Spec spec, GraphPath<GraphNode, DefaultEdge> path, String testName)
+			throws IOException, JClassAlreadyExistsException {
 		if (path == null) {
 			throw new InvalidPathException();
 		}
@@ -158,43 +187,104 @@ public class TestGenerator {
 		String packageName = "model.tests";
 		String className = packageName + "." + firstLetterCaptial(testName);
 		JDefinedClass definedClass = cm._class(className);
-		//definedClass._extends(ActionClass.class);
-		
-		//assume all execution start at root node; TODO - put a check later
-		System.out.println("Go to node "+graphGenerator.getRootNode());
-		
-		for(DefaultEdge e : path.getEdgeList()) {
-			GraphNode srcNode = graph.getEdgeSource(e);
-			GraphNode dstNode = graph.getEdgeTarget(e);
-			if(srcNode.getNodeType()!=NodeType.CONTROL) {
-				if(srcNode.getNodeType()!=NodeType.PAGE) {
-					System.out.println("Assert can see "+srcNode);
-				}else {
-					System.out.println("Assert at page "+srcNode);
-				}
-			}else {
-				String defaultData = "";
-				if(srcNode.getAction_type().toLowerCase().equals("type")) {
-					defaultData = srcNode.getAction_data();
-				}
-				System.out.println("Execute control "+srcNode+" "+srcNode.getAction_type()+" "+defaultData);
-			}
-			
+		// TODO: extend action class
+		// definedClass._extends(ActionClass.class);
 
-			//System.out.println(srcNode+" to "+dstNode);
-			
-		}
-		
+		// assume all execution start at root node; TODO - put a check later
+		System.out.println("Go to node " + graphGenerator.getRootNode());
+
+		// code for generating/asserting precondition
+		generatePreCondition(path);
+
+		// code for executing spec action
+		genearteSpecActions(spec.getWhen());
+
+		// code for wait
+		generateWait(spec.getWait());
+
+		// code for asserting postcondition
+		generatePostCondition(spec.getThen());
+
+		System.out.println("Generating class file ");
 		String filepath = outputDir + File.separator + "FlyPaper" + File.separator + "test" + File.separator + "main"
 				+ File.separator + "java";
-		
+
 		File file = new File(filepath);
 		file.mkdirs();
 		cm.build(file);
-		
-		
+
 	}
-	
+
+	private void generateWait(String wait) {
+		int waitTime = 0;
+		if (wait != null) {
+			if (wait.toLowerCase().equals("short")) {
+				waitTime = 3;
+			} else if (wait.toLowerCase().equals("normal")) {
+				waitTime = 5;
+			} else if (wait.toLowerCase().equals("long")) {
+				waitTime = 15;
+			}
+		}
+		if (waitTime > 0) {
+			System.out.println("Wait for " + waitTime + " seconds ");
+		}
+
+	}
+
+	private void generatePostCondition(State then) {
+		System.out.println("===| Generating precondition");
+
+		System.out.println("Assert at screen " + then.getScreen());
+		List<String> explicitAssertions = then.getAssertions();
+		if (explicitAssertions != null) {
+			// TODO: add code for explicit assertions
+		}
+
+	}
+
+	private void genearteSpecActions(Map<String, Action> actions) {
+		System.out.println("===| Generating spec action");
+
+		for (String action_tag : actions.keySet()) {
+
+			Action action = actions.get(action_tag);
+			String actionData = "";
+			if (action.getAction_type().toLowerCase().equals("type")) {
+				String userProvidedData = action.getAction_data();
+
+				if (userProvidedData != null && userProvidedData.trim().length() > 0) {
+					actionData = action.getAction_data();
+				} else {
+					actionData = graphGenerator.getNodeByKey(action.getAction_name()).getAction_data();
+				}
+			}
+			System.out.println("Execute " + action_tag + " " + action + " " + actionData);
+		}
+
+	}
+
+	private void generatePreCondition(GraphPath<GraphNode, DefaultEdge> path) {
+
+		System.out.println("===| Generating precondition");
+
+		for (DefaultEdge e : path.getEdgeList()) {
+			GraphNode srcNode = graph.getEdgeSource(e);
+			if (srcNode.getNodeType() != NodeType.CONTROL) {
+				if (srcNode.getNodeType() != NodeType.PAGE) {
+					System.out.println("Assert can see " + srcNode);
+				} else {
+					System.out.println("Assert at page " + srcNode);
+				}
+			} else {
+				String defaultData = "";
+				if (srcNode.getAction_type().toLowerCase().equals("type")) {
+					defaultData = srcNode.getAction_data();
+				}
+				System.out.println("Execute control " + srcNode + " " + srcNode.getAction_type() + " " + defaultData);
+			}
+		}
+	}
 
 	private String firstLetterCaptial(String name) {
 		if (name.length() <= 1) {
