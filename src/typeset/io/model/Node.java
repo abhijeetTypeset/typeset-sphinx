@@ -11,7 +11,8 @@ public class Node {
 	private String name;
 	private String url;
 	private Map<String, String> id;
-	private List<String> actions;
+	private String action_type;
+	private String action_data;
 	private List<String> precondition;
 	private List<String> implictAssertions = new ArrayList<>();
 
@@ -31,13 +32,7 @@ public class Node {
 		this.name = name;
 	}
 
-	public List<String> getActions() {
-		return actions;
-	}
 
-	public void setActions(List<String> actions) {
-		this.actions = actions;
-	}
 
 	public Map<String, String> getId() {
 		return id;
@@ -66,6 +61,22 @@ public class Node {
 
 	public void setPrecondition(List<String> precondition) {
 		this.precondition = precondition;
+	}
+
+	public String getAction_data() {
+		return action_data;
+	}
+
+	public void setAction_data(String action_data) {
+		this.action_data = action_data;
+	}
+
+	public String getAction_type() {
+		return action_type;
+	}
+
+	public void setAction_type(String action_type) {
+		this.action_type = action_type;
 	}
 
 }

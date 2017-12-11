@@ -173,7 +173,11 @@ public class TestGenerator {
 					System.out.println("Assert at page "+srcNode);
 				}
 			}else {
-				System.out.println("Execute control "+srcNode+" "+srcNode.getActions());
+				String defaultData = "";
+				if(srcNode.getAction_type().toLowerCase().equals("type")) {
+					defaultData = srcNode.getAction_data();
+				}
+				System.out.println("Execute control "+srcNode+" "+srcNode.getAction_type()+" "+defaultData);
 			}
 			
 

@@ -163,16 +163,24 @@ public class ModelGenerator {
 			JBlock block = getterMethod.body();
 			block._return(field);
 		}
-		// add actions
-		if (gnode.getActions() != null) {
-			JFieldVar propertyField = definedClass.field(JMod.PRIVATE, cm.ref(String.class).array(),
-					"permissibleActions");
-			JArray array = JExpr.newArray(cm.ref(String.class));
-			for (String action : gnode.getActions()) {
-				array.add(JExpr.lit(action));
-			}
-			propertyField.init(array);
-			JMethod getterMethod = definedClass.method(JMod.PUBLIC, cm.ref(String.class).array(), "getActions");
+		// add action
+		if (gnode.getAction_type() != null) {
+			JFieldVar propertyField = definedClass.field(JMod.PRIVATE, String.class,
+					"actionType");
+			JExpression init = JExpr.lit(gnode.getAction_type());
+			propertyField.init(init);
+			JMethod getterMethod = definedClass.method(JMod.PUBLIC, cm.ref(String.class).array(), "getActionType");
+			JBlock block = getterMethod.body();
+			block._return(propertyField);
+		}
+		
+		// add default data
+		if (gnode.getAction_data() != null) {
+			JFieldVar propertyField = definedClass.field(JMod.PRIVATE, String.class,
+					"actionData");
+			JExpression init = JExpr.lit(gnode.getAction_type());
+			propertyField.init(init);
+			JMethod getterMethod = definedClass.method(JMod.PUBLIC, cm.ref(String.class).array(), "getActionData");
 			JBlock block = getterMethod.body();
 			block._return(propertyField);
 		}

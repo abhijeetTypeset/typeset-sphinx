@@ -399,7 +399,7 @@ public class GraphGenerator {
 				node.addImplicitAssertion("canSee");
 			}
 
-			if (node.getNodeType() == NodeType.CONTROL && node.getActions().contains("type")) {
+			if (node.getNodeType() == NodeType.CONTROL && node.getAction_type().contains("type")) {
 				node.addImplicitAssertion("contains");
 				node.addImplicitAssertion("equals");
 				node.addImplicitAssertion("startsWith");
