@@ -14,9 +14,14 @@ import org.jgrapht.alg.shortestpath.AllDirectedPaths;
 import org.jgrapht.graph.DefaultDirectedGraph;
 import org.jgrapht.graph.DefaultEdge;
 
+import com.sun.codemodel.JClassAlreadyExistsException;
+import com.sun.codemodel.JCodeModel;
+import com.sun.codemodel.JDefinedClass;
+
 import typeset.io.exceptions.InvalidNodeException;
 import typeset.io.exceptions.InvalidPathException;
 import typeset.io.models.GraphNode;
+import typeset.io.models.NodeType;
 import typeset.io.models.Spec;
 import typeset.io.readers.SpecReader;
 
@@ -105,7 +110,7 @@ public class TestGenerator {
 		String startScreen = spec.getGiven().getScreen();
 		GraphNode rootNode = graphGenerator.getRootNode();
 		GraphNode startNode = graphGenerator.getNodeByKey(startScreen);
-		int minLength = 3;
+		int minLength = 10;
 		int maxLength = 15;
 
 		for (int pathLength = minLength; pathLength <= maxLength; pathLength++) {
@@ -120,33 +125,79 @@ public class TestGenerator {
 	}
 
 	private boolean isPathViable(GraphPath<GraphNode, DefaultEdge> path, List<String> assertions) {
-		
+		System.out.println("Received path "+path.getLength()+" "+path);
+		// DUMMY
+		if(path.getLength()<12) {
+			return false;
+		}
 		return true;
 	}
 
-	public void generateTest() {
+	public void generateTest() throws IOException, JClassAlreadyExistsException {
 		for (Spec spec : specList) {
 			GraphPath<GraphNode, DefaultEdge> path = getFeasiblePath(spec);
 			System.out.println("Resolving spec "+spec);
 			if(path != null) {
-				generateClasses(path, spec.getName());
 				System.out.println("Feasible path found "+path);
+				generateClasses(path, spec.getName());
 				
 			}else {
-				System.out.println("No feasibel path found");
+				System.out.println("No feasible path found");
 			}
 			
 		}
 
 	}
 
-	private void generateClasses(GraphPath<GraphNode, DefaultEdge> path, String testName) {
+	private void generateClasses(GraphPath<GraphNode, DefaultEdge> path, String testName) throws IOException, JClassAlreadyExistsException {
 		if (path == null) {
 			throw new InvalidPathException();
 		}
+		System.out.println("===| Generated class for " + firstLetterCaptial(testName));
+		JCodeModel cm = new JCodeModel();
+		String packageName = "model.tests";
+		String className = packageName + "." + firstLetterCaptial(testName);
+		JDefinedClass definedClass = cm._class(className);
+		//definedClass._extends(ActionClass.class);
+		
+		//assume all execution start at root node; TODO - put a check later
+		System.out.println("Go to node "+graphGenerator.getRootNode());
+		
+		for(DefaultEdge e : path.getEdgeList()) {
+			GraphNode srcNode = graph.getEdgeSource(e);
+			GraphNode dstNode = graph.getEdgeTarget(e);
+			if(srcNode.getNodeType()!=NodeType.CONTROL) {
+				if(srcNode.getNodeType()!=NodeType.PAGE) {
+					System.out.println("Assert can see "+srcNode);
+				}else {
+					System.out.println("Assert at page "+srcNode);
+				}
+			}else {
+				System.out.println("Execute control "+srcNode+" "+srcNode.getActions());
+			}
+			
+
+			//System.out.println(srcNode+" to "+dstNode);
+			
+		}
+		
+		String filepath = outputDir + File.separator + "FlyPaper" + File.separator + "test" + File.separator + "main"
+				+ File.separator + "java";
+		
+		File file = new File(filepath);
+		file.mkdirs();
+		cm.build(file);
 		
 		
-		
+	}
+	
+
+	private String firstLetterCaptial(String name) {
+		if (name.length() <= 1) {
+			return name.toUpperCase();
+		} else {
+			return name.substring(0, 1).toUpperCase() + name.substring(1);
+		}
 	}
 
 }
