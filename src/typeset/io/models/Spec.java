@@ -8,7 +8,7 @@ import java.util.Map;
 public class Spec {
 	private State given;
 	private String wait;
-	private Action when ;
+	private Map<String, Action> when ;
 	private State then;
 	private String name;
 	
@@ -36,13 +36,6 @@ public class Spec {
 		this.then = then;
 	}
 
-	public Action getWhen() {
-		return when;
-	}
-
-	public void setWhen(Action when) {
-		this.when = when;
-	}
 	
 	@Override
 	public String toString() {
@@ -61,5 +54,13 @@ public class Spec {
 
 	public void setName(String name) {
 		this.name = name;
+	}
+
+	public Map<String, Action> getWhen() {
+		return when;
+	}
+
+	public void setWhen(Map<String, Action> when) {
+		this.when = when;
 	}
 }

@@ -3,8 +3,10 @@ given:
  screen: screen_2
  assertions: 
 when: 
- control: control_4
- func: click
+ action_1: 
+  control: control_4
+  action_name: click
+  action_data: bla
 wait: short
 then:
  screen: screen_8
