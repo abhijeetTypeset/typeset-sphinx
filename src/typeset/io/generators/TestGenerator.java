@@ -21,8 +21,10 @@ import com.sun.codemodel.JCodeModel;
 import com.sun.codemodel.JDefinedClass;
 import com.sun.codemodel.JExpr;
 import com.sun.codemodel.JExpression;
+import com.sun.codemodel.JFieldRef;
 import com.sun.codemodel.JMethod;
 import com.sun.codemodel.JMod;
+import com.sun.codemodel.JStatement;
 import com.sun.codemodel.JVar;
 
 import typeset.io.exceptions.InvalidNodeException;
@@ -42,6 +44,7 @@ public class TestGenerator {
 	private List<Spec> specList;
 	private JCodeModel codeModel;
 	private JDefinedClass definedClass;
+	private JFieldRef outVar;
 
 	public TestGenerator(DefaultDirectedGraph<GraphNode, DefaultEdge> graph, GraphGenerator graphGenerator,
 			String inputDir, String outputDir) {
@@ -214,16 +217,18 @@ public class TestGenerator {
 	}
 
 	private void generateUserSpecifiedTestScenario(Spec spec) {
-		ScaffolingData testSpecSD = createMethodScaffolding("testSpec");
+		ScaffolingData sdata = createMethodScaffolding("testSpec");
 
 		// code for executing spec action
-		genearteSpecActions(testSpecSD.getBlock(), spec.getWhen());
+		genearteSpecActions(sdata.getBlock(), spec.getWhen());
 
 		// code for wait
-		generateWait(testSpecSD.getBlock(), spec.getWait());
+		generateWait(sdata.getBlock(), spec.getWait());
 
 		// code for asserting postcondition
-		generatePostCondition(testSpecSD.getBlock(), spec.getThen());
+		generatePostCondition(sdata.getBlock(), spec.getThen());
+		
+		addClosingAssert(sdata);
 
 	}
 
@@ -243,7 +248,15 @@ public class TestGenerator {
 	private void navigateToRootNode(GraphNode rootNode) {
 		System.out.println("Go to node " + rootNode);
 
-		createMethodScaffolding("goToRootNode");
+		ScaffolingData sdata = createMethodScaffolding("goToRootNode");
+
+		addClosingAssert(sdata);
+	}
+
+	private void addClosingAssert(ScaffolingData sdata) {
+		JStatement statement = sdata.getAssertVar().invoke("assertAll");
+		sdata.getBlock().add(statement);
+		sdata.getBlock().invoke(outVar, "println").arg("=============" + sdata.getMethod().name() + "=============");
 	}
 
 	private void generatePreCondition(GraphPath<GraphNode, DefaultEdge> path) {
@@ -255,7 +268,7 @@ public class TestGenerator {
 			GraphNode dstNode = graph.getEdgeTarget(e);
 
 			String funcName = getFunctionName(srcNode, dstNode);
-			ScaffolingData method = createMethodScaffolding(funcName);
+			ScaffolingData sdata = createMethodScaffolding(funcName);
 
 			if (srcNode.getNodeType() == NodeType.PAGE || srcNode.getNodeType() == NodeType.SCREEN) {
 				if (srcNode.getNodeType() != NodeType.PAGE) {
@@ -271,6 +284,7 @@ public class TestGenerator {
 				System.out.println(
 						"Invoke control/widget " + srcNode + " " + srcNode.getAction_type() + " " + defaultData);
 			}
+			addClosingAssert(sdata);
 		}
 	}
 
@@ -333,6 +347,9 @@ public class TestGenerator {
 		String packageName = "tests";
 		String className = packageName + "." + firstLetterCaptial(testName);
 		this.definedClass = this.codeModel._class(className);
+
+		outVar = codeModel.ref(System.class).staticRef("out");
+
 		// TODO: extend action class
 		// definedClass._extends(ActionClass.class);
 
