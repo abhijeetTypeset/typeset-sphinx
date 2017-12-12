@@ -44,6 +44,7 @@ public class ModelGenerator {
 	private String outputDir;
 	private JDefinedClass definedAbstractNode;
 
+	
 
 	public ModelGenerator(DefaultDirectedGraph<GraphNode, DefaultEdge> tgraph, String outputDir) {
 		this.tgraph = tgraph;
@@ -225,6 +226,14 @@ public class ModelGenerator {
 		} else {
 			return name.substring(0, 1).toUpperCase() + name.substring(1);
 		}
+	}
+
+	public static Map<GraphNode, JDefinedClass> getNodeClassMap() {
+		return nodeClassMap;
+	}
+
+	public static void setNodeClassMap(Map<GraphNode, JDefinedClass> nodeClassMap) {
+		ModelGenerator.nodeClassMap = nodeClassMap;
 	}
 
 

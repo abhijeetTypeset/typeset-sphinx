@@ -61,12 +61,12 @@ public class Main {
 			System.exit(0);
 		}
 
-		// convert the model to Java classes
+		// convert the model to Java classesss
 		ModelGenerator classGenerator = new ModelGenerator(tgraph, paramerets.get("output"));
 		classGenerator.generateClasses();
 
 		// covert specification to feasible paths; and then eventually into classes
-		TestGenerator testGenerator = new TestGenerator(tgraph, graphGenerator, paramerets.get("input"), paramerets.get("output"));
+		TestGenerator testGenerator = new TestGenerator(tgraph, graphGenerator, classGenerator, paramerets.get("input"), paramerets.get("output"));
 		testGenerator.getSpecs();
 		testGenerator.generateTest();
 		// testGenerator.testPath();

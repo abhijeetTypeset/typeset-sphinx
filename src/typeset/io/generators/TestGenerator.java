@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -22,9 +23,11 @@ import com.sun.codemodel.JDefinedClass;
 import com.sun.codemodel.JExpr;
 import com.sun.codemodel.JExpression;
 import com.sun.codemodel.JFieldRef;
+import com.sun.codemodel.JInvocation;
 import com.sun.codemodel.JMethod;
 import com.sun.codemodel.JMod;
 import com.sun.codemodel.JStatement;
+import com.sun.codemodel.JType;
 import com.sun.codemodel.JVar;
 
 import typeset.io.exceptions.InvalidNodeException;
@@ -45,13 +48,15 @@ public class TestGenerator {
 	private JCodeModel codeModel;
 	private JDefinedClass definedClass;
 	private JFieldRef outVar;
+	private ModelGenerator classGenerator;
 
 	public TestGenerator(DefaultDirectedGraph<GraphNode, DefaultEdge> graph, GraphGenerator graphGenerator,
-			String inputDir, String outputDir) {
+			ModelGenerator classGenerator, String inputDir, String outputDir) {
 		this.graph = graph;
 		this.graphGenerator = graphGenerator;
 		this.inputDir = inputDir;
 		this.outputDir = outputDir;
+		this.classGenerator = classGenerator;
 		this.specFiles = new TreeSet<String>();
 		this.specList = new ArrayList<Spec>();
 	}
@@ -216,23 +221,7 @@ public class TestGenerator {
 
 	}
 
-	private void generateUserSpecifiedTestScenario(Spec spec) {
-		ScaffolingData sdata = createMethodScaffolding("testSpec");
-
-		// code for executing spec action
-		genearteSpecActions(sdata.getBlock(), spec.getWhen());
-
-		// code for wait
-		generateWait(sdata.getBlock(), spec.getWait());
-
-		// code for asserting postcondition
-		generatePostCondition(sdata.getBlock(), spec.getThen());
-		
-		addClosingAssert(sdata);
-
-	}
-
-	private ScaffolingData createMethodScaffolding(String methodName) {
+	private  ScaffolingData createMethodScaffolding(String methodName) {
 		JMethod method = definedClass.method(JMod.PUBLIC, Void.class, methodName);
 		method._throws(InterruptedException.class);
 		method._throws(IOException.class);
@@ -273,27 +262,49 @@ public class TestGenerator {
 			if (srcNode.getNodeType() == NodeType.PAGE || srcNode.getNodeType() == NodeType.SCREEN) {
 				if (srcNode.getNodeType() != NodeType.PAGE) {
 					System.out.println("Assert can see " + srcNode);
+					assertCanSee(sdata, srcNode);
 				} else {
 					System.out.println("Assert at page " + srcNode);
+					assertAtPage(sdata, srcNode);
 				}
 			} else {
 				String defaultData = "";
+				JDefinedClass actionClass = classGenerator.getNodeClassMap().get(srcNode);
+				JInvocation classObj = JExpr._new(actionClass);
 				if (srcNode.getAction_type().toLowerCase().equals("type")) {
 					defaultData = srcNode.getAction_data();
+					sdata.getBlock().invoke("type").arg(classObj).arg(defaultData);
+				}else {
+					sdata.getBlock().invoke("click").arg(classObj);
 				}
 				System.out.println(
 						"Invoke control/widget " + srcNode + " " + srcNode.getAction_type() + " " + defaultData);
+				
+				
+				
+				
 			}
 			addClosingAssert(sdata);
 		}
 	}
 
-	private void genearteSpecActions(JBlock jBlock, Map<String, Action> actions) {
+	private void genearteSpecActions(ScaffolingData sdata, Map<String, Action> actions) {
 		System.out.println("===| Generating spec action");
+
+		Map<String, JExpression> initializedClasses = new HashMap<>();
 
 		for (String action_tag : actions.keySet()) {
 
 			Action action = actions.get(action_tag);
+			JExpression classObj = null;
+			if (initializedClasses.containsKey(action.getAction_name())) {
+				classObj = initializedClasses.get(action.getAction_name());
+			} else {
+				GraphNode actionNode = graphGenerator.getNodeByKey(action.getAction_name());
+				JDefinedClass actionClass = classGenerator.getNodeClassMap().get(actionNode);
+				classObj = JExpr._new(actionClass);
+				initializedClasses.put(action.getAction_name(), classObj);
+			}
 			String actionData = "";
 			if (action.getAction_type().toLowerCase().equals("type")) {
 				String userProvidedData = action.getAction_data();
@@ -303,16 +314,25 @@ public class TestGenerator {
 				} else {
 					actionData = graphGenerator.getNodeByKey(action.getAction_name()).getAction_data();
 				}
+
+				sdata.getBlock().invoke("type").arg(classObj).arg(actionData);
+				System.out.println("Execute " + action_tag + " " + action + " with " + actionData);
+			} else {
+
+				sdata.getBlock().invoke("click").arg(classObj);
+				System.out.println("Execute " + action_tag + " " + action);
 			}
-			System.out.println("Execute " + action_tag + " " + action + " " + actionData);
 		}
 
 	}
 
-	private void generatePostCondition(JBlock jBlock, State then) {
+	private void generatePostCondition(ScaffolingData sdata, State then) {
 		System.out.println("===| Generating precondition");
 
 		System.out.println("Assert at screen " + then.getScreen());
+		GraphNode graphNode = graphGenerator.getNodeByKey(then.getScreen());
+		assertCanSee(sdata, graphNode);
+		
 		List<String> explicitAssertions = then.getAssertions();
 		if (explicitAssertions != null) {
 			// TODO: add code for explicit assertions
@@ -320,7 +340,26 @@ public class TestGenerator {
 
 	}
 
-	private void generateWait(JBlock jBlock, String wait) {
+	private void assertCanSee(ScaffolingData sdata, GraphNode graphNode) {
+		
+		
+		JDefinedClass actionClass = classGenerator.getNodeClassMap().get(graphNode);
+		JInvocation classObj = JExpr._new(actionClass);
+
+		sdata.getBlock().invoke("canSee").arg(classObj);
+		
+	}
+	
+	private void assertAtPage(ScaffolingData sdata, GraphNode graphNode) {
+		
+		
+		JDefinedClass actionClass = classGenerator.getNodeClassMap().get(graphNode);
+		JInvocation classObj = JExpr._new(actionClass);
+
+		sdata.getBlock().invoke("atPage").arg(classObj);
+	}
+
+	private void generateWait(ScaffolingData sdata, String wait) {
 		int waitTime = 0;
 		if (wait != null) {
 			if (wait.toLowerCase().equals("short")) {
@@ -334,6 +373,24 @@ public class TestGenerator {
 		if (waitTime > 0) {
 			System.out.println("Wait for " + waitTime + " seconds ");
 		}
+
+	}
+
+	private void generateUserSpecifiedTestScenario(Spec spec) {
+		ScaffolingData sdata = createMethodScaffolding("testSpec");
+
+		// check precondition
+
+		// code for executing spec action
+		genearteSpecActions(sdata, spec.getWhen());
+
+		// code for wait
+		generateWait(sdata, spec.getWait());
+
+		// code for asserting postcondition
+		generatePostCondition(sdata, spec.getThen());
+
+		addClosingAssert(sdata);
 
 	}
 
@@ -362,7 +419,5 @@ public class TestGenerator {
 		generateUserSpecifiedTestScenario(spec);
 
 		writeTestToFile();
-
 	}
-
 }
