@@ -3,6 +3,7 @@ package typeset.io.generators;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -14,12 +15,19 @@ import org.jgrapht.alg.shortestpath.AllDirectedPaths;
 import org.jgrapht.graph.DefaultDirectedGraph;
 import org.jgrapht.graph.DefaultEdge;
 
+import com.sun.codemodel.JBlock;
 import com.sun.codemodel.JClassAlreadyExistsException;
 import com.sun.codemodel.JCodeModel;
 import com.sun.codemodel.JDefinedClass;
+import com.sun.codemodel.JExpr;
+import com.sun.codemodel.JExpression;
+import com.sun.codemodel.JMethod;
+import com.sun.codemodel.JMod;
+import com.sun.codemodel.JVar;
 
 import typeset.io.exceptions.InvalidNodeException;
 import typeset.io.exceptions.InvalidPathException;
+import typeset.io.generators.helper.ScaffolingData;
 import typeset.io.model.GraphNode;
 import typeset.io.model.NodeType;
 import typeset.io.model.spec.*;
@@ -32,6 +40,8 @@ public class TestGenerator {
 	private String inputDir;
 	private Set<String> specFiles;
 	private List<Spec> specList;
+	private JCodeModel codeModel;
+	private JDefinedClass definedClass;
 
 	public TestGenerator(DefaultDirectedGraph<GraphNode, DefaultEdge> graph, GraphGenerator graphGenerator,
 			String inputDir, String outputDir) {
@@ -65,6 +75,21 @@ public class TestGenerator {
 			}
 		}
 		System.out.println("Found " + specFiles.size() + " spec files");
+	}
+
+	private String getFunctionName(GraphNode srcNode, GraphNode dstNode) {
+		Timestamp timestamp = new Timestamp(System.currentTimeMillis());
+		String name = srcNode.getName() + "_" + dstNode.getName() + "_" + timestamp.getTime();
+
+		return name;
+	}
+
+	private String firstLetterCaptial(String name) {
+		if (name.length() <= 1) {
+			return name.toUpperCase();
+		} else {
+			return name.substring(0, 1).toUpperCase() + name.substring(1);
+		}
 	}
 
 	public List<GraphPath<GraphNode, DefaultEdge>> getPaths(GraphNode sNode, GraphNode dNode, int maxLength) {
@@ -177,73 +202,79 @@ public class TestGenerator {
 
 	}
 
-	private void generateClasses(Spec spec, GraphPath<GraphNode, DefaultEdge> path, String testName)
-			throws IOException, JClassAlreadyExistsException {
-		if (path == null) {
-			throw new InvalidPathException();
-		}
-		System.out.println("===| Generated class for " + firstLetterCaptial(testName));
-		JCodeModel cm = new JCodeModel();
-		String packageName = "model.tests";
-		String className = packageName + "." + firstLetterCaptial(testName);
-		JDefinedClass definedClass = cm._class(className);
-		// TODO: extend action class
-		// definedClass._extends(ActionClass.class);
-
-		// assume all execution start at root node; TODO - put a check later
-		System.out.println("Go to node " + graphGenerator.getRootNode());
-
-		// code for generating/asserting precondition
-		generatePreCondition(path);
-
-		// code for executing spec action
-		genearteSpecActions(spec.getWhen());
-
-		// code for wait
-		generateWait(spec.getWait());
-
-		// code for asserting postcondition
-		generatePostCondition(spec.getThen());
-
-		System.out.println("Generating class file ");
-		String filepath = outputDir + File.separator + "FlyPaper" + File.separator + "test" + File.separator + "main"
+	private void writeTestToFile() throws IOException {
+		String filepath = outputDir + File.separator + "FlyPaper" + File.separator + "src" + File.separator + "test"
 				+ File.separator + "java";
+		System.out.println("Generating class file " + filepath);
 
 		File file = new File(filepath);
 		file.mkdirs();
-		cm.build(file);
+		this.codeModel.build(file);
 
 	}
 
-	private void generateWait(String wait) {
-		int waitTime = 0;
-		if (wait != null) {
-			if (wait.toLowerCase().equals("short")) {
-				waitTime = 3;
-			} else if (wait.toLowerCase().equals("normal")) {
-				waitTime = 5;
-			} else if (wait.toLowerCase().equals("long")) {
-				waitTime = 15;
-			}
-		}
-		if (waitTime > 0) {
-			System.out.println("Wait for " + waitTime + " seconds ");
-		}
+	private void generateUserSpecifiedTestScenario(Spec spec) {
+		ScaffolingData testSpecSD = createMethodScaffolding("testSpec");
+
+		// code for executing spec action
+		genearteSpecActions(testSpecSD.getBlock(), spec.getWhen());
+
+		// code for wait
+		generateWait(testSpecSD.getBlock(), spec.getWait());
+
+		// code for asserting postcondition
+		generatePostCondition(testSpecSD.getBlock(), spec.getThen());
 
 	}
 
-	private void generatePostCondition(State then) {
+	private ScaffolingData createMethodScaffolding(String methodName) {
+		JMethod method = definedClass.method(JMod.PUBLIC, Void.class, methodName);
+		method._throws(InterruptedException.class);
+		method._throws(IOException.class);
+
+		JBlock block = method.body();
+		JVar assertVar = block.decl(this.codeModel._ref(org.testng.asserts.SoftAssert.class), "sAssert");
+		JExpression init = JExpr._new(this.codeModel._ref(org.testng.asserts.SoftAssert.class));
+		assertVar.init(init);
+
+		return new ScaffolingData(method, block, assertVar);
+	}
+
+	private void navigateToRootNode(GraphNode rootNode) {
+		System.out.println("Go to node " + rootNode);
+
+		createMethodScaffolding("goToRootNode");
+	}
+
+	private void generatePreCondition(GraphPath<GraphNode, DefaultEdge> path) {
+
 		System.out.println("===| Generating precondition");
 
-		System.out.println("Assert at screen " + then.getScreen());
-		List<String> explicitAssertions = then.getAssertions();
-		if (explicitAssertions != null) {
-			// TODO: add code for explicit assertions
-		}
+		for (DefaultEdge e : path.getEdgeList()) {
+			GraphNode srcNode = graph.getEdgeSource(e);
+			GraphNode dstNode = graph.getEdgeTarget(e);
 
+			String funcName = getFunctionName(srcNode, dstNode);
+			ScaffolingData method = createMethodScaffolding(funcName);
+
+			if (srcNode.getNodeType() == NodeType.PAGE || srcNode.getNodeType() == NodeType.SCREEN) {
+				if (srcNode.getNodeType() != NodeType.PAGE) {
+					System.out.println("Assert can see " + srcNode);
+				} else {
+					System.out.println("Assert at page " + srcNode);
+				}
+			} else {
+				String defaultData = "";
+				if (srcNode.getAction_type().toLowerCase().equals("type")) {
+					defaultData = srcNode.getAction_data();
+				}
+				System.out.println(
+						"Invoke control/widget " + srcNode + " " + srcNode.getAction_type() + " " + defaultData);
+			}
+		}
 	}
 
-	private void genearteSpecActions(Map<String, Action> actions) {
+	private void genearteSpecActions(JBlock jBlock, Map<String, Action> actions) {
 		System.out.println("===| Generating spec action");
 
 		for (String action_tag : actions.keySet()) {
@@ -264,34 +295,57 @@ public class TestGenerator {
 
 	}
 
-	private void generatePreCondition(GraphPath<GraphNode, DefaultEdge> path) {
-
+	private void generatePostCondition(JBlock jBlock, State then) {
 		System.out.println("===| Generating precondition");
 
-		for (DefaultEdge e : path.getEdgeList()) {
-			GraphNode srcNode = graph.getEdgeSource(e);
-			if (srcNode.getNodeType() != NodeType.CONTROL) {
-				if (srcNode.getNodeType() != NodeType.PAGE) {
-					System.out.println("Assert can see " + srcNode);
-				} else {
-					System.out.println("Assert at page " + srcNode);
-				}
-			} else {
-				String defaultData = "";
-				if (srcNode.getAction_type().toLowerCase().equals("type")) {
-					defaultData = srcNode.getAction_data();
-				}
-				System.out.println("Execute control " + srcNode + " " + srcNode.getAction_type() + " " + defaultData);
-			}
+		System.out.println("Assert at screen " + then.getScreen());
+		List<String> explicitAssertions = then.getAssertions();
+		if (explicitAssertions != null) {
+			// TODO: add code for explicit assertions
 		}
+
 	}
 
-	private String firstLetterCaptial(String name) {
-		if (name.length() <= 1) {
-			return name.toUpperCase();
-		} else {
-			return name.substring(0, 1).toUpperCase() + name.substring(1);
+	private void generateWait(JBlock jBlock, String wait) {
+		int waitTime = 0;
+		if (wait != null) {
+			if (wait.toLowerCase().equals("short")) {
+				waitTime = 3;
+			} else if (wait.toLowerCase().equals("normal")) {
+				waitTime = 5;
+			} else if (wait.toLowerCase().equals("long")) {
+				waitTime = 15;
+			}
 		}
+		if (waitTime > 0) {
+			System.out.println("Wait for " + waitTime + " seconds ");
+		}
+
+	}
+
+	private void generateClasses(Spec spec, GraphPath<GraphNode, DefaultEdge> path, String testName)
+			throws IOException, JClassAlreadyExistsException {
+		if (path == null) {
+			throw new InvalidPathException();
+		}
+		System.out.println("===| Generated class for " + firstLetterCaptial(testName));
+		this.codeModel = new JCodeModel();
+		String packageName = "tests";
+		String className = packageName + "." + firstLetterCaptial(testName);
+		this.definedClass = this.codeModel._class(className);
+		// TODO: extend action class
+		// definedClass._extends(ActionClass.class);
+
+		// assume all execution start at root node; TODO - put a check later
+
+		navigateToRootNode(graphGenerator.getRootNode());
+
+		generatePreCondition(path);
+
+		generateUserSpecifiedTestScenario(spec);
+
+		writeTestToFile();
+
 	}
 
 }
