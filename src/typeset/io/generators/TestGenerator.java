@@ -505,6 +505,10 @@ public class TestGenerator {
 		generateFieldVariables();
 		ScaffolingData sdata = createMethodScaffolding("execute", false);
 
+		// add testng annotation
+		JMethod method = sdata.getMethod();
+		method.annotate(org.testng.annotations.Test.class);
+		
 		// generate GIVEN
 		ScaffolingData givenSdata = generatePrecondition(path);
 
