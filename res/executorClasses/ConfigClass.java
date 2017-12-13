@@ -36,11 +36,11 @@ public class ConfigClass {
 		final String propFileName = "config.properties";
 		final FileInputStream ip = new FileInputStream(propFileName);
 		this.prop.load(ip);
-		testDataFile = this.prop.getProperty("testdata");
-		System.out.println("input data file " + testDataFile);
-		ExcelReader ereader = new ExcelReader();
-		ereader.readData(testDataFile);
-		ereader.verifyAllInputsPresent();
+		// testDataFile = this.prop.getProperty("testdata");
+		// System.out.println("input data file " + testDataFile);
+		// ExcelReader ereader = new ExcelReader();
+		// ereader.readData(testDataFile);
+		// ereader.verifyAllInputsPresent();
 	}
 
 	@BeforeMethod
