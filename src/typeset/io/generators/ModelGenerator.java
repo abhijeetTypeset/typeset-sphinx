@@ -45,7 +45,6 @@ public class ModelGenerator {
 	private String outputDir;
 	private JDefinedClass definedAbstractNode;
 	private JDefinedClass actionClass;
-	
 
 	public ModelGenerator(DefaultDirectedGraph<GraphNode, DefaultEdge> tgraph, String outputDir) {
 		this.tgraph = tgraph;
@@ -102,7 +101,7 @@ public class ModelGenerator {
 		generateTestExecutorClasses();
 
 	}
-	
+
 	public JDefinedClass getActionClass() {
 		return actionClass;
 	}
@@ -110,25 +109,25 @@ public class ModelGenerator {
 	private void generateTestExecutorClasses() throws JClassAlreadyExistsException, IOException {
 		JCodeModel cm = new JCodeModel();
 		String packageName = "utils";
-		String className = packageName + "." + "Config";
+		String className = packageName + "." + "ConfigClass";
 
 		JDefinedClass configClass = cm._class(className);
 		String filepath = outputDir + File.separator + "FlyPaper" + File.separator + "src" + File.separator + "main"
-				+ File.separator + "java" ;
+				+ File.separator + "java";
 		File file = new File(filepath);
 		file.mkdirs();
 		cm.build(file);
-		
+
 		packageName = "controller";
-		className = packageName + "." + "Action";
+		className = packageName + "." + "ActionClass";
 		actionClass = cm._class(className);
 		actionClass._extends(configClass);
 		filepath = outputDir + File.separator + "FlyPaper" + File.separator + "src" + File.separator + "main"
-				+ File.separator + "java" ;
+				+ File.separator + "java";
 		file = new File(filepath);
 		file.mkdirs();
 		cm.build(file);
-		
+
 	}
 
 	private void generateAbstractClasses() throws JClassAlreadyExistsException, IOException {
@@ -151,7 +150,7 @@ public class ModelGenerator {
 
 	private void copyBaseClasses() throws IOException {
 
-		String baseDirStructure = "res/baseDirStructure";
+		String baseDirStructure = "res" + File.separator + "baseDirStructure";
 
 		FileUtils.copyDirectory(new File(baseDirStructure), new File(outputDir));
 		System.out.println("Copying base directory structure from " + baseDirStructure + " to " + outputDir);

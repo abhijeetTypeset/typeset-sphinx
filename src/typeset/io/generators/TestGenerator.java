@@ -479,10 +479,12 @@ public class TestGenerator {
 
 	private void updateTestExecutorClasses() throws IOException {
 		String dirpath = outputDir + File.separator + "FlyPaper" + File.separator + "src" + File.separator + "main"
-				+ File.separator + "java" ;
+				+ File.separator + "java";
 		
-		FileUtils.copyFile(new File(dirpath + File.separator + "utils" + File.separator + "ConfigClass.java"), new File(dirpath + File.separator + "utils" + File.separator + "Config.java"));
-		FileUtils.copyFile(new File(dirpath + File.separator + "controller" + File.separator + "ActionClass.java"), new File(dirpath + File.separator + "controller" + File.separator + "Action.java"));
+		FileUtils.copyFile(new File("res" + File.separator + "executorClasses" + File.separator + "ConfigClass.java"),
+				new File(dirpath + File.separator + "utils" + File.separator + "ConfigClass.java"));
+		FileUtils.copyFile(new File("res" + File.separator + "executorClasses" + File.separator + "ActionClass.java"),
+				new File(dirpath + File.separator + "controller" + File.separator + "ActionClass.java"));
 
 	}
 
