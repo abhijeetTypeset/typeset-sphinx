@@ -13,6 +13,7 @@ import java.util.Set;
 import java.util.Stack;
 import java.util.TreeSet;
 
+import org.apache.commons.io.FileUtils;
 import org.jgrapht.GraphPath;
 import org.jgrapht.alg.shortestpath.AllDirectedPaths;
 import org.jgrapht.graph.DefaultDirectedGraph;
@@ -303,7 +304,7 @@ public class TestGenerator {
 	}
 
 	private void assert_element(ScaffolingData sdata, GraphNode activeNode) {
-		JInvocation assertStatement = sdata.getBlock().invoke(sdata.getAssertVar(),"assertTrue");
+		JInvocation assertStatement = sdata.getBlock().invoke(sdata.getAssertVar(), "assertTrue");
 		JInvocation invokeStatement = sdata.getBlock().invoke(activeNode.getImplictAssertions().get(0));
 		JExpression argumentExpr = null;
 		boolean flag = true;
@@ -469,6 +470,19 @@ public class TestGenerator {
 		addClosingAssert(sdata);
 
 		return sdata;
+	}
+
+	private void call(ScaffolingData sdata, ScaffolingData givenSdata) {
+
+		sdata.getBlock().invoke(givenSdata.getMethod());
+	}
+
+	private void updateTestExecutorClasses() throws IOException {
+		String dirpath = outputDir + File.separator + "FlyPaper" + File.separator + "src" + File.separator + "main"
+				+ File.separator + "java" ;
+		
+		FileUtils.copyFile(new File(dirpath + File.separator + "utils" + File.separator + "ConfigClass.java"), new File(dirpath + File.separator + "utils" + File.separator + "Config.java"));
+		FileUtils.copyFile(new File(dirpath + File.separator + "controller" + File.separator + "ActionClass.java"), new File(dirpath + File.separator + "controller" + File.separator + "Action.java"));
 
 	}
 
@@ -482,8 +496,7 @@ public class TestGenerator {
 		String packageName = "tests";
 		String className = packageName + "." + GeneratorUtilities.firstLetterCaptial(testName);
 		this.definedClass = this.codeModel._class(className);
-		// TODO: extend action class
-		// definedClass._extends(ActionClass.class);
+		definedClass._extends(classGenerator.getActionClass());
 
 		outVar = codeModel.ref(System.class).staticRef("out");
 		usedPages = getUsedPages(path, spec);
@@ -510,11 +523,8 @@ public class TestGenerator {
 
 		writeTestToFile();
 
-	}
+		updateTestExecutorClasses();
 
-	private void call(ScaffolingData sdata, ScaffolingData givenSdata) {
-
-		sdata.getBlock().invoke(givenSdata.getMethod());
 	}
 
 }

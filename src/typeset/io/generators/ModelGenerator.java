@@ -44,6 +44,8 @@ public class ModelGenerator {
 	private static Map<GraphNode, JDefinedClass> nodeClassMap = new HashMap<>();
 	private String outputDir;
 	private JDefinedClass definedAbstractNode;
+	private JDefinedClass actionClass;
+	
 
 	public ModelGenerator(DefaultDirectedGraph<GraphNode, DefaultEdge> tgraph, String outputDir) {
 		this.tgraph = tgraph;
@@ -97,6 +99,36 @@ public class ModelGenerator {
 			}
 		}
 
+		generateTestExecutorClasses();
+
+	}
+	
+	public JDefinedClass getActionClass() {
+		return actionClass;
+	}
+
+	private void generateTestExecutorClasses() throws JClassAlreadyExistsException, IOException {
+		JCodeModel cm = new JCodeModel();
+		String packageName = "utils";
+		String className = packageName + "." + "Config";
+
+		JDefinedClass configClass = cm._class(className);
+		String filepath = outputDir + File.separator + "FlyPaper" + File.separator + "src" + File.separator + "main"
+				+ File.separator + "java" ;
+		File file = new File(filepath);
+		file.mkdirs();
+		cm.build(file);
+		
+		packageName = "controller";
+		className = packageName + "." + "Action";
+		actionClass = cm._class(className);
+		actionClass._extends(configClass);
+		filepath = outputDir + File.separator + "FlyPaper" + File.separator + "src" + File.separator + "main"
+				+ File.separator + "java" ;
+		file = new File(filepath);
+		file.mkdirs();
+		cm.build(file);
+		
 	}
 
 	private void generateAbstractClasses() throws JClassAlreadyExistsException, IOException {
