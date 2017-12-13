@@ -4,9 +4,12 @@ import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.swing.plaf.synth.SynthSplitPaneUI;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.TransformerException;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
@@ -26,9 +29,11 @@ import com.sun.codemodel.JClassAlreadyExistsException;
 import typeset.io.generators.ModelGenerator;
 import typeset.io.generators.GraphGenerator;
 import typeset.io.generators.TestGenerator;
+import typeset.io.generators.TestNGGenerator;
 import typeset.io.model.GraphNode;
 import typeset.io.model.Model;
 import typeset.io.model.NodeType;
+import typeset.io.model.spec.Spec;
 import typeset.io.readers.ModelReader;
 import typeset.io.readers.SpecReader;
 
@@ -37,7 +42,7 @@ public class Main {
 	private final static Map<String, String> paramerets = new HashMap<String, String>();
 
 	public static void main(String[] args)
-			throws IOException, IllegalAccessException, InvocationTargetException, JClassAlreadyExistsException {
+			throws IOException, IllegalAccessException, InvocationTargetException, JClassAlreadyExistsException, ParserConfigurationException, TransformerException {
 		
 		// get parameters
 		getParameters(args);
@@ -61,15 +66,18 @@ public class Main {
 			System.exit(0);
 		}
 
-		// convert the model to Java classesss
+		// convert the model to Java classes
 		ModelGenerator classGenerator = new ModelGenerator(tgraph, paramerets.get("output"));
 		classGenerator.generateClasses();
 
 		// covert specification to feasible paths; and then eventually into classes
 		TestGenerator testGenerator = new TestGenerator(tgraph, graphGenerator, classGenerator, paramerets.get("input"), paramerets.get("output"));
-		testGenerator.getSpecs();
+		List<Spec> specList = testGenerator.getSpecs();
 		testGenerator.generateTest();
 		// testGenerator.testPath();
+		
+		TestNGGenerator testNGGenerator = new TestNGGenerator(paramerets.get("output"), specList, "FlyPaper", "https://typeset.io");
+		testNGGenerator.generateXML();
 
 	}
 

@@ -120,7 +120,7 @@ public class TestGenerator {
 		}
 	}
 
-	public void getSpecs() {
+	public List<Spec> getSpecs() {
 		getSpecFiles();
 		for (String sf : specFiles) {
 			try {
@@ -137,6 +137,7 @@ public class TestGenerator {
 				System.out.println("Error parsing spec file : " + sf);
 			}
 		}
+		return specList;
 	}
 
 	private boolean isValidSpec(Spec spec) {
@@ -502,7 +503,7 @@ public class TestGenerator {
 		outVar = codeModel.ref(System.class).staticRef("out");
 		usedPages = getUsedPages(path, spec);
 		generateFieldVariables();
-		ScaffolingData sdata = createMethodScaffolding(spec.getName(), false);
+		ScaffolingData sdata = createMethodScaffolding("execute", false);
 
 		// generate GIVEN
 		ScaffolingData givenSdata = generatePrecondition(path);

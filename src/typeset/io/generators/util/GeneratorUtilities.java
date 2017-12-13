@@ -1,5 +1,7 @@
 package typeset.io.generators.util;
 
+import java.sql.Timestamp;
+
 import typeset.io.model.NodeType;
 
 public class GeneratorUtilities {
@@ -30,5 +32,10 @@ public class GeneratorUtilities {
 			return -1;
 		}
 		
+	}
+
+	public static String getTimestamp() {
+		Timestamp timestamp = new Timestamp(System.currentTimeMillis());
+		return timestamp.getTime() + "";
 	}
 }
