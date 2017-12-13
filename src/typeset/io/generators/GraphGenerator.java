@@ -51,6 +51,7 @@ public class GraphGenerator {
 	private GraphNode rootNode;
 	private String targetDir;
 	private List<GraphNode> nodesWithPrecondition;
+	private Map<String, String> screenToPage;
 
 	public GraphGenerator(Model model, String targetDir) {
 		this.model = model;
@@ -75,6 +76,7 @@ public class GraphGenerator {
 		graph = new DefaultDirectedGraph<>(DefaultEdge.class);
 		nameNodeMap = new HashMap<>();
 		nodesWithPrecondition = new ArrayList<>();
+		screenToPage = new HashMap<>();
 
 		// add all the vertices
 
@@ -218,6 +220,7 @@ public class GraphGenerator {
 						System.out.println("Adding edge from page " + pageNode + " to screen " + screenNode);
 						graph.addEdge(pageNode, screenNode);
 					}
+					screenToPage.put(s, p);
 				}
 			}
 
@@ -467,6 +470,10 @@ public class GraphGenerator {
 
 	public  GraphNode getRootNode() {
 		return rootNode;
+	}
+
+	public Map<String, String> getScreenToPage() {
+		return screenToPage;
 	}
 
 }

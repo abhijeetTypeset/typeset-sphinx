@@ -28,6 +28,7 @@ import com.sun.codemodel.JMod;
 import com.sun.codemodel.JType;
 
 import typeset.io.exceptions.InconsistentGraphException;
+import typeset.io.generators.util.GeneratorUtilities;
 import typeset.io.model.App;
 import typeset.io.model.GraphNode;
 import typeset.io.model.Model;
@@ -44,12 +45,10 @@ public class ModelGenerator {
 	private String outputDir;
 	private JDefinedClass definedAbstractNode;
 
-	
-
 	public ModelGenerator(DefaultDirectedGraph<GraphNode, DefaultEdge> tgraph, String outputDir) {
 		this.tgraph = tgraph;
 		this.outputDir = outputDir;
-		
+
 	}
 
 	public void generateClasses() throws IOException, JClassAlreadyExistsException {
@@ -104,14 +103,13 @@ public class ModelGenerator {
 		JCodeModel cm = new JCodeModel();
 		String packageName = "model";
 		String className = packageName + "." + "Node";
-		
 
 		ClassType t = ClassType.CLASS;
-		definedAbstractNode = cm._class(JMod.PUBLIC|JMod.ABSTRACT, className, t );
-		
-		definedAbstractNode.method(JMod.PUBLIC|JMod.ABSTRACT, org.openqa.selenium.By.class, "getId");
-		definedAbstractNode.method(JMod.PUBLIC|JMod.ABSTRACT, String.class, "getName");
-		
+		definedAbstractNode = cm._class(JMod.PUBLIC | JMod.ABSTRACT, className, t);
+
+		definedAbstractNode.method(JMod.PUBLIC | JMod.ABSTRACT, org.openqa.selenium.By.class, "getId");
+		definedAbstractNode.method(JMod.PUBLIC | JMod.ABSTRACT, String.class, "getName");
+
 		String filepath = outputDir + File.separator + "FlyPaper" + File.separator + "src" + File.separator + "main"
 				+ File.separator + "java";
 		File file = new File(filepath);
@@ -120,7 +118,7 @@ public class ModelGenerator {
 	}
 
 	private void copyBaseClasses() throws IOException {
-		
+
 		String baseDirStructure = "res/baseDirStructure";
 
 		FileUtils.copyDirectory(new File(baseDirStructure), new File(outputDir));
@@ -131,7 +129,7 @@ public class ModelGenerator {
 		System.out.println("===| Generated class for " + gnode);
 		JCodeModel cm = new JCodeModel();
 		String packageName = "model" + "." + gnode.getNodeType() + "s";
-		String className = packageName + "." + firstLetterCaptial(gnode.getName());
+		String className = packageName + "." + GeneratorUtilities.firstLetterCaptial(gnode.getName());
 
 		JDefinedClass definedClass = cm._class(className);
 		definedClass._extends(definedAbstractNode);
@@ -166,27 +164,24 @@ public class ModelGenerator {
 		}
 		// add action
 		if (gnode.getAction_type() != null) {
-			JFieldVar propertyField = definedClass.field(JMod.PRIVATE, String.class,
-					"actionType");
+			JFieldVar propertyField = definedClass.field(JMod.PRIVATE, String.class, "actionType");
 			JExpression init = JExpr.lit(gnode.getAction_type());
 			propertyField.init(init);
 			JMethod getterMethod = definedClass.method(JMod.PUBLIC, cm.ref(String.class).array(), "getActionType");
 			JBlock block = getterMethod.body();
 			block._return(propertyField);
 		}
-		
+
 		// add default data
 		if (gnode.getAction_data() != null) {
-			JFieldVar propertyField = definedClass.field(JMod.PRIVATE, String.class,
-					"actionData");
+			JFieldVar propertyField = definedClass.field(JMod.PRIVATE, String.class, "actionData");
 			JExpression init = JExpr.lit(gnode.getAction_type());
 			propertyField.init(init);
 			JMethod getterMethod = definedClass.method(JMod.PUBLIC, cm.ref(String.class).array(), "getActionData");
 			JBlock block = getterMethod.body();
 			block._return(propertyField);
 		}
-		
-	
+
 		if (gnode.getNodeType() != NodeType.CONTROL) {
 			Set<DefaultEdge> edges = tgraph.edgesOf(gnode);
 			for (DefaultEdge edge : edges) {
@@ -202,7 +197,8 @@ public class ModelGenerator {
 				JFieldVar field = definedClass.field(JMod.PRIVATE, exitingClassNode, "var" + targetNode.getName());
 				JExpression init = JExpr._new(exitingClassNode);
 				field.init(init);
-				JMethod getterMethod = definedClass.method(JMod.PUBLIC, exitingClassNode, "get" + firstLetterCaptial(targetNode.getName()));
+				JMethod getterMethod = definedClass.method(JMod.PUBLIC, exitingClassNode,
+						GeneratorUtilities.getGetterName(targetNode.getName()));
 				JBlock block = getterMethod.body();
 				block._return(field);
 
@@ -220,14 +216,6 @@ public class ModelGenerator {
 		cm.build(file);
 	}
 
-	private String firstLetterCaptial(String name) {
-		if (name.length() <= 1) {
-			return name.toUpperCase();
-		} else {
-			return name.substring(0, 1).toUpperCase() + name.substring(1);
-		}
-	}
-
 	public static Map<GraphNode, JDefinedClass> getNodeClassMap() {
 		return nodeClassMap;
 	}
@@ -235,8 +223,5 @@ public class ModelGenerator {
 	public static void setNodeClassMap(Map<GraphNode, JDefinedClass> nodeClassMap) {
 		ModelGenerator.nodeClassMap = nodeClassMap;
 	}
-
-
-
 
 }

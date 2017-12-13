@@ -2,13 +2,15 @@ package typeset.io.generators;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Path;
+
 import java.sql.Timestamp;
 import java.util.ArrayList;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.Stack;
 import java.util.TreeSet;
 
 import org.jgrapht.GraphPath;
@@ -23,6 +25,7 @@ import com.sun.codemodel.JDefinedClass;
 import com.sun.codemodel.JExpr;
 import com.sun.codemodel.JExpression;
 import com.sun.codemodel.JFieldRef;
+import com.sun.codemodel.JFieldVar;
 import com.sun.codemodel.JInvocation;
 import com.sun.codemodel.JMethod;
 import com.sun.codemodel.JMod;
@@ -33,6 +36,7 @@ import com.sun.codemodel.JVar;
 import typeset.io.exceptions.InvalidNodeException;
 import typeset.io.exceptions.InvalidPathException;
 import typeset.io.generators.helper.ScaffolingData;
+import typeset.io.generators.util.GeneratorUtilities;
 import typeset.io.model.GraphNode;
 import typeset.io.model.NodeType;
 import typeset.io.model.spec.*;
@@ -49,6 +53,10 @@ public class TestGenerator {
 	private JDefinedClass definedClass;
 	private JFieldRef outVar;
 	private ModelGenerator classGenerator;
+	private Map<GraphNode, JFieldVar> definedPages = new HashMap<>();
+	private Stack<GraphNode> stack = new Stack<GraphNode>();
+	private JFieldVar activePageVariable = null;
+	private Map<String, GraphNode> usedPages;
 
 	public TestGenerator(DefaultDirectedGraph<GraphNode, DefaultEdge> graph, GraphGenerator graphGenerator,
 			ModelGenerator classGenerator, String inputDir, String outputDir) {
@@ -90,14 +98,6 @@ public class TestGenerator {
 		String name = srcNode.getName() + "_" + dstNode.getName() + "_" + timestamp.getTime();
 
 		return name;
-	}
-
-	private String firstLetterCaptial(String name) {
-		if (name.length() <= 1) {
-			return name.toUpperCase();
-		} else {
-			return name.substring(0, 1).toUpperCase() + name.substring(1);
-		}
 	}
 
 	public List<GraphPath<GraphNode, DefaultEdge>> getPaths(GraphNode sNode, GraphNode dNode, int maxLength) {
@@ -221,25 +221,19 @@ public class TestGenerator {
 
 	}
 
-	private  ScaffolingData createMethodScaffolding(String methodName) {
+	private ScaffolingData createMethodScaffolding(String methodName, boolean addAssert) {
 		JMethod method = definedClass.method(JMod.PUBLIC, Void.class, methodName);
 		method._throws(InterruptedException.class);
 		method._throws(IOException.class);
-
+		JVar assertVar = null;
 		JBlock block = method.body();
-		JVar assertVar = block.decl(this.codeModel._ref(org.testng.asserts.SoftAssert.class), "sAssert");
-		JExpression init = JExpr._new(this.codeModel._ref(org.testng.asserts.SoftAssert.class));
-		assertVar.init(init);
+		if (addAssert) {
+			assertVar = block.decl(this.codeModel._ref(org.testng.asserts.SoftAssert.class), "sAssert");
+			JExpression init = JExpr._new(this.codeModel._ref(org.testng.asserts.SoftAssert.class));
+			assertVar.init(init);
+		}
 
 		return new ScaffolingData(method, block, assertVar);
-	}
-
-	private void navigateToRootNode(GraphNode rootNode) {
-		System.out.println("Go to node " + rootNode);
-
-		ScaffolingData sdata = createMethodScaffolding("goToRootNode");
-
-		addClosingAssert(sdata);
 	}
 
 	private void addClosingAssert(ScaffolingData sdata) {
@@ -248,63 +242,14 @@ public class TestGenerator {
 		sdata.getBlock().invoke(outVar, "println").arg("=============" + sdata.getMethod().name() + "=============");
 	}
 
-	private void generatePreCondition(GraphPath<GraphNode, DefaultEdge> path) {
-
-		System.out.println("===| Generating precondition");
-
-		for (DefaultEdge e : path.getEdgeList()) {
-			GraphNode srcNode = graph.getEdgeSource(e);
-			GraphNode dstNode = graph.getEdgeTarget(e);
-
-			String funcName = getFunctionName(srcNode, dstNode);
-			ScaffolingData sdata = createMethodScaffolding(funcName);
-
-			if (srcNode.getNodeType() == NodeType.PAGE || srcNode.getNodeType() == NodeType.SCREEN) {
-				if (srcNode.getNodeType() != NodeType.PAGE) {
-					System.out.println("Assert can see " + srcNode);
-					assertCanSee(sdata, srcNode);
-				} else {
-					System.out.println("Assert at page " + srcNode);
-					assertAtPage(sdata, srcNode);
-				}
-			} else {
-				String defaultData = "";
-				JDefinedClass actionClass = classGenerator.getNodeClassMap().get(srcNode);
-				JInvocation classObj = JExpr._new(actionClass);
-				if (srcNode.getAction_type().toLowerCase().equals("type")) {
-					defaultData = srcNode.getAction_data();
-					sdata.getBlock().invoke("type").arg(classObj).arg(defaultData);
-				}else {
-					sdata.getBlock().invoke("click").arg(classObj);
-				}
-				System.out.println(
-						"Invoke control/widget " + srcNode + " " + srcNode.getAction_type() + " " + defaultData);
-				
-				
-				
-				
-			}
-			addClosingAssert(sdata);
-		}
-	}
-
-	private void genearteSpecActions(ScaffolingData sdata, Map<String, Action> actions) {
-		System.out.println("===| Generating spec action");
-
-		Map<String, JExpression> initializedClasses = new HashMap<>();
+	private ScaffolingData genearteSpecActions(Map<String, Action> actions) {
+		ScaffolingData sdata = createMethodScaffolding("when", true);
 
 		for (String action_tag : actions.keySet()) {
 
 			Action action = actions.get(action_tag);
-			JExpression classObj = null;
-			if (initializedClasses.containsKey(action.getAction_name())) {
-				classObj = initializedClasses.get(action.getAction_name());
-			} else {
-				GraphNode actionNode = graphGenerator.getNodeByKey(action.getAction_name());
-				JDefinedClass actionClass = classGenerator.getNodeClassMap().get(actionNode);
-				classObj = JExpr._new(actionClass);
-				initializedClasses.put(action.getAction_name(), classObj);
-			}
+			GraphNode actionNode = graphGenerator.getNodeByKey(action.getAction_name());
+
 			String actionData = "";
 			if (action.getAction_type().toLowerCase().equals("type")) {
 				String userProvidedData = action.getAction_data();
@@ -315,48 +260,117 @@ public class TestGenerator {
 					actionData = graphGenerator.getNodeByKey(action.getAction_name()).getAction_data();
 				}
 
-				sdata.getBlock().invoke("type").arg(classObj).arg(actionData);
+				invoke_element(sdata, actionNode, actionData);
 				System.out.println("Execute " + action_tag + " " + action + " with " + actionData);
 			} else {
 
-				sdata.getBlock().invoke("click").arg(classObj);
+				invoke_element(sdata, actionNode, actionNode.getAction_data());
 				System.out.println("Execute " + action_tag + " " + action);
 			}
 		}
+		// add closing asserts
+		addClosingAssert(sdata);
 
+		return sdata;
 	}
 
-	private void generatePostCondition(ScaffolingData sdata, State then) {
-		System.out.println("===| Generating precondition");
+	private void setActivePage(GraphNode pageNode) {
+		activePageVariable = definedPages.get(pageNode);
+		lightenStack(NodeType.PAGE);
+	}
 
-		System.out.println("Assert at screen " + then.getScreen());
-		GraphNode graphNode = graphGenerator.getNodeByKey(then.getScreen());
-		assertCanSee(sdata, graphNode);
-		
+	private ScaffolingData generatePostCondition(State then) {
+		ScaffolingData sdata = createMethodScaffolding("then", true);
+
+		GraphNode pageNode = usedPages.get(then.getScreen());
+		setActivePage(pageNode);
+
+		// assert that we are on page
+		assert_element(sdata, pageNode.getImplictAssertions().get(0));
+
+		// assert that we are on screen
+		GraphNode screenNode = graphGenerator.getNodeByKey(then.getScreen());
+		assert_element(sdata, screenNode);
+
 		List<String> explicitAssertions = then.getAssertions();
 		if (explicitAssertions != null) {
 			// TODO: add code for explicit assertions
 		}
 
+		// add closing asserts
+		addClosingAssert(sdata);
+		
+		return sdata;
+
 	}
 
-	private void assertCanSee(ScaffolingData sdata, GraphNode graphNode) {
-		
-		
-		JDefinedClass actionClass = classGenerator.getNodeClassMap().get(graphNode);
-		JInvocation classObj = JExpr._new(actionClass);
-
-		sdata.getBlock().invoke("canSee").arg(classObj);
-		
+	private void assert_element(ScaffolingData sdata, String functionName) {
+		JExpression jexpr = JExpr.invoke(activePageVariable, "getId");
+		sdata.getBlock().invoke(functionName).arg(jexpr);
 	}
-	
-	private void assertAtPage(ScaffolingData sdata, GraphNode graphNode) {
-		
-		
-		JDefinedClass actionClass = classGenerator.getNodeClassMap().get(graphNode);
-		JInvocation classObj = JExpr._new(actionClass);
 
-		sdata.getBlock().invoke("atPage").arg(classObj);
+	private void assert_element(ScaffolingData sdata, GraphNode activeNode) {
+		JInvocation invokeStatement = sdata.getBlock().invoke(activeNode.getImplictAssertions().get(0));
+		JExpression argumentExpr = null;
+		boolean flag = true;
+
+		for (GraphNode stackNode : stack) {
+			if (flag) {
+				argumentExpr = JExpr.invoke(activePageVariable, GeneratorUtilities.getGetterName(stackNode.getName()));
+				flag = false;
+			} else {
+				argumentExpr = JExpr.invoke(argumentExpr, GeneratorUtilities.getGetterName(stackNode.getName()));
+			}
+		}
+		String getterName = GeneratorUtilities.getGetterName(activeNode.getName());
+		if (flag) {
+			argumentExpr = JExpr.invoke(activePageVariable, getterName);
+
+		} else {
+			argumentExpr = JExpr.invoke(argumentExpr, getterName);
+		}
+		argumentExpr = JExpr.invoke(argumentExpr, "getId");
+		invokeStatement.arg(argumentExpr);
+		updateStack(activeNode);
+	}
+
+	private boolean isTypeText(String actionType) {
+		if (actionType.toLowerCase().equals("type")) {
+			return true;
+		}
+		return false;
+	}
+
+	private void invoke_element(ScaffolingData sdata, GraphNode activeNode, String actionData) {
+		JInvocation invokeStatement = sdata.getBlock().invoke(activeNode.getAction_type());
+		JExpression argumentExpr = null;
+		boolean flag = true;
+
+		for (GraphNode stackNode : stack) {
+			if (flag) {
+				argumentExpr = JExpr.invoke(activePageVariable, GeneratorUtilities.getGetterName(stackNode.getName()));
+				flag = false;
+			} else {
+				argumentExpr = JExpr.invoke(argumentExpr, GeneratorUtilities.getGetterName(stackNode.getName()));
+			}
+		}
+		String getterName = GeneratorUtilities.getGetterName(activeNode.getName());
+		if (flag) {
+			argumentExpr = JExpr.invoke(activePageVariable, getterName);
+
+		} else {
+			argumentExpr = JExpr.invoke(argumentExpr, getterName);
+		}
+		argumentExpr = JExpr.invoke(argumentExpr, "getId");
+		if (isTypeText(activeNode.getAction_type())) {
+			invokeStatement.arg(argumentExpr).arg(actionData);
+		} else {
+			invokeStatement.arg(argumentExpr);
+		}
+		updateStack(activeNode);
+		sdata.getBlock().invoke(outVar, "println")
+				.arg("=============" + activeNode.getAction_type() + " " + activeNode.getName() + "=============");
+
 	}
 
 	private void generateWait(ScaffolingData sdata, String wait) {
@@ -371,26 +385,92 @@ public class TestGenerator {
 			}
 		}
 		if (waitTime > 0) {
-			System.out.println("Wait for " + waitTime + " seconds ");
+			sdata.getBlock().invoke(outVar, "println")
+					.arg("=============" + "Waiting for " + waitTime + " seconds " + "=============");
+			JExpression expr = JExpr.lit(waitTime);
+			sdata.getBlock().invoke("wait").arg(expr);
 		}
 
 	}
 
-	private void generateUserSpecifiedTestScenario(Spec spec) {
-		ScaffolingData sdata = createMethodScaffolding("testSpec");
+	private Map<String, GraphNode> getUsedPages(GraphPath<GraphNode, DefaultEdge> path, Spec spec) {
+		Map<String, GraphNode> usedPages = new HashMap<>();
 
-		// check precondition
+		for (DefaultEdge e : path.getEdgeList()) {
+			GraphNode srcNode = graph.getEdgeSource(e);
+			GraphNode dstNode = graph.getEdgeTarget(e);
 
-		// code for executing spec action
-		genearteSpecActions(sdata, spec.getWhen());
+			if (srcNode.getNodeType() == NodeType.PAGE) {
+				usedPages.put(dstNode.getName(), srcNode);
+			}
+		}
+		String lastScreen = spec.getThen().getScreen();
+		String lastPage = graphGenerator.getScreenToPage().get(lastScreen);
 
-		// code for wait
-		generateWait(sdata, spec.getWait());
+		System.out.println("last page node is " + lastPage);
+		usedPages.put(lastScreen, graphGenerator.getNodeByKey(lastPage));
 
-		// code for asserting postcondition
-		generatePostCondition(sdata, spec.getThen());
+		return usedPages;
 
+	}
+
+	private void generateFieldVariables() {
+		for (String key : usedPages.keySet()) {
+
+			GraphNode pageNode = usedPages.get(key);
+			JDefinedClass pageClass = classGenerator.getNodeClassMap().get(pageNode);
+
+			JFieldVar pageField = this.definedClass.field(JMod.FINAL, pageClass, "field" + pageNode.getName(),
+					JExpr._new(pageClass));
+			definedPages.put(pageNode, pageField);
+		}
+
+	}
+
+	private void lightenStack(NodeType nodeType) {
+		while (!stack.isEmpty() && GeneratorUtilities.getNodeType(stack.peek().getNodeType()) > GeneratorUtilities
+				.getNodeType(nodeType)) {
+			GraphNode popedNode = stack.pop();
+			System.out.println("Popped " + popedNode);
+		}
+	}
+
+	private void updateStack(GraphNode graphNode) {
+		if (graphNode.getNodeType() == NodeType.CONTROL) {
+			return;
+		}
+		lightenStack(graphNode.getNodeType());
+		stack.push(graphNode);
+	}
+
+	private ScaffolingData generatePrecondition(GraphPath<GraphNode, DefaultEdge> path) {
+
+		ScaffolingData sdata = createMethodScaffolding("given", true);
+
+		// go to homepage
+		JExpression url = JExpr.lit(graphGenerator.getRootNode().getUrl());
+		sdata.getBlock().invoke("goToPage").arg(url);
+
+		for (DefaultEdge e : path.getEdgeList()) {
+			GraphNode srcNode = graph.getEdgeSource(e);
+			if (srcNode.getNodeType() == NodeType.PAGE) {
+				setActivePage(srcNode);
+				assert_element(sdata, srcNode.getImplictAssertions().get(0));
+			} else if (srcNode.getNodeType() == NodeType.SCREEN) {
+				assert_element(sdata, srcNode);
+			} else if (srcNode.getNodeType() == NodeType.APP) {
+				assert_element(sdata, srcNode);
+			} else if (srcNode.getNodeType() == NodeType.WIDGET) {
+				assert_element(sdata, srcNode);
+			} else {
+				invoke_element(sdata, srcNode, srcNode.getAction_data());
+			}
+		}
+
+		// add closing asserts
 		addClosingAssert(sdata);
+
+		return sdata;
 
 	}
 
@@ -399,25 +479,44 @@ public class TestGenerator {
 		if (path == null) {
 			throw new InvalidPathException();
 		}
-		System.out.println("===| Generated class for " + firstLetterCaptial(testName));
+		System.out.println("===| Generated class for " + GeneratorUtilities.firstLetterCaptial(testName));
 		this.codeModel = new JCodeModel();
 		String packageName = "tests";
-		String className = packageName + "." + firstLetterCaptial(testName);
+		String className = packageName + "." + GeneratorUtilities.firstLetterCaptial(testName);
 		this.definedClass = this.codeModel._class(className);
-
-		outVar = codeModel.ref(System.class).staticRef("out");
-
 		// TODO: extend action class
 		// definedClass._extends(ActionClass.class);
 
-		// assume all execution start at root node; TODO - put a check later
+		outVar = codeModel.ref(System.class).staticRef("out");
+		usedPages = getUsedPages(path, spec);
+		generateFieldVariables();
+		ScaffolingData sdata = createMethodScaffolding(spec.getName(), false);
 
-		navigateToRootNode(graphGenerator.getRootNode());
+		// generate GIVEN
+		ScaffolingData givenSdata = generatePrecondition(path);
 
-		generatePreCondition(path);
+		call(sdata, givenSdata);
 
-		generateUserSpecifiedTestScenario(spec);
+		// generate WHEN
+		ScaffolingData whenSdata = genearteSpecActions(spec.getWhen());
+
+		call(sdata, whenSdata);
+
+		// generate WAIT
+		generateWait(sdata, spec.getWait());
+
+		// generate THEN
+		ScaffolingData thenSdata = generatePostCondition(spec.getThen());
+
+		call(sdata, thenSdata);
 
 		writeTestToFile();
+
 	}
+
+	private void call(ScaffolingData sdata, ScaffolingData givenSdata) {
+
+		sdata.getBlock().invoke(givenSdata.getMethod());
+	}
+
 }
