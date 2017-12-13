@@ -299,7 +299,7 @@ public class TestGenerator {
 	}
 
 	private void assert_element(ScaffolingData sdata, String functionName) {
-		JExpression jexpr = JExpr.invoke(activePageVariable, "getId");
+		JExpression jexpr = JExpr.invoke(activePageVariable, "getUrl");
 		sdata.getBlock().invoke(functionName).arg(jexpr);
 	}
 
@@ -444,8 +444,7 @@ public class TestGenerator {
 		ScaffolingData sdata = createMethodScaffolding("given", true);
 
 		// go to homepage
-		JExpression url = JExpr.lit(graphGenerator.getRootNode().getUrl());
-		sdata.getBlock().invoke("goToPage").arg(url);
+		sdata.getBlock().invoke("goToHomePage");
 
 		GraphNode lastNode = null;
 		for (DefaultEdge e : path.getEdgeList()) {

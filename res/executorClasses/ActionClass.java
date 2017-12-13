@@ -1,5 +1,9 @@
 package controller;
 
+import java.io.IOException;
+import java.net.HttpURLConnection;
+import java.net.URL;
+
 import org.openqa.selenium.By;
 import org.openqa.selenium.InvalidElementStateException;
 import org.openqa.selenium.JavascriptExecutor;
@@ -52,6 +56,14 @@ public class ActionClass extends ConfigClass {
 			System.out.println("Not at page " + url + " X " + pageUrl);
 			return false;
 		}
+	}
+	
+    public void goToHomePage() throws IOException {
+		final URL url = new URL(driver.getCurrentUrl());
+		final HttpURLConnection hurcon = (HttpURLConnection) url.openConnection();
+		hurcon.setRequestMethod("GET");
+		hurcon.connect();
+		
 	}
 
 	public void click(By locator) // To click on a locator

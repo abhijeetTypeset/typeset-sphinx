@@ -198,7 +198,7 @@ public class ModelGenerator {
 			JFieldVar propertyField = definedClass.field(JMod.PRIVATE, String.class, "actionType");
 			JExpression init = JExpr.lit(gnode.getAction_type());
 			propertyField.init(init);
-			JMethod getterMethod = definedClass.method(JMod.PUBLIC, cm.ref(String.class).array(), "getActionType");
+			JMethod getterMethod = definedClass.method(JMod.PUBLIC, String.class, "getActionType");
 			JBlock block = getterMethod.body();
 			block._return(propertyField);
 		}
@@ -208,7 +208,7 @@ public class ModelGenerator {
 			JFieldVar propertyField = definedClass.field(JMod.PRIVATE, String.class, "actionData");
 			JExpression init = JExpr.lit(gnode.getAction_type());
 			propertyField.init(init);
-			JMethod getterMethod = definedClass.method(JMod.PUBLIC, cm.ref(String.class).array(), "getActionData");
+			JMethod getterMethod = definedClass.method(JMod.PUBLIC, String.class, "getActionData");
 			JBlock block = getterMethod.body();
 			block._return(propertyField);
 		}
