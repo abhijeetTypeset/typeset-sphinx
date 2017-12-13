@@ -93,13 +93,6 @@ public class TestGenerator {
 		System.out.println("Found " + specFiles.size() + " spec files");
 	}
 
-	private String getFunctionName(GraphNode srcNode, GraphNode dstNode) {
-		Timestamp timestamp = new Timestamp(System.currentTimeMillis());
-		String name = srcNode.getName() + "_" + dstNode.getName() + "_" + timestamp.getTime();
-
-		return name;
-	}
-
 	public List<GraphPath<GraphNode, DefaultEdge>> getPaths(GraphNode sNode, GraphNode dNode, int maxLength) {
 
 		if (sNode == null || dNode == null) {
@@ -222,7 +215,7 @@ public class TestGenerator {
 	}
 
 	private ScaffolingData createMethodScaffolding(String methodName, boolean addAssert) {
-		JMethod method = definedClass.method(JMod.PUBLIC, Void.class, methodName);
+		JMethod method = definedClass.method(JMod.PUBLIC, JType.parse(codeModel, "void"), methodName);
 		method._throws(InterruptedException.class);
 		method._throws(IOException.class);
 		JVar assertVar = null;
@@ -299,7 +292,7 @@ public class TestGenerator {
 
 		// add closing asserts
 		addClosingAssert(sdata);
-		
+
 		return sdata;
 
 	}
@@ -310,6 +303,7 @@ public class TestGenerator {
 	}
 
 	private void assert_element(ScaffolingData sdata, GraphNode activeNode) {
+		JInvocation assertStatement = sdata.getBlock().invoke(sdata.getAssertVar(),"assertTrue");
 		JInvocation invokeStatement = sdata.getBlock().invoke(activeNode.getImplictAssertions().get(0));
 		JExpression argumentExpr = null;
 		boolean flag = true;
@@ -331,6 +325,7 @@ public class TestGenerator {
 		}
 		argumentExpr = JExpr.invoke(argumentExpr, "getId");
 		invokeStatement.arg(argumentExpr);
+		assertStatement.arg(invokeStatement);
 		updateStack(activeNode);
 	}
 
@@ -451,8 +446,10 @@ public class TestGenerator {
 		JExpression url = JExpr.lit(graphGenerator.getRootNode().getUrl());
 		sdata.getBlock().invoke("goToPage").arg(url);
 
+		GraphNode lastNode = null;
 		for (DefaultEdge e : path.getEdgeList()) {
 			GraphNode srcNode = graph.getEdgeSource(e);
+			lastNode = graph.getEdgeTarget(e);
 			if (srcNode.getNodeType() == NodeType.PAGE) {
 				setActivePage(srcNode);
 				assert_element(sdata, srcNode.getImplictAssertions().get(0));
@@ -466,6 +463,7 @@ public class TestGenerator {
 				invoke_element(sdata, srcNode, srcNode.getAction_data());
 			}
 		}
+		assert_element(sdata, lastNode);
 
 		// add closing asserts
 		addClosingAssert(sdata);
