@@ -1,0 +1,9 @@
+name: refTest
+given: 
+ screen: screen_6
+ assertions: 
+when: 
+wait: short
+then:
+ screen: screen_5
+ assertions: 
