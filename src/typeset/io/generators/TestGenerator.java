@@ -167,7 +167,7 @@ public class TestGenerator {
 		System.out.println("Received path " + path.getLength() + " " + path);
 
 		// TODO: get this some other way
-		int MAX_LENGTH = 12;
+		int MAX_LENGTH = 25;
 
 		List<String> assertions = spec.getGiven().getAssertions();
 		Map<String, Action> actions = spec.getWhen();
@@ -240,27 +240,29 @@ public class TestGenerator {
 	private ScaffolingData genearteSpecActions(Map<String, Action> actions) {
 		ScaffolingData sdata = createMethodScaffolding("when", true);
 
-		for (String action_tag : actions.keySet()) {
+		if (actions != null && !actions.isEmpty()) {
+			for (String action_tag : actions.keySet()) {
 
-			Action action = actions.get(action_tag);
-			GraphNode actionNode = graphGenerator.getNodeByKey(action.getAction_name());
+				Action action = actions.get(action_tag);
+				GraphNode actionNode = graphGenerator.getNodeByKey(action.getAction_name());
 
-			String actionData = "";
-			if (action.getAction_type().toLowerCase().equals("type")) {
-				String userProvidedData = action.getAction_data();
+				String actionData = "";
+				if (action.getAction_type().toLowerCase().equals("type")) {
+					String userProvidedData = action.getAction_data();
 
-				if (userProvidedData != null && userProvidedData.trim().length() > 0) {
-					actionData = action.getAction_data();
+					if (userProvidedData != null && userProvidedData.trim().length() > 0) {
+						actionData = action.getAction_data();
+					} else {
+						actionData = graphGenerator.getNodeByKey(action.getAction_name()).getAction_data();
+					}
+
+					invoke_element(sdata, actionNode, actionData);
+					System.out.println("Execute " + action_tag + " " + action + " with " + actionData);
 				} else {
-					actionData = graphGenerator.getNodeByKey(action.getAction_name()).getAction_data();
+
+					invoke_element(sdata, actionNode, actionNode.getAction_data());
+					System.out.println("Execute " + action_tag + " " + action);
 				}
-
-				invoke_element(sdata, actionNode, actionData);
-				System.out.println("Execute " + action_tag + " " + action + " with " + actionData);
-			} else {
-
-				invoke_element(sdata, actionNode, actionNode.getAction_data());
-				System.out.println("Execute " + action_tag + " " + action);
 			}
 		}
 		// add closing asserts
@@ -277,7 +279,7 @@ public class TestGenerator {
 	private ScaffolingData generatePostCondition(State then) {
 		ScaffolingData sdata = createMethodScaffolding("then", true);
 
-		GraphNode pageNode = usedPages.get(then.getScreen());
+		GraphNode pageNode = usedPages.get(graphGenerator.getNodeByKey(then.getScreen()).getName());
 		setActivePage(pageNode);
 
 		// assert that we are on page
@@ -308,8 +310,9 @@ public class TestGenerator {
 
 	private void assert_element(ScaffolingData sdata, GraphNode activeNode) {
 		JInvocation assertStatement = sdata.getBlock().invoke(sdata.getAssertVar(), "assertTrue");
-		//JInvocation invokeStatement = sdata.getBlock().invoke(activeNode.getImplictAssertions().get(0));
-		
+		// JInvocation invokeStatement =
+		// sdata.getBlock().invoke(activeNode.getImplictAssertions().get(0));
+
 		JExpression argumentExpr = null;
 		boolean flag = true;
 
@@ -329,7 +332,7 @@ public class TestGenerator {
 			argumentExpr = JExpr.invoke(argumentExpr, getterName);
 		}
 		argumentExpr = JExpr.invoke(argumentExpr, "getId");
-		//invokeStatement.arg(argumentExpr);
+		// invokeStatement.arg(argumentExpr);
 		JExpression canSeeExpr = JExpr.invoke(activeNode.getImplictAssertions().get(0)).arg(argumentExpr);
 		assertStatement.arg(canSeeExpr);
 		updateStack(activeNode);
@@ -409,7 +412,11 @@ public class TestGenerator {
 		String lastPage = graphGenerator.getScreenToPage().get(lastScreen);
 
 		System.out.println("last page node is " + lastPage);
-		usedPages.put(lastScreen, graphGenerator.getNodeByKey(lastPage));
+		usedPages.put(graphGenerator.getNodeByKey(lastScreen).getName(), graphGenerator.getNodeByKey(lastPage));
+
+		for (String screen : usedPages.keySet()) {
+			System.out.println("used screen " + screen + " used page " + usedPages.get(screen));
+		}
 
 		return usedPages;
 
@@ -484,7 +491,7 @@ public class TestGenerator {
 	private void updateTestExecutorClasses() throws IOException {
 		String dirpath = outputDir + File.separator + "FlyPaper" + File.separator + "src" + File.separator + "main"
 				+ File.separator + "java";
-		
+
 		FileUtils.copyFile(new File("res" + File.separator + "executorClasses" + File.separator + "ConfigClass.java"),
 				new File(dirpath + File.separator + "utils" + File.separator + "ConfigClass.java"));
 		FileUtils.copyFile(new File("res" + File.separator + "executorClasses" + File.separator + "ActionClass.java"),
@@ -512,7 +519,7 @@ public class TestGenerator {
 		// add testng annotation
 		JMethod method = sdata.getMethod();
 		method.annotate(org.testng.annotations.Test.class);
-		
+
 		// generate GIVEN
 		ScaffolingData givenSdata = generatePrecondition(path);
 
