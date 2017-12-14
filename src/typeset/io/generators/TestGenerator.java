@@ -300,13 +300,16 @@ public class TestGenerator {
 	}
 
 	private void assert_element(ScaffolingData sdata, String functionName) {
-		JExpression jexpr = JExpr.invoke(activePageVariable, "getUrl");
-		sdata.getBlock().invoke(functionName).arg(jexpr);
+		JInvocation assertStatement = sdata.getBlock().invoke(sdata.getAssertVar(), "assertTrue");
+		JExpression getUrlExpr = JExpr.invoke(activePageVariable, "getUrl");
+		JExpression atPageExpr = JExpr.invoke(functionName).arg(getUrlExpr);
+		assertStatement.arg(atPageExpr);
 	}
 
 	private void assert_element(ScaffolingData sdata, GraphNode activeNode) {
 		JInvocation assertStatement = sdata.getBlock().invoke(sdata.getAssertVar(), "assertTrue");
-		JInvocation invokeStatement = sdata.getBlock().invoke(activeNode.getImplictAssertions().get(0));
+		//JInvocation invokeStatement = sdata.getBlock().invoke(activeNode.getImplictAssertions().get(0));
+		
 		JExpression argumentExpr = null;
 		boolean flag = true;
 
@@ -326,8 +329,9 @@ public class TestGenerator {
 			argumentExpr = JExpr.invoke(argumentExpr, getterName);
 		}
 		argumentExpr = JExpr.invoke(argumentExpr, "getId");
-		invokeStatement.arg(argumentExpr);
-		assertStatement.arg(invokeStatement);
+		//invokeStatement.arg(argumentExpr);
+		JExpression canSeeExpr = JExpr.invoke(activeNode.getImplictAssertions().get(0)).arg(argumentExpr);
+		assertStatement.arg(canSeeExpr);
 		updateStack(activeNode);
 	}
 
