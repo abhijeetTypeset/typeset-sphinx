@@ -177,6 +177,8 @@ public class GraphGenerator {
 					if (doesNotHaveIncomingEdges(appNode)) {
 						System.out.println("Adding edge from screen " + screenNode + " to app " + appNode);
 						graph.addEdge(screenNode, appNode);
+					}else {
+						screenNode.addNoEdges(appNode);
 					}
 				}
 			}
@@ -187,6 +189,8 @@ public class GraphGenerator {
 					if (doesNotHaveIncomingEdges(widgetNode)) {
 						System.out.println("Adding edge from screen " + screenNode + " to widget " + widgetNode);
 						graph.addEdge(screenNode, widgetNode);
+					}else {
+						screenNode.addNoEdges(widgetNode);
 					}
 				}
 			}
@@ -197,6 +201,8 @@ public class GraphGenerator {
 					if (doesNotHaveIncomingEdges(controlNode)) {
 						System.out.println("Adding edge from screen " + screenNode + " to control " + controlNode);
 						graph.addEdge(screenNode, controlNode);
+					}else {
+						screenNode.addNoEdges(controlNode);
 					}
 				}
 			}
@@ -219,6 +225,8 @@ public class GraphGenerator {
 					if (doesNotHaveIncomingEdges(screenNode)) {
 						System.out.println("Adding edge from page " + pageNode + " to screen " + screenNode);
 						graph.addEdge(pageNode, screenNode);
+					}else {
+						pageNode.addNoEdges(screenNode);
 					}
 					screenToPage.put(s, p);
 				}
@@ -230,6 +238,8 @@ public class GraphGenerator {
 					if (doesNotHaveIncomingEdges(appNode)) {
 						System.out.println("Adding edge from page " + pageNode + " to app " + appNode);
 						graph.addEdge(pageNode, appNode);
+					}else {
+						pageNode.addNoEdges(appNode);
 					}
 				}
 			}
@@ -240,6 +250,8 @@ public class GraphGenerator {
 					if (doesNotHaveIncomingEdges(widgetNode)) {
 						System.out.println("Adding edge from page " + pageNode + " to widget " + widgetNode);
 						graph.addEdge(pageNode, widgetNode);
+					}else {
+						pageNode.addNoEdges(widgetNode);
 					}
 				}
 			}
@@ -250,6 +262,8 @@ public class GraphGenerator {
 					if (doesNotHaveIncomingEdges(controlNode)) {
 						System.out.println("Adding edge from page " + pageNode + " to control " + controlNode);
 						graph.addEdge(pageNode, controlNode);
+					}else {
+						pageNode.addNoEdges(controlNode);
 					}
 				}
 			}
@@ -322,8 +336,9 @@ public class GraphGenerator {
 		for (GraphNode node : nodesWithPrecondition) {
 			List<String> precondtionString = node.getPrecondition();
 
-			ExplicitAssertion precondition = parsePrecondtion(precondtionString);
-			System.out.println(precondition);
+			ExplicitAssertion parsedPrecondition = parsePrecondtion(precondtionString);
+			node.setParsedPreCondition(parsedPrecondition);
+			System.out.println(parsedPrecondition);
 		}
 	}
 

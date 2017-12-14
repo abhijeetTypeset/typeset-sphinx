@@ -2,7 +2,7 @@ package typeset.io.generators;
 
 import java.io.File;
 import java.io.IOException;
-
+import java.io.PrintStream;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 
@@ -15,9 +15,13 @@ import java.util.TreeSet;
 
 import org.apache.commons.io.FileUtils;
 import org.jgrapht.GraphPath;
+import org.jgrapht.alg.shortestpath.AStarShortestPath;
 import org.jgrapht.alg.shortestpath.AllDirectedPaths;
 import org.jgrapht.graph.DefaultDirectedGraph;
 import org.jgrapht.graph.DefaultEdge;
+import org.jgrapht.traverse.BreadthFirstIterator;
+import org.jgrapht.traverse.ClosestFirstIterator;
+import org.jgrapht.traverse.GraphIterator;
 
 import com.sun.codemodel.JBlock;
 import com.sun.codemodel.JClassAlreadyExistsException;
@@ -36,10 +40,14 @@ import com.sun.codemodel.JVar;
 
 import typeset.io.exceptions.InvalidNodeException;
 import typeset.io.exceptions.InvalidPathException;
+import typeset.io.exceptions.TooComplexExpression;
 import typeset.io.generators.helper.ScaffolingData;
 import typeset.io.generators.util.GeneratorUtilities;
 import typeset.io.model.GraphNode;
 import typeset.io.model.NodeType;
+import typeset.io.model.assertions.Clause;
+import typeset.io.model.assertions.ExplicitAssertion;
+import typeset.io.model.assertions.Literal;
 import typeset.io.model.spec.*;
 import typeset.io.readers.SpecReader;
 
@@ -58,6 +66,9 @@ public class TestGenerator {
 	private Stack<GraphNode> stack = new Stack<GraphNode>();
 	private JFieldVar activePageVariable = null;
 	private Map<String, GraphNode> usedPages;
+
+	// TODO: get this some other way
+	private int MAX_LENGTH = 25;
 
 	public TestGenerator(DefaultDirectedGraph<GraphNode, DefaultEdge> graph, GraphGenerator graphGenerator,
 			ModelGenerator classGenerator, String inputDir, String outputDir) {
@@ -107,17 +118,75 @@ public class TestGenerator {
 
 	}
 
+	// public List<DefaultEdge> getPaths(GraphNode sNode, GraphNode dNode, int
+	// maxLength) {
+	//
+	// if (sNode == null || dNode == null) {
+	// throw new InvalidNodeException("node null cannot proceed");
+	// }
+	// AStarShortestPath<GraphNode, DefaultEdge> x = new
+	// AStarShortestPath<GraphNode, DefaultEdge>(graph, null);
+	// GraphIterator<GraphNode, DefaultEdge> iterator = new
+	// ClosestFirstIterator<>(graph, sNode);
+	// x.getPaths(arg0)
+	//
+	// int count = 0;
+	// List<DefaultEdge> path = new ArrayList<>();
+	//
+	// GraphNode lastNode = null;
+	// GraphNode lastToLastNode = null;
+	//
+	// while (iterator.hasNext()) {
+	// count++;
+	// GraphNode node = iterator.next();
+	// if (lastNode != null) {
+	// DefaultEdge edge = graph.getEdge(lastNode, node);
+	//
+	//// if (edge == null) {
+	//// if (lastToLastNode != null) {
+	//// edge = graph.getEdge(lastToLastNode, node);
+	//// }
+	//// }
+	// System.out.println(
+	// "Last Node : " + lastNode + "Last last node " + " this node " + node + " edge
+	// " + edge);
+	// if (edge != null) {
+	// path.add(edge);
+	// } else {
+	// System.out.println("Edge null");
+	// return null;
+	// }
+	//
+	// }
+	//
+	// System.out.println(count + " " + path);
+	// if (maxLength <= count) {
+	// return null;
+	// }
+	// if (node == dNode) {
+	// return path;
+	// }
+	// if (GeneratorUtilities.getNodeType(node.getNodeType()) < 4 ||
+	// node.getLeadsto() != null) {
+	// //lastToLastNode = lastNode;
+	// lastNode = node;
+	// }
+	//
+	// }
+	//
+	// return null;
+	//
+	// }
+
 	public void testPath() {
 		String srcNode = "page_1";
 		String dstNode = "page_5";
-		int maxLength = 12;
+
 		GraphNode sNode = graphGenerator.getNodeByKey(srcNode);
 		GraphNode dNode = graphGenerator.getNodeByKey(dstNode);
 
-		List<GraphPath<GraphNode, DefaultEdge>> paths = getPaths(sNode, dNode, maxLength);
-		for (GraphPath<GraphNode, DefaultEdge> path : paths) {
-			System.out.println(path.getLength() + ":::" + path);
-		}
+		List<GraphPath<GraphNode, DefaultEdge>> paths = getPaths(sNode, dNode, MAX_LENGTH);
+
 	}
 
 	public List<Spec> getSpecs() {
@@ -150,24 +219,26 @@ public class TestGenerator {
 		GraphNode rootNode = graphGenerator.getRootNode();
 		GraphNode startNode = graphGenerator.getNodeByKey(startScreen);
 		int minLength = 3;
-		int maxLength = 15;
 
-		for (int pathLength = minLength; pathLength <= maxLength; pathLength++) {
+		for (int pathLength = minLength; pathLength <= MAX_LENGTH; pathLength++) {
+			System.out.println("Checking paths for length " + pathLength);
 			List<GraphPath<GraphNode, DefaultEdge>> paths = getPaths(rootNode, startNode, pathLength);
-			for (GraphPath<GraphNode, DefaultEdge> path : paths) {
-				if (isPathViable(path, spec)) {
-					return path;
+			if (paths != null) {
+
+				for (GraphPath<GraphNode, DefaultEdge> path : paths) {
+					System.out.println(path.getLength()+" paths "+path);
+					if (isPathViable(path, spec)) {
+						return path;
+					}
 				}
 			}
 		}
+
 		return null;
 	}
 
 	private boolean isPathViable(GraphPath<GraphNode, DefaultEdge> path, Spec spec) {
 		System.out.println("Received path " + path.getLength() + " " + path);
-
-		// TODO: get this some other way
-		int MAX_LENGTH = 25;
 
 		List<String> assertions = spec.getGiven().getAssertions();
 		Map<String, Action> actions = spec.getWhen();
@@ -185,8 +256,50 @@ public class TestGenerator {
 		if (assertions != null) {
 			// TODO: implement assertion checking here
 		}
+		List<GraphNode> nodesToHere = new ArrayList<GraphNode>();
+
+		for (DefaultEdge e : path.getEdgeList()) {
+			GraphNode srcNode = graph.getEdgeSource(e);
+
+			if (srcNode.getNodeType() == NodeType.CONTROL) {
+				ExplicitAssertion precondition = srcNode.getParsedPreCondition();
+				if (!satisfiesPrecondition(nodesToHere, precondition)) {
+					System.out.println(path + " does not satisfies precondition on node " + srcNode);
+					return false;
+				}
+			}
+			nodesToHere.add(srcNode);
+		}
 
 		return true;
+	}
+
+	private boolean satisfiesPrecondition(List<GraphNode> nodesToHere, ExplicitAssertion precondition) {
+		if (precondition != null) {
+			checkExpressionComplexity(precondition);
+			// currently we only support very simple (single clause, single literal)
+			// preconditions
+
+			GraphNode constrainingNode = precondition.getclauses().get(0).getLiterals().get(0).getNode();
+			if (nodesToHere.contains(constrainingNode)) {
+				return true;
+			}
+			return false;
+
+		} else {
+			return true;
+		}
+	}
+
+	private void checkExpressionComplexity(ExplicitAssertion precondition) {
+		List<Clause> clauses = precondition.getclauses();
+		if (clauses.size() > 1) {
+			throw new TooComplexExpression(precondition.toString());
+		}
+		List<Literal> literals = clauses.get(0).getLiterals();
+		if (literals.size() > 1) {
+			throw new TooComplexExpression(precondition.toString());
+		}
 	}
 
 	public void generateTest() throws IOException, JClassAlreadyExistsException {
@@ -276,6 +389,10 @@ public class TestGenerator {
 		lightenStack(NodeType.PAGE);
 	}
 
+	private void setActiveScreen(GraphNode pageNode) {
+		lightenStack(NodeType.SCREEN);
+	}
+
 	private ScaffolingData generatePostCondition(State then) {
 		ScaffolingData sdata = createMethodScaffolding("then", true);
 
@@ -315,6 +432,14 @@ public class TestGenerator {
 
 		JExpression argumentExpr = null;
 		boolean flag = true;
+
+		if (activeNode.getNodeType() == NodeType.SCREEN) {
+			setActiveScreen(activeNode);
+			while (!stack.isEmpty() && stack.peek() != activeNode) {
+				GraphNode popedNode = stack.pop();
+				System.out.println("Popped " + popedNode);
+			}
+		}
 
 		for (GraphNode stackNode : stack) {
 			if (flag) {

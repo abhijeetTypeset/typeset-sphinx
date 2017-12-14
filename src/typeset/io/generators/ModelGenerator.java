@@ -240,6 +240,19 @@ public class ModelGenerator {
 				block._return(field);
 
 			}
+			
+			// TODO: add missing variables
+			for(GraphNode noEdgeNode :  gnode.getNoEdges()) {
+				System.out.println("to add edges : "+noEdgeNode.getName());
+				JDefinedClass exitingClassNode = nodeClassMap.get(noEdgeNode);
+				JFieldVar field = definedClass.field(JMod.PRIVATE, exitingClassNode, "var" + noEdgeNode.getName());
+				JExpression init = JExpr._new(exitingClassNode);
+				field.init(init);
+				JMethod getterMethod = definedClass.method(JMod.PUBLIC, exitingClassNode,
+						GeneratorUtilities.getGetterName(noEdgeNode.getName()));
+				JBlock block = getterMethod.body();
+				block._return(field);
+			}
 		}
 
 		// add it to pool of defined classes
