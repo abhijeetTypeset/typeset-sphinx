@@ -32,7 +32,19 @@ public class ActionClass extends ConfigClass {
 		return driver.findElement(locator).getText();
 	}
 
+	public void waitTime(int time) {
+		try {
+			Thread.sleep(time * 1000);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
 	public boolean canSee(By locator) {
+		if (locator==null) {
+			return true;
+		}
 		if (driver.findElements(locator).size() > 0) {
 			System.out.println("Can see " + locator);
 			return true;

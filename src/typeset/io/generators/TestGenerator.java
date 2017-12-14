@@ -389,7 +389,7 @@ public class TestGenerator {
 			sdata.getBlock().invoke(outVar, "println")
 					.arg("=============" + "Waiting for " + waitTime + " seconds " + "=============");
 			JExpression expr = JExpr.lit(waitTime);
-			sdata.getBlock().invoke("wait").arg(expr);
+			sdata.getBlock().invoke("waitTime").arg(expr);
 		}
 
 	}
