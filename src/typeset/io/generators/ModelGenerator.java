@@ -186,9 +186,15 @@ public class ModelGenerator {
 		// add an id
 		if (gnode.getId() != null) {
 			JFieldVar field = definedClass.field(JMod.PRIVATE, org.openqa.selenium.By.class, "id");
-			JExpression init = cm.ref(org.openqa.selenium.By.class).staticInvoke(gnode.getId().get("by"))
-					.arg(JExpr.lit(gnode.getId().get("locator")));
-			field.init(init);
+			
+			if(gnode.getId().get("by")!=null && gnode.getId().get("locator")!=null) {
+				JExpression init = cm.ref(org.openqa.selenium.By.class).staticInvoke(gnode.getId().get("by"))
+						.arg(JExpr.lit(gnode.getId().get("locator")));
+				field.init(init);
+			}else {
+				field.init(JExpr._null());
+			}
+
 			JMethod getterMethod = definedClass.method(JMod.PUBLIC, org.openqa.selenium.By.class, "getId");
 			JBlock block = getterMethod.body();
 			block._return(field);
