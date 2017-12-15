@@ -452,6 +452,12 @@ public class TestGenerator {
 		} else {
 			invokeStatement.arg(argumentExpr);
 		}
+		
+		if(activeNode.getWait_time()!=null) {
+			generateWait(sdata, activeNode.getWait_time());
+		}
+		
+		
 		updateStack(activeNode);
 		sdata.getBlock().invoke(outVar, "println")
 				.arg("=============" + activeNode.getAction_type() + " " + activeNode.getName() + "=============");

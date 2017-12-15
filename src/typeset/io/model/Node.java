@@ -14,6 +14,7 @@ public class Node {
 	private String action_type;
 	private String action_data;
 	private List<String> precondition;
+	private String wait_time;
 	private List<String> implictAssertions = new ArrayList<>();
 
 	public List<String> getImplictAssertions() {
@@ -77,6 +78,14 @@ public class Node {
 
 	public void setAction_type(String action_type) {
 		this.action_type = action_type;
+	}
+
+	public String getWait_time() {
+		return wait_time;
+	}
+
+	public void setWait_time(String wait_time) {
+		this.wait_time = wait_time;
 	}
 
 }
