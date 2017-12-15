@@ -6,7 +6,7 @@ when:
  action_1: 
   action_name: control_21
   action_type: type
-  action_data: Paper on Parasailing Monkeys
+  action_data: 
  action_2: 
   action_name: control_23
   action_type: click
