@@ -118,66 +118,6 @@ public class TestGenerator {
 
 	}
 
-	// public List<DefaultEdge> getPaths(GraphNode sNode, GraphNode dNode, int
-	// maxLength) {
-	//
-	// if (sNode == null || dNode == null) {
-	// throw new InvalidNodeException("node null cannot proceed");
-	// }
-	// AStarShortestPath<GraphNode, DefaultEdge> x = new
-	// AStarShortestPath<GraphNode, DefaultEdge>(graph, null);
-	// GraphIterator<GraphNode, DefaultEdge> iterator = new
-	// ClosestFirstIterator<>(graph, sNode);
-	// x.getPaths(arg0)
-	//
-	// int count = 0;
-	// List<DefaultEdge> path = new ArrayList<>();
-	//
-	// GraphNode lastNode = null;
-	// GraphNode lastToLastNode = null;
-	//
-	// while (iterator.hasNext()) {
-	// count++;
-	// GraphNode node = iterator.next();
-	// if (lastNode != null) {
-	// DefaultEdge edge = graph.getEdge(lastNode, node);
-	//
-	//// if (edge == null) {
-	//// if (lastToLastNode != null) {
-	//// edge = graph.getEdge(lastToLastNode, node);
-	//// }
-	//// }
-	// System.out.println(
-	// "Last Node : " + lastNode + "Last last node " + " this node " + node + " edge
-	// " + edge);
-	// if (edge != null) {
-	// path.add(edge);
-	// } else {
-	// System.out.println("Edge null");
-	// return null;
-	// }
-	//
-	// }
-	//
-	// System.out.println(count + " " + path);
-	// if (maxLength <= count) {
-	// return null;
-	// }
-	// if (node == dNode) {
-	// return path;
-	// }
-	// if (GeneratorUtilities.getNodeType(node.getNodeType()) < 4 ||
-	// node.getLeadsto() != null) {
-	// //lastToLastNode = lastNode;
-	// lastNode = node;
-	// }
-	//
-	// }
-	//
-	// return null;
-	//
-	// }
-
 	public void testPath() {
 		String srcNode = "page_1";
 		String dstNode = "page_5";
@@ -226,7 +166,7 @@ public class TestGenerator {
 			if (paths != null) {
 
 				for (GraphPath<GraphNode, DefaultEdge> path : paths) {
-					System.out.println(path.getLength()+" paths "+path);
+					// System.out.println(path.getLength()+" paths "+path);
 					if (isPathViable(path, spec)) {
 						return path;
 					}
@@ -238,7 +178,7 @@ public class TestGenerator {
 	}
 
 	private boolean isPathViable(GraphPath<GraphNode, DefaultEdge> path, Spec spec) {
-		System.out.println("Received path " + path.getLength() + " " + path);
+		// System.out.println("Received path " + path.getLength() + " " + path);
 
 		List<String> assertions = spec.getGiven().getAssertions();
 		Map<String, Action> actions = spec.getWhen();
@@ -256,15 +196,18 @@ public class TestGenerator {
 		if (assertions != null) {
 			// TODO: implement assertion checking here
 		}
-		List<GraphNode> nodesToHere = new ArrayList<GraphNode>();
 
+		// check precondition on paths
+		List<GraphNode> nodesToHere = new ArrayList<GraphNode>();
 		for (DefaultEdge e : path.getEdgeList()) {
 			GraphNode srcNode = graph.getEdgeSource(e);
 
 			if (srcNode.getNodeType() == NodeType.CONTROL) {
 				ExplicitAssertion precondition = srcNode.getParsedPreCondition();
+				// System.out.println("Constrain on " + srcNode + " ; " + precondition);
 				if (!satisfiesPrecondition(nodesToHere, precondition)) {
-					System.out.println(path + " does not satisfies precondition on node " + srcNode);
+					// System.out.println(path + " does not satisfies precondition on node " +
+					// srcNode);
 					return false;
 				}
 			}
@@ -282,6 +225,7 @@ public class TestGenerator {
 
 			GraphNode constrainingNode = precondition.getclauses().get(0).getLiterals().get(0).getNode();
 			if (nodesToHere.contains(constrainingNode)) {
+				System.out.println("Contraint satisfied found " + constrainingNode);
 				return true;
 			}
 			return false;
@@ -389,8 +333,19 @@ public class TestGenerator {
 		lightenStack(NodeType.PAGE);
 	}
 
-	private void setActiveScreen(GraphNode pageNode) {
+	private void setActiveScreen(GraphNode screenNode) {
 		lightenStack(NodeType.SCREEN);
+		GraphNode popedNode;
+		while (!stack.isEmpty() && stack.peek() != screenNode) {
+			popedNode = stack.pop();
+			System.out.println("Popped " + popedNode);
+		}
+		if (!stack.isEmpty() && stack.peek() == screenNode) {
+			popedNode = stack.pop();
+			System.out.println("Popped " + popedNode);
+		}
+
+		System.out.println("Node type screen, stack content : " + stack);
 	}
 
 	private ScaffolingData generatePostCondition(State then) {
@@ -427,21 +382,23 @@ public class TestGenerator {
 
 	private void assert_element(ScaffolingData sdata, GraphNode activeNode) {
 		JInvocation assertStatement = sdata.getBlock().invoke(sdata.getAssertVar(), "assertTrue");
-		// JInvocation invokeStatement =
-		// sdata.getBlock().invoke(activeNode.getImplictAssertions().get(0));
 
+		System.out.println("asserting for element " + activeNode);
 		JExpression argumentExpr = null;
 		boolean flag = true;
 
 		if (activeNode.getNodeType() == NodeType.SCREEN) {
+			System.out.println("Node type screen, stack content : " + stack);
 			setActiveScreen(activeNode);
-			while (!stack.isEmpty() && stack.peek() != activeNode) {
-				GraphNode popedNode = stack.pop();
-				System.out.println("Popped " + popedNode);
-			}
+			// while (!stack.isEmpty() && stack.peek() != activeNode) {
+			// GraphNode popedNode = stack.pop();
+			// System.out.println("Popped " + popedNode);
+			// }
+			// System.out.println("Node type screen, stack content : "+stack);
 		}
 
 		for (GraphNode stackNode : stack) {
+			System.out.println("Obtained from the stack " + stackNode);
 			if (flag) {
 				argumentExpr = JExpr.invoke(activePageVariable, GeneratorUtilities.getGetterName(stackNode.getName()));
 				flag = false;
@@ -457,7 +414,6 @@ public class TestGenerator {
 			argumentExpr = JExpr.invoke(argumentExpr, getterName);
 		}
 		argumentExpr = JExpr.invoke(argumentExpr, "getId");
-		// invokeStatement.arg(argumentExpr);
 		JExpression canSeeExpr = JExpr.invoke(activeNode.getImplictAssertions().get(0)).arg(argumentExpr);
 		assertStatement.arg(canSeeExpr);
 		updateStack(activeNode);
@@ -573,7 +529,9 @@ public class TestGenerator {
 			return;
 		}
 		lightenStack(graphNode.getNodeType());
+		System.out.println("Pushed to stack " + graphNode);
 		stack.push(graphNode);
+		System.out.println("Contents of stack " + stack);
 	}
 
 	private ScaffolingData generatePrecondition(GraphPath<GraphNode, DefaultEdge> path) {
