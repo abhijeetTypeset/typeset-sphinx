@@ -1,0 +1,18 @@
+name: searchTest
+given: 
+ screen: screen_5
+ assertions: 
+when: 
+ action_1: 
+  action_name: control_32
+  action_type: click
+  action_data: 
+ action_2: 
+  action_name: control_36
+  action_type: type
+  action_data: 
+wait: short
+then:
+ screen: screen_5
+ assertions: 
+  - control_37%as%contains%blabla

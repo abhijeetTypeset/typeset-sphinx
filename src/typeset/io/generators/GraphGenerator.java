@@ -67,7 +67,6 @@ public class GraphGenerator {
 		throw new InvalidLiteralException("No such symbol as " + key);
 	}
 
-	
 	public DefaultDirectedGraph<GraphNode, DefaultEdge> initialize()
 			throws IllegalAccessException, InvocationTargetException {
 		if (model == null) {
@@ -177,7 +176,7 @@ public class GraphGenerator {
 					if (doesNotHaveIncomingEdges(appNode)) {
 						System.out.println("Adding edge from screen " + screenNode + " to app " + appNode);
 						graph.addEdge(screenNode, appNode);
-					}else {
+					} else {
 						screenNode.addNoEdges(appNode);
 					}
 				}
@@ -189,7 +188,7 @@ public class GraphGenerator {
 					if (doesNotHaveIncomingEdges(widgetNode)) {
 						System.out.println("Adding edge from screen " + screenNode + " to widget " + widgetNode);
 						graph.addEdge(screenNode, widgetNode);
-					}else {
+					} else {
 						screenNode.addNoEdges(widgetNode);
 					}
 				}
@@ -201,7 +200,7 @@ public class GraphGenerator {
 					if (doesNotHaveIncomingEdges(controlNode)) {
 						System.out.println("Adding edge from screen " + screenNode + " to control " + controlNode);
 						graph.addEdge(screenNode, controlNode);
-					}else {
+					} else {
 						screenNode.addNoEdges(controlNode);
 					}
 				}
@@ -225,7 +224,7 @@ public class GraphGenerator {
 					if (doesNotHaveIncomingEdges(screenNode)) {
 						System.out.println("Adding edge from page " + pageNode + " to screen " + screenNode);
 						graph.addEdge(pageNode, screenNode);
-					}else {
+					} else {
 						pageNode.addNoEdges(screenNode);
 					}
 					screenToPage.put(s, p);
@@ -238,7 +237,7 @@ public class GraphGenerator {
 					if (doesNotHaveIncomingEdges(appNode)) {
 						System.out.println("Adding edge from page " + pageNode + " to app " + appNode);
 						graph.addEdge(pageNode, appNode);
-					}else {
+					} else {
 						pageNode.addNoEdges(appNode);
 					}
 				}
@@ -250,7 +249,7 @@ public class GraphGenerator {
 					if (doesNotHaveIncomingEdges(widgetNode)) {
 						System.out.println("Adding edge from page " + pageNode + " to widget " + widgetNode);
 						graph.addEdge(pageNode, widgetNode);
-					}else {
+					} else {
 						pageNode.addNoEdges(widgetNode);
 					}
 				}
@@ -262,7 +261,7 @@ public class GraphGenerator {
 					if (doesNotHaveIncomingEdges(controlNode)) {
 						System.out.println("Adding edge from page " + pageNode + " to control " + controlNode);
 						graph.addEdge(pageNode, controlNode);
-					}else {
+					} else {
 						pageNode.addNoEdges(controlNode);
 					}
 				}
@@ -294,18 +293,23 @@ public class GraphGenerator {
 
 	private void addToMap(String c, GraphNode v) {
 		nameNodeMap.put(c, v);
-		
+
 	}
 
 	private Literal parseLiteral(String literalString) {
 		String[] parts = literalString.split("%");
 
-		if (parts.length != 3) {
+		if (parts.length != 3 && parts.length != 4) {
 			throw new InvalidClauseException(literalString);
 		}
 
+		Literal literal = null;
 		GraphNode node = getNodeByKey(parts[0].trim());
-		Literal literal = new Literal(node, parts[2].trim(), parts[1].toLowerCase().trim().equals("not"));
+		if (parts.length == 3) {
+			literal = new Literal(node, parts[2].trim(), parts[1].toLowerCase().trim().equals("not"));
+		} else {
+			literal = new Literal(node, parts[2].trim(), parts[1].toLowerCase().trim().equals("not"), parts[3].trim());
+		}
 		return literal;
 	}
 
@@ -320,7 +324,10 @@ public class GraphGenerator {
 		return clause;
 	}
 
-	private ExplicitAssertion parsePrecondtion(List<String> precodtionString) {
+	public ExplicitAssertion parsePrecondtion(List<String> precodtionString) {
+		if (precodtionString == null) {
+			return null;
+		}
 		// System.out.println("pre-condition " + precodtionString);
 		ExplicitAssertion explicitAssertion = new ExplicitAssertion();
 		for (String precs : precodtionString) {
@@ -430,14 +437,14 @@ public class GraphGenerator {
 	}
 
 	public void consistencyCheck() {
-		
+
 		// TODO: check if it is consistent
 		// 1. Isolated nodes not allowed
 		// 2. Referencing of non-existing nodes not allowed
 		// 3. Nodes must have respective properties initialized
 		// 4. A control can have only one parent
 		// 5. A control can only lead to one location
-		
+
 		Set<GraphNode> allNodes = graph.vertexSet();
 		for (GraphNode node : allNodes) {
 
@@ -447,7 +454,6 @@ public class GraphGenerator {
 		}
 
 	}
-
 
 	public void toDot() throws IOException {
 
@@ -483,7 +489,7 @@ public class GraphGenerator {
 		return nameNodeMap;
 	}
 
-	public  GraphNode getRootNode() {
+	public GraphNode getRootNode() {
 		return rootNode;
 	}
 

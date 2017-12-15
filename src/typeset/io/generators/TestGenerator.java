@@ -135,6 +135,12 @@ public class TestGenerator {
 			try {
 				Spec spec = SpecReader.read(sf);
 
+				ExplicitAssertion eassertThen = graphGenerator.parsePrecondtion(spec.getThen().getAssertions());
+				spec.getThen().setParsedAssertion(eassertThen);
+
+				ExplicitAssertion eassertGiven = graphGenerator.parsePrecondtion(spec.getGiven().getAssertions());
+				spec.getGiven().setParsedAssertion(eassertGiven);
+
 				if (isValidSpec(spec)) {
 					System.out.println("Added spec : " + spec);
 					specList.add(spec);
@@ -294,7 +300,7 @@ public class TestGenerator {
 		sdata.getBlock().invoke(outVar, "println").arg("=============" + sdata.getMethod().name() + "=============");
 	}
 
-	private ScaffolingData genearteSpecActions(Map<String, Action> actions) {
+	private ScaffolingData generateSpecActions(Map<String, Action> actions) {
 		ScaffolingData sdata = createMethodScaffolding("when", true);
 
 		if (actions != null && !actions.isEmpty()) {
@@ -320,6 +326,13 @@ public class TestGenerator {
 					invoke_element(sdata, actionNode, actionNode.getAction_data());
 					System.out.println("Execute " + action_tag + " " + action);
 				}
+				
+				// in case action leads to somewhere, update the stack
+				String leadsToNodeString = actionNode.getLeadsto();
+				if (leadsToNodeString != null) {
+					GraphNode leadsToNode = graphGenerator.getNodeByKey(leadsToNodeString);
+					setActive(leadsToNode);
+				}
 			}
 		}
 		// add closing asserts
@@ -328,31 +341,73 @@ public class TestGenerator {
 		return sdata;
 	}
 
-	private void setActivePage(GraphNode pageNode) {
-		activePageVariable = definedPages.get(pageNode);
-		lightenStack(NodeType.PAGE);
+	// private void setActivePage(GraphNode pageNode) {
+	// activePageVariable = definedPages.get(pageNode);
+	// lightenStack(NodeType.PAGE);
+	// }
+
+	private void lightenStack(NodeType nodeType) {
+		while (!stack.isEmpty() && GeneratorUtilities.getNodeType(stack.peek().getNodeType()) >= GeneratorUtilities
+				.getNodeType(nodeType)) {
+			GraphNode popedNode = stack.pop();
+			System.out.println("Popped " + popedNode);
+		}
 	}
 
-	private void setActiveScreen(GraphNode screenNode) {
-		lightenStack(NodeType.SCREEN);
-		GraphNode popedNode;
-		while (!stack.isEmpty() && stack.peek() != screenNode) {
-			popedNode = stack.pop();
-			System.out.println("Popped " + popedNode);
-		}
-		if (!stack.isEmpty() && stack.peek() == screenNode) {
-			popedNode = stack.pop();
-			System.out.println("Popped " + popedNode);
+	// private void updateStack(GraphNode graphNode) {
+	// if (graphNode.getNodeType() == NodeType.CONTROL) {
+	// return;
+	// }
+	// lightenStack(graphNode.getNodeType());
+	// System.out.println("Pushed to stack " + graphNode);
+	// stack.push(graphNode);
+	// System.out.println("Contents of stack " + stack);
+	// }
+
+	private void setActive(GraphNode graphNode) {
+
+		if (graphNode.getNodeType() == NodeType.CONTROL) {
+			return;
 		}
 
-		System.out.println("Node type screen, stack content : " + stack);
+		lightenStack(graphNode.getNodeType());
+		JFieldVar pageVariable = definedPages.get(graphNode);
+		if (graphNode.getNodeType() == NodeType.PAGE) {
+			if (pageVariable != activePageVariable) {
+				activePageVariable = definedPages.get(graphNode);
+				stack.clear();
+			}
+			return;
+		}
+
+		// GraphNode popedNode;
+		// while (!stack.isEmpty() && stack.peek() != graphNode) {
+		// popedNode = stack.pop();
+		// System.out.println("Popped " + popedNode);
+		// }
+
+		// if (!stack.isEmpty()) {
+		//
+		// if (stack.peek() != graphNode) {
+		// System.out.println("Pushed to stack " + graphNode);
+		// stack.push(graphNode);
+		// }
+		// } else {
+		// System.out.println("Pushed to stack " + graphNode);
+		// stack.push(graphNode);
+		// }
+
+		System.out.println("Pushed to stack " + graphNode);
+		stack.push(graphNode);
+		System.out.println("Contents of stack " + stack);
 	}
 
 	private ScaffolingData generatePostCondition(State then) {
 		ScaffolingData sdata = createMethodScaffolding("then", true);
 
 		GraphNode pageNode = usedPages.get(graphGenerator.getNodeByKey(then.getScreen()).getName());
-		setActivePage(pageNode);
+		// setActivePage(pageNode);
+		setActive(pageNode);
 
 		// assert that we are on page
 		assert_element(sdata, pageNode.getImplictAssertions().get(0));
@@ -387,36 +442,35 @@ public class TestGenerator {
 		JExpression argumentExpr = null;
 		boolean flag = true;
 
-		if (activeNode.getNodeType() == NodeType.SCREEN) {
-			System.out.println("Node type screen, stack content : " + stack);
-			setActiveScreen(activeNode);
-			// while (!stack.isEmpty() && stack.peek() != activeNode) {
-			// GraphNode popedNode = stack.pop();
-			// System.out.println("Popped " + popedNode);
-			// }
-			// System.out.println("Node type screen, stack content : "+stack);
-		}
+		// if (activeNode.getNodeType() != NodeType.CONTROL) {
+		// setActive(activeNode);
+		// }
 
 		for (GraphNode stackNode : stack) {
-			System.out.println("Obtained from the stack " + stackNode);
+			String getterName = GeneratorUtilities.getGetterName(stackNode.getName());
 			if (flag) {
-				argumentExpr = JExpr.invoke(activePageVariable, GeneratorUtilities.getGetterName(stackNode.getName()));
+
+				argumentExpr = JExpr.invoke(activePageVariable, getterName);
 				flag = false;
 			} else {
-				argumentExpr = JExpr.invoke(argumentExpr, GeneratorUtilities.getGetterName(stackNode.getName()));
+				argumentExpr = JExpr.invoke(argumentExpr, getterName);
 			}
+			System.out.println("Obtained from the stack " + stackNode + " getter name " + getterName);
+
 		}
 		String getterName = GeneratorUtilities.getGetterName(activeNode.getName());
 		if (flag) {
 			argumentExpr = JExpr.invoke(activePageVariable, getterName);
-
-		} else {
-			argumentExpr = JExpr.invoke(argumentExpr, getterName);
 		}
+		// else {
+		// argumentExpr = JExpr.invoke(argumentExpr, getterName);
+		// }
+
 		argumentExpr = JExpr.invoke(argumentExpr, "getId");
 		JExpression canSeeExpr = JExpr.invoke(activeNode.getImplictAssertions().get(0)).arg(argumentExpr);
 		assertStatement.arg(canSeeExpr);
-		updateStack(activeNode);
+		// updateStack(activeNode);
+		// setActive(activeNode);
 	}
 
 	private boolean isTypeText(String actionType) {
@@ -452,13 +506,14 @@ public class TestGenerator {
 		} else {
 			invokeStatement.arg(argumentExpr);
 		}
-		
-		if(activeNode.getWait_time()!=null) {
+
+		System.out.println("Invoked " + activeNode);
+		if (activeNode.getWait_time() != null) {
 			generateWait(sdata, activeNode.getWait_time());
 		}
-		
-		
-		updateStack(activeNode);
+
+		// updateStack(activeNode);
+		// setActive(activeNode);
 		sdata.getBlock().invoke(outVar, "println")
 				.arg("=============" + activeNode.getAction_type() + " " + activeNode.getName() + "=============");
 
@@ -522,24 +577,6 @@ public class TestGenerator {
 
 	}
 
-	private void lightenStack(NodeType nodeType) {
-		while (!stack.isEmpty() && GeneratorUtilities.getNodeType(stack.peek().getNodeType()) > GeneratorUtilities
-				.getNodeType(nodeType)) {
-			GraphNode popedNode = stack.pop();
-			System.out.println("Popped " + popedNode);
-		}
-	}
-
-	private void updateStack(GraphNode graphNode) {
-		if (graphNode.getNodeType() == NodeType.CONTROL) {
-			return;
-		}
-		lightenStack(graphNode.getNodeType());
-		System.out.println("Pushed to stack " + graphNode);
-		stack.push(graphNode);
-		System.out.println("Contents of stack " + stack);
-	}
-
 	private ScaffolingData generatePrecondition(GraphPath<GraphNode, DefaultEdge> path) {
 
 		ScaffolingData sdata = createMethodScaffolding("given", true);
@@ -551,19 +588,33 @@ public class TestGenerator {
 		for (DefaultEdge e : path.getEdgeList()) {
 			GraphNode srcNode = graph.getEdgeSource(e);
 			lastNode = graph.getEdgeTarget(e);
+
+			setActive(srcNode);
+
 			if (srcNode.getNodeType() == NodeType.PAGE) {
-				setActivePage(srcNode);
+
 				assert_element(sdata, srcNode.getImplictAssertions().get(0));
+
 			} else if (srcNode.getNodeType() == NodeType.SCREEN) {
+
 				assert_element(sdata, srcNode);
+
 			} else if (srcNode.getNodeType() == NodeType.APP) {
+
 				assert_element(sdata, srcNode);
+
 			} else if (srcNode.getNodeType() == NodeType.WIDGET) {
+
 				assert_element(sdata, srcNode);
+
 			} else {
+
 				invoke_element(sdata, srcNode, srcNode.getAction_data());
 			}
 		}
+
+		setActive(lastNode);
+
 		assert_element(sdata, lastNode);
 
 		// add closing asserts
@@ -615,7 +666,7 @@ public class TestGenerator {
 		call(sdata, givenSdata);
 
 		// generate WHEN
-		ScaffolingData whenSdata = genearteSpecActions(spec.getWhen());
+		ScaffolingData whenSdata = generateSpecActions(spec.getWhen());
 
 		call(sdata, whenSdata);
 
