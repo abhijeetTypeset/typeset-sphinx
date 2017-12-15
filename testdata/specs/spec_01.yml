@@ -6,7 +6,7 @@ when:
  action_1: 
   action_name: control_2
   action_type: type
-  action_data: typeset_user@email.com
+  action_data: 
  action_2: 
   action_name: control_3
   action_type: type
