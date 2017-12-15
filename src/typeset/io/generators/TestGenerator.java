@@ -341,10 +341,6 @@ public class TestGenerator {
 		return sdata;
 	}
 
-	// private void setActivePage(GraphNode pageNode) {
-	// activePageVariable = definedPages.get(pageNode);
-	// lightenStack(NodeType.PAGE);
-	// }
 
 	private void lightenStack(NodeType nodeType) {
 		while (!stack.isEmpty() && GeneratorUtilities.getNodeType(stack.peek().getNodeType()) >= GeneratorUtilities
@@ -354,15 +350,6 @@ public class TestGenerator {
 		}
 	}
 
-	// private void updateStack(GraphNode graphNode) {
-	// if (graphNode.getNodeType() == NodeType.CONTROL) {
-	// return;
-	// }
-	// lightenStack(graphNode.getNodeType());
-	// System.out.println("Pushed to stack " + graphNode);
-	// stack.push(graphNode);
-	// System.out.println("Contents of stack " + stack);
-	// }
 
 	private void setActive(GraphNode graphNode) {
 
@@ -379,23 +366,6 @@ public class TestGenerator {
 			}
 			return;
 		}
-
-		// GraphNode popedNode;
-		// while (!stack.isEmpty() && stack.peek() != graphNode) {
-		// popedNode = stack.pop();
-		// System.out.println("Popped " + popedNode);
-		// }
-
-		// if (!stack.isEmpty()) {
-		//
-		// if (stack.peek() != graphNode) {
-		// System.out.println("Pushed to stack " + graphNode);
-		// stack.push(graphNode);
-		// }
-		// } else {
-		// System.out.println("Pushed to stack " + graphNode);
-		// stack.push(graphNode);
-		// }
 
 		System.out.println("Pushed to stack " + graphNode);
 		stack.push(graphNode);
@@ -442,10 +412,6 @@ public class TestGenerator {
 		JExpression argumentExpr = null;
 		boolean flag = true;
 
-		// if (activeNode.getNodeType() != NodeType.CONTROL) {
-		// setActive(activeNode);
-		// }
-
 		for (GraphNode stackNode : stack) {
 			String getterName = GeneratorUtilities.getGetterName(stackNode.getName());
 			if (flag) {
@@ -462,15 +428,10 @@ public class TestGenerator {
 		if (flag) {
 			argumentExpr = JExpr.invoke(activePageVariable, getterName);
 		}
-		// else {
-		// argumentExpr = JExpr.invoke(argumentExpr, getterName);
-		// }
 
 		argumentExpr = JExpr.invoke(argumentExpr, "getId");
 		JExpression canSeeExpr = JExpr.invoke(activeNode.getImplictAssertions().get(0)).arg(argumentExpr);
 		assertStatement.arg(canSeeExpr);
-		// updateStack(activeNode);
-		// setActive(activeNode);
 	}
 
 	private boolean isTypeText(String actionType) {
@@ -512,8 +473,6 @@ public class TestGenerator {
 			generateWait(sdata, activeNode.getWait_time());
 		}
 
-		// updateStack(activeNode);
-		// setActive(activeNode);
 		sdata.getBlock().invoke(outVar, "println")
 				.arg("=============" + activeNode.getAction_type() + " " + activeNode.getName() + "=============");
 
