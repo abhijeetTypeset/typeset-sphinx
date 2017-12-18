@@ -1,6 +1,5 @@
 package typeset.io.generators;
 
-
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -12,7 +11,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
 
 import org.apache.commons.beanutils.BeanUtils;
 import org.jgrapht.GraphPath;
@@ -44,37 +42,38 @@ import typeset.io.model.assertions.Literal;
 import typeset.io.readers.ConfigReader;
 
 /**
- * The Class GraphGenerator. 
- * Converts yml model into a graph.
+ * The Class GraphGenerator. Converts yml model into a graph.
  */
 public class GraphGenerator {
-	
+
 	/** The model of the product extracted from yml */
 	private Model model;
-	
+
 	/** The map of yml tag names to node */
 	private Map<String, GraphNode> nameNodeMap;
-	
+
 	/** The graph representing the model */
 	private DefaultDirectedGraph<GraphNode, DefaultEdge> graph;
-	
+
 	/** The root node in the graph */
 	private GraphNode rootNode;
-	
+
 	/** The target dir. */
 	private String targetDir;
-	
+
 	/** The nodes with precondition. */
 	private List<GraphNode> nodesWithPrecondition;
-	
+
 	/** Screen to page mapping */
 	private Map<String, String> screenToPage;
 
 	/**
 	 * Instantiates a new graph generator.
 	 *
-	 * @param model the model
-	 * @param targetDir the target dir
+	 * @param model
+	 *            the model
+	 * @param targetDir
+	 *            the target dir
 	 */
 	public GraphGenerator(Model model) {
 		this.model = model;
@@ -84,7 +83,8 @@ public class GraphGenerator {
 	/**
 	 * Gets the node by yml key.
 	 *
-	 * @param key the key
+	 * @param key
+	 *            the key
 	 * @return the node by key
 	 */
 	public GraphNode getNodeByKey(String key) {
@@ -100,8 +100,10 @@ public class GraphGenerator {
 	 * Initialize the graph from the yml model
 	 *
 	 * @return the default directed graph
-	 * @throws IllegalAccessException the illegal access exception
-	 * @throws InvocationTargetException the invocation target exception
+	 * @throws IllegalAccessException
+	 *             the illegal access exception
+	 * @throws InvocationTargetException
+	 *             the invocation target exception
 	 */
 	public DefaultDirectedGraph<GraphNode, DefaultEdge> initialize()
 			throws IllegalAccessException, InvocationTargetException {
@@ -330,8 +332,10 @@ public class GraphGenerator {
 	/**
 	 * Adds node to the nameNodeMap.
 	 *
-	 * @param c the c
-	 * @param v the v
+	 * @param c
+	 *            the c
+	 * @param v
+	 *            the v
 	 */
 	private void addToMap(String c, GraphNode v) {
 		nameNodeMap.put(c, v);
@@ -341,7 +345,8 @@ public class GraphGenerator {
 	/**
 	 * Parses the literal (from String)
 	 *
-	 * @param literalString the literal string
+	 * @param literalString
+	 *            the literal string
 	 * @return the literal
 	 */
 	private Literal parseLiteral(String literalString) {
@@ -353,9 +358,9 @@ public class GraphGenerator {
 
 		Literal literal = null;
 		GraphNode node = getNodeByKey(parts[0].trim());
-		
+
 		// TODO: need to put more sanity checking for the allowed functions
-		
+
 		if (parts.length == 3) {
 			literal = new Literal(node, parts[2].trim(), parts[1].toLowerCase().trim().equals("not"));
 		} else {
@@ -367,7 +372,8 @@ public class GraphGenerator {
 	/**
 	 * Parses the clause (from String).
 	 *
-	 * @param clauseString the clause string
+	 * @param clauseString
+	 *            the clause string
 	 * @return the clause
 	 */
 	private Clause parseClause(String clauseString) {
@@ -384,7 +390,8 @@ public class GraphGenerator {
 	/**
 	 * Parses the precondition (from String).
 	 *
-	 * @param precodtionString the precodtion string
+	 * @param precodtionString
+	 *            the precodtion string
 	 * @return the explicit assertion
 	 */
 	public ExplicitAssertion parsePrecondition(List<String> precodtionString) {
@@ -418,7 +425,8 @@ public class GraphGenerator {
 	/**
 	 * Checks if node has incomming edges
 	 *
-	 * @param node the node
+	 * @param node
+	 *            the node
 	 * @return true, if successful
 	 */
 	private boolean doesNotHaveIncomingEdges(GraphNode node) {
@@ -434,11 +442,15 @@ public class GraphGenerator {
 	/**
 	 * Creates a new control vertex.
 	 *
-	 * @param control the control
-	 * @param nodeType the node type
+	 * @param control
+	 *            the control
+	 * @param nodeType
+	 *            the node type
 	 * @return the graph node
-	 * @throws IllegalAccessException the illegal access exception
-	 * @throws InvocationTargetException the invocation target exception
+	 * @throws IllegalAccessException
+	 *             the illegal access exception
+	 * @throws InvocationTargetException
+	 *             the invocation target exception
 	 */
 	private GraphNode createNewVertex(Control control, NodeType nodeType)
 			throws IllegalAccessException, InvocationTargetException {
@@ -448,17 +460,22 @@ public class GraphGenerator {
 		if (graphNode.getPrecondition() != null) {
 			nodesWithPrecondition.add(graphNode);
 		}
+		graphNode.setName(graphNode.getName().replaceAll(" ", ""));
 		return graphNode;
 	}
 
 	/**
 	 * Creates a new widget vertex.
 	 *
-	 * @param widget the widget
-	 * @param nodeType the node type
+	 * @param widget
+	 *            the widget
+	 * @param nodeType
+	 *            the node type
 	 * @return the graph node
-	 * @throws IllegalAccessException the illegal access exception
-	 * @throws InvocationTargetException the invocation target exception
+	 * @throws IllegalAccessException
+	 *             the illegal access exception
+	 * @throws InvocationTargetException
+	 *             the invocation target exception
 	 */
 	private GraphNode createNewVertex(Widget widget, NodeType nodeType)
 			throws IllegalAccessException, InvocationTargetException {
@@ -468,17 +485,22 @@ public class GraphGenerator {
 		if (graphNode.getPrecondition() != null) {
 			nodesWithPrecondition.add(graphNode);
 		}
+		graphNode.setName(graphNode.getName().replaceAll(" ", ""));
 		return graphNode;
 	}
 
 	/**
 	 * Creates a new app vertex.
 	 *
-	 * @param app the app
-	 * @param nodeType the node type
+	 * @param app
+	 *            the app
+	 * @param nodeType
+	 *            the node type
 	 * @return the graph node
-	 * @throws IllegalAccessException the illegal access exception
-	 * @throws InvocationTargetException the invocation target exception
+	 * @throws IllegalAccessException
+	 *             the illegal access exception
+	 * @throws InvocationTargetException
+	 *             the invocation target exception
 	 */
 	private GraphNode createNewVertex(App app, NodeType nodeType)
 			throws IllegalAccessException, InvocationTargetException {
@@ -488,17 +510,22 @@ public class GraphGenerator {
 		if (graphNode.getPrecondition() != null) {
 			nodesWithPrecondition.add(graphNode);
 		}
+		graphNode.setName(graphNode.getName().replaceAll(" ", ""));
 		return graphNode;
 	}
 
 	/**
 	 * Creates a new screen vertex.
 	 *
-	 * @param screen the screen
-	 * @param nodeType the node type
+	 * @param screen
+	 *            the screen
+	 * @param nodeType
+	 *            the node type
 	 * @return the graph node
-	 * @throws IllegalAccessException the illegal access exception
-	 * @throws InvocationTargetException the invocation target exception
+	 * @throws IllegalAccessException
+	 *             the illegal access exception
+	 * @throws InvocationTargetException
+	 *             the invocation target exception
 	 */
 	private GraphNode createNewVertex(Screen screen, NodeType nodeType)
 			throws IllegalAccessException, InvocationTargetException {
@@ -508,17 +535,22 @@ public class GraphGenerator {
 		if (graphNode.getPrecondition() != null) {
 			nodesWithPrecondition.add(graphNode);
 		}
+		graphNode.setName(graphNode.getName().replaceAll(" ", ""));
 		return graphNode;
 	}
 
 	/**
 	 * Creates a new page vertex.
 	 *
-	 * @param page the page
-	 * @param nodeType the node type
+	 * @param page
+	 *            the page
+	 * @param nodeType
+	 *            the node type
 	 * @return the graph node
-	 * @throws IllegalAccessException the illegal access exception
-	 * @throws InvocationTargetException the invocation target exception
+	 * @throws IllegalAccessException
+	 *             the illegal access exception
+	 * @throws InvocationTargetException
+	 *             the invocation target exception
 	 */
 	private GraphNode createNewVertex(Page page, NodeType nodeType)
 			throws IllegalAccessException, InvocationTargetException {
@@ -528,6 +560,7 @@ public class GraphGenerator {
 		if (graphNode.getPrecondition() != null) {
 			nodesWithPrecondition.add(graphNode);
 		}
+		graphNode.setName(graphNode.getName().replaceAll(" ", ""));
 		return graphNode;
 	}
 
@@ -546,7 +579,7 @@ public class GraphGenerator {
 
 			// TODO: set from configs
 			if (node.getNodeType() == NodeType.CONTROL && node.getAction_type().contains("type")) {
-				for(String funcName: ConfigReader.controlTypeImplictFunc) {
+				for (String funcName : ConfigReader.controlTypeImplictFunc) {
 					node.addImplicitAssertion(funcName);
 				}
 			}
@@ -561,17 +594,20 @@ public class GraphGenerator {
 	public void consistencyCheck() {
 
 		// TODO: check if it is consistent
-		// 1. Isolated nodes not allowed
+
 		// 2. Referencing of non-existing nodes not allowed
 		// 3. Nodes must have respective properties initialized
 		// 4. A control can have only one parent
 		// 5. A control can only lead to one location
 
+		// 1. Isolated nodes not allowed
 		Set<GraphNode> allNodes = graph.vertexSet();
 		for (GraphNode node : allNodes) {
-
 			GraphPath<GraphNode, DefaultEdge> path = DijkstraShortestPath.findPathBetween(graph, rootNode, node);
-			System.out.println("path between " + rootNode + " and " + node + " is " + path);
+			if (path == null || path.getLength() <= 0) {
+				System.out.println("No path between " + rootNode + " and " + node + " is " + path);
+				throw new InvalidModelException(node.toString()+" is isolated");
+			}
 
 		}
 
@@ -580,7 +616,8 @@ public class GraphGenerator {
 	/**
 	 * Converts graph to dot format, used for visualization
 	 *
-	 * @throws IOException Signals that an I/O exception has occurred.
+	 * @throws IOException
+	 *             Signals that an I/O exception has occurred.
 	 */
 	public void toDot() throws IOException {
 
@@ -600,7 +637,6 @@ public class GraphGenerator {
 
 		try {
 			String pngFilePath = graphOutputDir + File.separator + "graph.png";
-			
 
 			String[] command = { "dot", "-Tpng", graphFilePath, "-o", pngFilePath };
 			System.out.println("Png conversion  : " + Arrays.toString(command));

@@ -79,7 +79,6 @@ public class Main {
 		TestGenerator testGenerator = new TestGenerator(tgraph, graphGenerator, classGenerator);
 		List<Spec> specList = testGenerator.getSpecs();
 		testGenerator.generateTest();
-		// testGenerator.testPath();
 
 		// generate test classes
 		TestNGGenerator testNGGenerator = new TestNGGenerator(specList, "FlyPaper", "https://typeset.io");

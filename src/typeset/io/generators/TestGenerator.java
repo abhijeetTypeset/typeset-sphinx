@@ -61,6 +61,7 @@ public class TestGenerator {
 	private Stack<GraphNode> stack = new Stack<GraphNode>();
 	private JFieldVar activePageVariable = null;
 	private Map<String, GraphNode> usedPages;
+	private AllDirectedPaths<GraphNode, DefaultEdge> allDirectedPath;
 
 	// TODO: get this some other way
 	private int MAX_LENGTH = 25;
@@ -74,6 +75,7 @@ public class TestGenerator {
 		this.classGenerator = classGenerator;
 		this.specFiles = new TreeSet<String>();
 		this.specList = new ArrayList<Spec>();
+		this.allDirectedPath = new AllDirectedPaths<>(graph);
 	}
 
 	public void parseSpecFile(String filename) {
@@ -106,7 +108,7 @@ public class TestGenerator {
 			throw new InvalidNodeException("node null cannot proceed");
 		}
 
-		AllDirectedPaths<GraphNode, DefaultEdge> allDirectedPath = new AllDirectedPaths<>(graph);
+//		AllDirectedPaths<GraphNode, DefaultEdge> allDirectedPath = new AllDirectedPaths<>(graph);
 
 		List<GraphPath<GraphNode, DefaultEdge>> paths = allDirectedPath.getAllPaths(sNode, dNode, false, maxLength);
 		return paths;
