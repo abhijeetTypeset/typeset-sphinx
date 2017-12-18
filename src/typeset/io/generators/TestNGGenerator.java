@@ -7,26 +7,45 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerConfigurationException;
+
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
-import org.w3c.dom.Attr;
+
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 import typeset.io.generators.util.GeneratorUtilities;
 import typeset.io.model.spec.Spec;
 
+/**
+ * The Class TestNGGenerator.
+ * Generates testng xml - used for co-ordinating tests
+ */
 public class TestNGGenerator {
 
+	/** The output dir. */
 	private String outputDir;
+	
+	/** The project name to use for test project */
 	private String projectName;
+	
+	/** The home page. */
 	private String homePage;
+	
+	/** The spec list. */
 	private List<Spec> specList;
 
+	/**
+	 * Instantiates a new test NG generator.
+	 *
+	 * @param outputDir the output dir
+	 * @param specList the spec list
+	 * @param projectName the project name
+	 * @param homePage the home page
+	 */
 	public TestNGGenerator(String outputDir, List<Spec> specList, String projectName, String homePage) {
 		this.outputDir = outputDir;
 		this.projectName = projectName;
@@ -34,6 +53,12 @@ public class TestNGGenerator {
 		this.specList = specList;
 	}
 
+	/**
+	 * Generate testng XML.
+	 *
+	 * @throws ParserConfigurationException the parser configuration exception
+	 * @throws TransformerException the transformer exception
+	 */
 	public void generateXML() throws ParserConfigurationException, TransformerException {
 
 		System.out.println("Generating testNG XMl config file");

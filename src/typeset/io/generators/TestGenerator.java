@@ -2,8 +2,6 @@ package typeset.io.generators;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.PrintStream;
-import java.sql.Timestamp;
 import java.util.ArrayList;
 
 import java.util.HashMap;
@@ -15,13 +13,9 @@ import java.util.TreeSet;
 
 import org.apache.commons.io.FileUtils;
 import org.jgrapht.GraphPath;
-import org.jgrapht.alg.shortestpath.AStarShortestPath;
 import org.jgrapht.alg.shortestpath.AllDirectedPaths;
 import org.jgrapht.graph.DefaultDirectedGraph;
 import org.jgrapht.graph.DefaultEdge;
-import org.jgrapht.traverse.BreadthFirstIterator;
-import org.jgrapht.traverse.ClosestFirstIterator;
-import org.jgrapht.traverse.GraphIterator;
 
 import com.sun.codemodel.JBlock;
 import com.sun.codemodel.JClassAlreadyExistsException;
@@ -41,7 +35,7 @@ import com.sun.codemodel.JVar;
 import typeset.io.exceptions.InvalidNodeException;
 import typeset.io.exceptions.InvalidPathException;
 import typeset.io.exceptions.TooComplexExpression;
-import typeset.io.generators.helper.ScaffolingData;
+import typeset.io.generators.ds.ScaffolingData;
 import typeset.io.generators.util.GeneratorUtilities;
 import typeset.io.model.GraphNode;
 import typeset.io.model.NodeType;
@@ -118,16 +112,6 @@ public class TestGenerator {
 
 	}
 
-	public void testPath() {
-		String srcNode = "page_1";
-		String dstNode = "page_5";
-
-		GraphNode sNode = graphGenerator.getNodeByKey(srcNode);
-		GraphNode dNode = graphGenerator.getNodeByKey(dstNode);
-
-		List<GraphPath<GraphNode, DefaultEdge>> paths = getPaths(sNode, dNode, MAX_LENGTH);
-
-	}
 
 	public List<Spec> getSpecs() {
 		getSpecFiles();
@@ -135,10 +119,10 @@ public class TestGenerator {
 			try {
 				Spec spec = SpecReader.read(sf);
 
-				ExplicitAssertion eassertThen = graphGenerator.parsePrecondtion(spec.getThen().getAssertions());
+				ExplicitAssertion eassertThen = graphGenerator.parsePrecondition(spec.getThen().getAssertions());
 				spec.getThen().setParsedAssertion(eassertThen);
 
-				ExplicitAssertion eassertGiven = graphGenerator.parsePrecondtion(spec.getGiven().getAssertions());
+				ExplicitAssertion eassertGiven = graphGenerator.parsePrecondition(spec.getGiven().getAssertions());
 				spec.getGiven().setParsedAssertion(eassertGiven);
 
 				if (isValidSpec(spec)) {
@@ -184,10 +168,8 @@ public class TestGenerator {
 	}
 
 	private boolean isPathViable(GraphPath<GraphNode, DefaultEdge> path, Spec spec) {
-		// System.out.println("Received path " + path.getLength() + " " + path);
 
 		List<String> assertions = spec.getGiven().getAssertions();
-		Map<String, Action> actions = spec.getWhen();
 
 		// condition for viability of a path
 		// it should be of less than or equal to max length
@@ -390,7 +372,7 @@ public class TestGenerator {
 
 		List<String> explicitAssertions = then.getAssertions();
 		if (explicitAssertions != null) {
-			ExplicitAssertion parsedEXplicit = graphGenerator.parsePrecondtion(explicitAssertions);
+			ExplicitAssertion parsedEXplicit = graphGenerator.parsePrecondition(explicitAssertions);
 			generatePostExplicitAssertions(sdata, parsedEXplicit);
 		}
 
@@ -638,13 +620,13 @@ public class TestGenerator {
 		sdata.getBlock().invoke(givenSdata.getMethod());
 	}
 
-	private void updateTestExecutorClasses() throws IOException {
+	private void updateAuxiliaryClasses() throws IOException {
 		String dirpath = outputDir + File.separator + "FlyPaper" + File.separator + "src" + File.separator + "main"
 				+ File.separator + "java";
 
-		FileUtils.copyFile(new File("res" + File.separator + "executorClasses" + File.separator + "ConfigClass.java"),
+		FileUtils.copyFile(new File("res" + File.separator + "auxiliaryClasses" + File.separator + "ConfigClass.java"),
 				new File(dirpath + File.separator + "utils" + File.separator + "ConfigClass.java"));
-		FileUtils.copyFile(new File("res" + File.separator + "executorClasses" + File.separator + "ActionClass.java"),
+		FileUtils.copyFile(new File("res" + File.separator + "auxiliaryClasses" + File.separator + "ActionClass.java"),
 				new File(dirpath + File.separator + "controller" + File.separator + "ActionClass.java"));
 
 	}
@@ -694,7 +676,7 @@ public class TestGenerator {
 
 		writeTestToFile();
 
-		updateTestExecutorClasses();
+		updateAuxiliaryClasses();
 
 	}
 

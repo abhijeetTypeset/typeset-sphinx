@@ -1,10 +1,10 @@
 package typeset.io.generators;
 
-import java.io.BufferedWriter;
+
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.OutputStream;
+
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -12,17 +12,15 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.TreeSet;
+
 
 import org.apache.commons.beanutils.BeanUtils;
 import org.jgrapht.GraphPath;
-import org.jgrapht.alg.interfaces.ShortestPathAlgorithm;
-import org.jgrapht.alg.shortestpath.AllDirectedPaths;
+
 import org.jgrapht.alg.shortestpath.DijkstraShortestPath;
 import org.jgrapht.graph.DefaultDirectedGraph;
 import org.jgrapht.graph.DefaultEdge;
-import org.jgrapht.graph.DefaultWeightedEdge;
-import org.jgrapht.graph.Multigraph;
+
 import org.jgrapht.io.ComponentNameProvider;
 import org.jgrapht.io.DOTExporter;
 import org.jgrapht.io.IntegerComponentNameProvider;
@@ -31,7 +29,7 @@ import org.jgrapht.io.StringComponentNameProvider;
 import typeset.io.exceptions.InvalidClauseException;
 import typeset.io.exceptions.InvalidLiteralException;
 import typeset.io.exceptions.InvalidModelException;
-import typeset.io.exceptions.InvalidNodeException;
+
 import typeset.io.model.App;
 import typeset.io.model.Control;
 import typeset.io.model.GraphNode;
@@ -44,20 +42,50 @@ import typeset.io.model.assertions.Clause;
 import typeset.io.model.assertions.ExplicitAssertion;
 import typeset.io.model.assertions.Literal;
 
+/**
+ * The Class GraphGenerator. 
+ * Converts yml model into a graph.
+ */
 public class GraphGenerator {
+	
+	/** The model of the product extracted from yml */
 	private Model model;
+	
+	/** The map of yml tag names to node */
 	private Map<String, GraphNode> nameNodeMap;
+	
+	/** The graph representing the model */
 	private DefaultDirectedGraph<GraphNode, DefaultEdge> graph;
+	
+	/** The root node in the graph */
 	private GraphNode rootNode;
+	
+	/** The target dir. */
 	private String targetDir;
+	
+	/** The nodes with precondition. */
 	private List<GraphNode> nodesWithPrecondition;
+	
+	/** Screen to page mapping */
 	private Map<String, String> screenToPage;
 
+	/**
+	 * Instantiates a new graph generator.
+	 *
+	 * @param model the model
+	 * @param targetDir the target dir
+	 */
 	public GraphGenerator(Model model, String targetDir) {
 		this.model = model;
 		this.targetDir = targetDir;
 	}
 
+	/**
+	 * Gets the node by yml key.
+	 *
+	 * @param key the key
+	 * @return the node by key
+	 */
 	public GraphNode getNodeByKey(String key) {
 		GraphNode node = nameNodeMap.get(key);
 		if (node != null) {
@@ -67,6 +95,13 @@ public class GraphGenerator {
 		throw new InvalidLiteralException("No such symbol as " + key);
 	}
 
+	/**
+	 * Initialize the graph from the yml model
+	 *
+	 * @return the default directed graph
+	 * @throws IllegalAccessException the illegal access exception
+	 * @throws InvocationTargetException the invocation target exception
+	 */
 	public DefaultDirectedGraph<GraphNode, DefaultEdge> initialize()
 			throws IllegalAccessException, InvocationTargetException {
 		if (model == null) {
@@ -285,17 +320,29 @@ public class GraphGenerator {
 
 		// resolve preconditions
 
-		resolvePreconditons();
+		resolvePreconditions();
 
 		return graph;
 
 	}
 
+	/**
+	 * Adds node to the nameNodeMap.
+	 *
+	 * @param c the c
+	 * @param v the v
+	 */
 	private void addToMap(String c, GraphNode v) {
 		nameNodeMap.put(c, v);
 
 	}
 
+	/**
+	 * Parses the literal (from String)
+	 *
+	 * @param literalString the literal string
+	 * @return the literal
+	 */
 	private Literal parseLiteral(String literalString) {
 		String[] parts = literalString.split("%");
 
@@ -316,7 +363,13 @@ public class GraphGenerator {
 		return literal;
 	}
 
-	private Clause parseClasuse(String clauseString) {
+	/**
+	 * Parses the clause (from String).
+	 *
+	 * @param clauseString the clause string
+	 * @return the clause
+	 */
+	private Clause parseClause(String clauseString) {
 		Clause clause = new Clause();
 		String[] literals = clauseString.split(",");
 		for (String literalString : literals) {
@@ -327,14 +380,20 @@ public class GraphGenerator {
 		return clause;
 	}
 
-	public ExplicitAssertion parsePrecondtion(List<String> precodtionString) {
+	/**
+	 * Parses the precondition (from String).
+	 *
+	 * @param precodtionString the precodtion string
+	 * @return the explicit assertion
+	 */
+	public ExplicitAssertion parsePrecondition(List<String> precodtionString) {
 		if (precodtionString == null) {
 			return null;
 		}
 		// System.out.println("pre-condition " + precodtionString);
 		ExplicitAssertion explicitAssertion = new ExplicitAssertion();
 		for (String precs : precodtionString) {
-			Clause clause = parseClasuse(precs);
+			Clause clause = parseClause(precs);
 			explicitAssertion.addclauses(clause);
 		}
 
@@ -342,16 +401,25 @@ public class GraphGenerator {
 
 	}
 
-	private void resolvePreconditons() {
+	/**
+	 * Resolve preconditions (from String).
+	 */
+	private void resolvePreconditions() {
 		for (GraphNode node : nodesWithPrecondition) {
 			List<String> precondtionString = node.getPrecondition();
 
-			ExplicitAssertion parsedPrecondition = parsePrecondtion(precondtionString);
+			ExplicitAssertion parsedPrecondition = parsePrecondition(precondtionString);
 			node.setParsedPreCondition(parsedPrecondition);
 			System.out.println(parsedPrecondition);
 		}
 	}
 
+	/**
+	 * Checks if node has incomming edges
+	 *
+	 * @param node the node
+	 * @return true, if successful
+	 */
 	private boolean doesNotHaveIncomingEdges(GraphNode node) {
 		Set<DefaultEdge> edges = graph.incomingEdgesOf(node);
 
@@ -362,6 +430,15 @@ public class GraphGenerator {
 		}
 	}
 
+	/**
+	 * Creates a new control vertex.
+	 *
+	 * @param control the control
+	 * @param nodeType the node type
+	 * @return the graph node
+	 * @throws IllegalAccessException the illegal access exception
+	 * @throws InvocationTargetException the invocation target exception
+	 */
 	private GraphNode createNewVertex(Control control, NodeType nodeType)
 			throws IllegalAccessException, InvocationTargetException {
 		GraphNode graphNode = new GraphNode();
@@ -373,6 +450,15 @@ public class GraphGenerator {
 		return graphNode;
 	}
 
+	/**
+	 * Creates a new widget vertex.
+	 *
+	 * @param widget the widget
+	 * @param nodeType the node type
+	 * @return the graph node
+	 * @throws IllegalAccessException the illegal access exception
+	 * @throws InvocationTargetException the invocation target exception
+	 */
 	private GraphNode createNewVertex(Widget widget, NodeType nodeType)
 			throws IllegalAccessException, InvocationTargetException {
 		GraphNode graphNode = new GraphNode();
@@ -384,6 +470,15 @@ public class GraphGenerator {
 		return graphNode;
 	}
 
+	/**
+	 * Creates a new app vertex.
+	 *
+	 * @param app the app
+	 * @param nodeType the node type
+	 * @return the graph node
+	 * @throws IllegalAccessException the illegal access exception
+	 * @throws InvocationTargetException the invocation target exception
+	 */
 	private GraphNode createNewVertex(App app, NodeType nodeType)
 			throws IllegalAccessException, InvocationTargetException {
 		GraphNode graphNode = new GraphNode();
@@ -395,6 +490,15 @@ public class GraphGenerator {
 		return graphNode;
 	}
 
+	/**
+	 * Creates a new screen vertex.
+	 *
+	 * @param screen the screen
+	 * @param nodeType the node type
+	 * @return the graph node
+	 * @throws IllegalAccessException the illegal access exception
+	 * @throws InvocationTargetException the invocation target exception
+	 */
 	private GraphNode createNewVertex(Screen screen, NodeType nodeType)
 			throws IllegalAccessException, InvocationTargetException {
 		GraphNode graphNode = new GraphNode();
@@ -406,6 +510,15 @@ public class GraphGenerator {
 		return graphNode;
 	}
 
+	/**
+	 * Creates a new page vertex.
+	 *
+	 * @param page the page
+	 * @param nodeType the node type
+	 * @return the graph node
+	 * @throws IllegalAccessException the illegal access exception
+	 * @throws InvocationTargetException the invocation target exception
+	 */
 	private GraphNode createNewVertex(Page page, NodeType nodeType)
 			throws IllegalAccessException, InvocationTargetException {
 		GraphNode graphNode = new GraphNode();
@@ -417,6 +530,9 @@ public class GraphGenerator {
 		return graphNode;
 	}
 
+	/**
+	 * Adds implicit assertions to required nodes
+	 */
 	public void addImplicitAssertions() {
 		// get all the nodes
 		Set<GraphNode> allNodes = graph.vertexSet();
@@ -427,6 +543,7 @@ public class GraphGenerator {
 				node.addImplicitAssertion("canSee");
 			}
 
+			// TODO: set from configs
 			if (node.getNodeType() == NodeType.CONTROL && node.getAction_type().contains("type")) {
 				node.addImplicitAssertion("contains");
 				node.addImplicitAssertion("equals");
@@ -439,6 +556,9 @@ public class GraphGenerator {
 
 	}
 
+	/**
+	 * Consistency check for the entire graph
+	 */
 	public void consistencyCheck() {
 
 		// TODO: check if it is consistent
@@ -458,13 +578,18 @@ public class GraphGenerator {
 
 	}
 
+	/**
+	 * Converts graph to dot format, used for visualization
+	 *
+	 * @throws IOException Signals that an I/O exception has occurred.
+	 */
 	public void toDot() throws IOException {
 
 		String graphOutputDir = targetDir + File.separator + "graphs";
 		File file = new File(graphOutputDir);
 		file.mkdirs();
 
-		String graphFilePath = graphOutputDir + file.separator + "graph.dot";
+		String graphFilePath = graphOutputDir + File.separator + "graph.dot";
 		ComponentNameProvider<GraphNode> vertexIDProvider = new IntegerComponentNameProvider<GraphNode>();
 		ComponentNameProvider<GraphNode> vertexLabelProvider = new StringComponentNameProvider<GraphNode>();
 
@@ -475,27 +600,42 @@ public class GraphGenerator {
 		exporter.exportGraph(graph, new FileWriter(graphFilePath));
 
 		try {
-			// String pngFilePath = graphOutputDir + file.separator + "graph.png";
-			String pngFilePath = "/home/ub16/share" + file.separator + "graph.png";
+			String pngFilePath = graphOutputDir + File.separator + "graph.png";
+			
 
 			String[] command = { "dot", "-Tpng", graphFilePath, "-o", pngFilePath };
 			System.out.println("Png conversion  : " + Arrays.toString(command));
 			ProcessBuilder probuilder = new ProcessBuilder(command);
-			Process process = probuilder.start();
+			probuilder.start();
 		} catch (Exception e) {
 			System.out.println("Error while generating the graph png");
 		}
 
 	}
 
+	/**
+	 * Gets the name node map.
+	 *
+	 * @return the name node map
+	 */
 	public Map<String, GraphNode> getNameNodeMap() {
 		return nameNodeMap;
 	}
 
+	/**
+	 * Gets the root node.
+	 *
+	 * @return the root node
+	 */
 	public GraphNode getRootNode() {
 		return rootNode;
 	}
 
+	/**
+	 * Gets the screen to page.
+	 *
+	 * @return the screen to page
+	 */
 	public Map<String, String> getScreenToPage() {
 		return screenToPage;
 	}

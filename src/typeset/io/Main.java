@@ -7,7 +7,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.swing.plaf.synth.SynthSplitPaneUI;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.TransformerException;
 
@@ -21,8 +20,6 @@ import org.apache.commons.cli.ParseException;
 import org.apache.commons.io.FileUtils;
 import org.jgrapht.graph.DefaultDirectedGraph;
 import org.jgrapht.graph.DefaultEdge;
-import org.jgrapht.graph.DefaultWeightedEdge;
-import org.jgrapht.graph.Multigraph;
 
 import com.sun.codemodel.JClassAlreadyExistsException;
 
@@ -32,18 +29,17 @@ import typeset.io.generators.TestGenerator;
 import typeset.io.generators.TestNGGenerator;
 import typeset.io.model.GraphNode;
 import typeset.io.model.Model;
-import typeset.io.model.NodeType;
+
 import typeset.io.model.spec.Spec;
 import typeset.io.readers.ModelReader;
-import typeset.io.readers.SpecReader;
 
 public class Main {
 
 	private final static Map<String, String> paramerets = new HashMap<String, String>();
 
-	public static void main(String[] args)
-			throws IOException, IllegalAccessException, InvocationTargetException, JClassAlreadyExistsException, ParserConfigurationException, TransformerException {
-		
+	public static void main(String[] args) throws IOException, IllegalAccessException, InvocationTargetException,
+			JClassAlreadyExistsException, ParserConfigurationException, TransformerException {
+
 		// get parameters
 		getParameters(args);
 
@@ -58,7 +54,10 @@ public class Main {
 		DefaultDirectedGraph<GraphNode, DefaultEdge> tgraph = graphGenerator.initialize();
 		graphGenerator.toDot();
 
+		// consistency checks on the graph
 		graphGenerator.consistencyCheck();
+
+		// adding implict assertions
 		graphGenerator.addImplicitAssertions();
 
 		if (!paramerets.get("generate").toLowerCase().equals("true")) {
@@ -71,12 +70,15 @@ public class Main {
 		classGenerator.generateClasses();
 
 		// covert specification to feasible paths; and then eventually into classes
-		TestGenerator testGenerator = new TestGenerator(tgraph, graphGenerator, classGenerator, paramerets.get("input"), paramerets.get("output"));
+		TestGenerator testGenerator = new TestGenerator(tgraph, graphGenerator, classGenerator, paramerets.get("input"),
+				paramerets.get("output"));
 		List<Spec> specList = testGenerator.getSpecs();
 		testGenerator.generateTest();
 		// testGenerator.testPath();
-		
-		TestNGGenerator testNGGenerator = new TestNGGenerator(paramerets.get("output"), specList, "FlyPaper", "https://typeset.io");
+
+		// generate test classes
+		TestNGGenerator testNGGenerator = new TestNGGenerator(paramerets.get("output"), specList, "FlyPaper",
+				"https://typeset.io");
 		testNGGenerator.generateXML();
 
 	}

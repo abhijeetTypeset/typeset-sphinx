@@ -10,8 +10,18 @@ import org.yaml.snakeyaml.Yaml;
 
 import typeset.io.model.Model;
 
+/**
+ * The Class for YML Model Reader.
+ */
 public class ModelReader {
 
+	/**
+	 * Read.
+	 *
+	 * @param inputDir the input dir
+	 * @return the model
+	 * @throws IOException Signals that an I/O exception has occurred.
+	 */
 	public static Model read(String inputDir) throws IOException {
 
 		String modelFile = inputDir + File.separator + "model.yml";

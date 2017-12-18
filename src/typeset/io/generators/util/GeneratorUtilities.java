@@ -4,7 +4,19 @@ import java.sql.Timestamp;
 
 import typeset.io.model.NodeType;
 
+
+/**
+ * The Class GeneratorUtilities.
+ * A class to hold various class generation utilities
+ */
 public class GeneratorUtilities {
+	
+	/**
+	 * First letter captial.
+	 *
+	 * @param name the name
+	 * @return the string
+	 */
 	public static String firstLetterCaptial(String name) {
 		if (name.length() <= 1) {
 			return name.toUpperCase();
@@ -13,10 +25,22 @@ public class GeneratorUtilities {
 		}
 	}
 
+	/**
+	 * Gets the getter name.
+	 *
+	 * @param name the name
+	 * @return the getter name
+	 */
 	public static String getGetterName(String name) {
 		return "get" + firstLetterCaptial(name);
 	}
 
+	/**
+	 * Gets the node type.
+	 *
+	 * @param nodeType the node type
+	 * @return the node type
+	 */
 	public static int getNodeType(NodeType nodeType) {
 		if(nodeType == NodeType.PAGE) {
 			return 0;
@@ -34,6 +58,11 @@ public class GeneratorUtilities {
 		
 	}
 
+	/**
+	 * Gets the timestamp.
+	 *
+	 * @return the timestamp
+	 */
 	public static String getTimestamp() {
 		Timestamp timestamp = new Timestamp(System.currentTimeMillis());
 		return timestamp.getTime() + "";

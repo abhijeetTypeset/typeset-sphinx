@@ -2,8 +2,6 @@ package typeset.io.generators;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -11,11 +9,8 @@ import java.util.Set;
 import org.apache.commons.io.FileUtils;
 import org.jgrapht.graph.DefaultDirectedGraph;
 import org.jgrapht.graph.DefaultEdge;
-import org.jgrapht.graph.DefaultWeightedEdge;
-import org.jgrapht.graph.Multigraph;
 
 import com.sun.codemodel.ClassType;
-import com.sun.codemodel.JArray;
 import com.sun.codemodel.JBlock;
 import com.sun.codemodel.JClassAlreadyExistsException;
 import com.sun.codemodel.JCodeModel;
@@ -25,40 +20,58 @@ import com.sun.codemodel.JExpression;
 import com.sun.codemodel.JFieldVar;
 import com.sun.codemodel.JMethod;
 import com.sun.codemodel.JMod;
-import com.sun.codemodel.JType;
 
 import typeset.io.exceptions.InconsistentGraphException;
 import typeset.io.generators.util.GeneratorUtilities;
-import typeset.io.model.App;
 import typeset.io.model.GraphNode;
-import typeset.io.model.Model;
 import typeset.io.model.NodeType;
-import typeset.io.model.Page;
-import typeset.io.model.Screen;
-import typeset.io.model.Widget;
 
-import org.openqa.selenium.By;
-
+/**
+ * The Class ModelGenerator.
+ * Generate Java Classes representing product model from the graph model
+ */
 public class ModelGenerator {
+	
+	/** The tgraph. */
 	private DefaultDirectedGraph<GraphNode, DefaultEdge> tgraph;
-	private static Map<GraphNode, JDefinedClass> nodeClassMap = new HashMap<>();
+	
+	/** The node class map. */
+	private Map<GraphNode, JDefinedClass> nodeClassMap = new HashMap<>();
+	
+	/** The output dir. */
 	private String outputDir;
+	
+	/** The defined abstract node. */
 	private JDefinedClass definedAbstractNode;
+	
+	/** The action class. */
 	private JDefinedClass actionClass;
 
+	/**
+	 * Instantiates a new model generator.
+	 *
+	 * @param tgraph the tgraph
+	 * @param outputDir the output dir
+	 */
 	public ModelGenerator(DefaultDirectedGraph<GraphNode, DefaultEdge> tgraph, String outputDir) {
 		this.tgraph = tgraph;
 		this.outputDir = outputDir;
 
 	}
 
+	/**
+	 * Generate classes representing elements of the W.A.S.P. model.
+	 *
+	 * @throws IOException Signals that an I/O exception has occurred.
+	 * @throws JClassAlreadyExistsException the j class already exists exception
+	 */
 	public void generateClasses() throws IOException, JClassAlreadyExistsException {
 
 		if (tgraph == null) {
 			throw new InconsistentGraphException("Cannot proceed with a null graph");
 		}
 
-		copyBaseClasses();
+		copyDirectoryStructure();
 
 		generateAbstractClasses();
 
@@ -98,15 +111,26 @@ public class ModelGenerator {
 			}
 		}
 
-		generateTestExecutorClasses();
+		generateAuxiliaryClasses();
 
 	}
 
+	/**
+	 * Gets the action class.
+	 *
+	 * @return the action class
+	 */
 	public JDefinedClass getActionClass() {
 		return actionClass;
 	}
 
-	private void generateTestExecutorClasses() throws JClassAlreadyExistsException, IOException {
+	/**
+	 * Generate a bunch of auxiliary classes useful for test execution
+	 *
+	 * @throws JClassAlreadyExistsException the j class already exists exception
+	 * @throws IOException Signals that an I/O exception has occurred.
+	 */
+	private void generateAuxiliaryClasses() throws JClassAlreadyExistsException, IOException {
 		JCodeModel cm = new JCodeModel();
 		String packageName = "utils";
 		String className = packageName + "." + "ConfigClass";
@@ -130,6 +154,12 @@ public class ModelGenerator {
 
 	}
 
+	/**
+	 * Generate abstract classes representing W.A.S.P. elements
+	 *
+	 * @throws JClassAlreadyExistsException the j class already exists exception
+	 * @throws IOException Signals that an I/O exception has occurred.
+	 */
 	private void generateAbstractClasses() throws JClassAlreadyExistsException, IOException {
 		JCodeModel cm = new JCodeModel();
 		String packageName = "model";
@@ -148,7 +178,12 @@ public class ModelGenerator {
 		cm.build(file);
 	}
 
-	private void copyBaseClasses() throws IOException {
+	/**
+	 * Copy directory structure and base classes.
+	 *
+	 * @throws IOException Signals that an I/O exception has occurred.
+	 */
+	private void copyDirectoryStructure() throws IOException {
 
 		String baseDirStructure = "res" + File.separator + "baseDirStructure";
 
@@ -156,6 +191,13 @@ public class ModelGenerator {
 		System.out.println("Copying base directory structure from " + baseDirStructure + " to " + outputDir);
 	}
 
+	/**
+	 * Generate class file for a given graph node
+	 *
+	 * @param gnode the gnode
+	 * @throws JClassAlreadyExistsException the j class already exists exception
+	 * @throws IOException Signals that an I/O exception has occurred.
+	 */
 	private void generateClassFile(GraphNode gnode) throws JClassAlreadyExistsException, IOException {
 		System.out.println("===| Generated class for " + gnode);
 		JCodeModel cm = new JCodeModel();
@@ -186,12 +228,12 @@ public class ModelGenerator {
 		// add an id
 		if (gnode.getId() != null) {
 			JFieldVar field = definedClass.field(JMod.PRIVATE, org.openqa.selenium.By.class, "id");
-			
-			if(gnode.getId().get("by")!=null && gnode.getId().get("locator")!=null) {
+
+			if (gnode.getId().get("by") != null && gnode.getId().get("locator") != null) {
 				JExpression init = cm.ref(org.openqa.selenium.By.class).staticInvoke(gnode.getId().get("by"))
 						.arg(JExpr.lit(gnode.getId().get("locator")));
 				field.init(init);
-			}else {
+			} else {
 				field.init(JExpr._null());
 			}
 
@@ -240,10 +282,10 @@ public class ModelGenerator {
 				block._return(field);
 
 			}
-			
+
 			// TODO: add missing variables
-			for(GraphNode noEdgeNode :  gnode.getNoEdges()) {
-				System.out.println("to add edges : "+noEdgeNode.getName());
+			for (GraphNode noEdgeNode : gnode.getNoEdges()) {
+				System.out.println("to add edges : " + noEdgeNode.getName());
 				JDefinedClass exitingClassNode = nodeClassMap.get(noEdgeNode);
 				JFieldVar field = definedClass.field(JMod.PRIVATE, exitingClassNode, "var" + noEdgeNode.getName());
 				JExpression init = JExpr._new(exitingClassNode);
@@ -266,12 +308,22 @@ public class ModelGenerator {
 		cm.build(file);
 	}
 
-	public static Map<GraphNode, JDefinedClass> getNodeClassMap() {
+	/**
+	 * Gets the node class map.
+	 *
+	 * @return the node class map
+	 */
+	public Map<GraphNode, JDefinedClass> getNodeClassMap() {
 		return nodeClassMap;
 	}
 
-	public static void setNodeClassMap(Map<GraphNode, JDefinedClass> nodeClassMap) {
-		ModelGenerator.nodeClassMap = nodeClassMap;
+	/**
+	 * Sets the node class map.
+	 *
+	 * @param nodeClassMap the node class map
+	 */
+	public void setNodeClassMap(Map<GraphNode, JDefinedClass> nodeClassMap) {
+		this.nodeClassMap = nodeClassMap;
 	}
 
 }
