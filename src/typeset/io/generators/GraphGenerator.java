@@ -305,6 +305,9 @@ public class GraphGenerator {
 
 		Literal literal = null;
 		GraphNode node = getNodeByKey(parts[0].trim());
+		
+		// TODO: need to put more sanity checking for the allowed functions
+		
 		if (parts.length == 3) {
 			literal = new Literal(node, parts[2].trim(), parts[1].toLowerCase().trim().equals("not"));
 		} else {

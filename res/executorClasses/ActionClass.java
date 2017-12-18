@@ -31,6 +31,19 @@ public class ActionClass extends ConfigClass {
 	public String textContent(By locator) {
 		return driver.findElement(locator).getText();
 	}
+	
+	public boolean contains(By locator, String expectedContent) {
+		if (locator==null) {
+			return true;
+		}
+		String observedContent = driver.findElement(locator).getText();
+		System.out.println("Obseved content in "+locator+"  is  "+observedContent);
+		if(observedContent.contains(expectedContent)) {
+			return true;
+		}
+		
+		return false;
+	}
 
 	public void waitTime(int time) {
 		try {

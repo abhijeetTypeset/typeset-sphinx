@@ -23,6 +23,7 @@ public class ConfigClass {
 	static String OS = System.getProperty("os.name").toLowerCase();
 	InputStream inputStream;
 
+	private int BROWSER_TIMEOUT = 60;
 	Properties prop;
 
 	@AfterMethod
@@ -50,7 +51,7 @@ public class ConfigClass {
 		if (Browser.equalsIgnoreCase("phantom")) {
 			driver = new PhantomJSDriver();
 			driver.manage().window().maximize();
-			driver.manage().timeouts().implicitlyWait(30, TimeUnit.SECONDS);
+			driver.manage().timeouts().implicitlyWait(BROWSER_TIMEOUT, TimeUnit.SECONDS);
 			System.out.println("phantom driver selected");
 			driver.get(Url);
 
@@ -59,7 +60,7 @@ public class ConfigClass {
 		if (Browser.equalsIgnoreCase("firefox")) {
 			driver = new FirefoxDriver();
 			driver.manage().window().maximize();
-			driver.manage().timeouts().implicitlyWait(30, TimeUnit.SECONDS);
+			driver.manage().timeouts().implicitlyWait(BROWSER_TIMEOUT, TimeUnit.SECONDS);
 			System.out.println("firefox driver selected");
 			driver.get(Url);
 		}
@@ -68,7 +69,7 @@ public class ConfigClass {
 			System.out.println("Chrome path : " + System.getProperty("webdriver.chrome.driver"));
 			driver = new ChromeDriver();
 			driver.manage().window().maximize();
-			driver.manage().timeouts().implicitlyWait(30, TimeUnit.SECONDS);
+			driver.manage().timeouts().implicitlyWait(BROWSER_TIMEOUT, TimeUnit.SECONDS);
 			System.out.println("Chrome driver selected");
 			driver.get(Url);
 
@@ -81,14 +82,14 @@ public class ConfigClass {
 			options.addArguments("window-size=1200x1072");
 			driver = new ChromeDriver(options);
 			driver.manage().window().maximize();
-			driver.manage().timeouts().implicitlyWait(30, TimeUnit.SECONDS);
+			driver.manage().timeouts().implicitlyWait(BROWSER_TIMEOUT, TimeUnit.SECONDS);
 			System.out.println("Chrome-headless driver selected");
 			driver.get(Url);
 
 		}
 		if (Browser.equalsIgnoreCase("iexplorer")) {
 			driver = new InternetExplorerDriver();
-			driver.manage().timeouts().implicitlyWait(3, TimeUnit.SECONDS);
+			driver.manage().timeouts().implicitlyWait(BROWSER_TIMEOUT, TimeUnit.SECONDS);
 			driver.manage().window().maximize();
 			driver.get(Url);
 		}

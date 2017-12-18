@@ -15,4 +15,4 @@ wait: short
 then:
  screen: screen_5
  assertions: 
-  - control_37%as%contains%blabla
+  - control_37%as%contains%Parasailing Monkeys
