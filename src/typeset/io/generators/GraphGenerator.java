@@ -359,14 +359,26 @@ public class GraphGenerator {
 		Literal literal = null;
 		GraphNode node = getNodeByKey(parts[0].trim());
 
-		// TODO: need to put more sanity checking for the allowed functions
+		String action = parts[2].trim();
+		boolean isNegation = parts[1].toLowerCase().trim().equals("not");
 
 		if (parts.length == 3) {
-			literal = new Literal(node, parts[2].trim(), parts[1].toLowerCase().trim().equals("not"));
+			literal = new Literal(node, action, isNegation);
 		} else {
-			literal = new Literal(node, parts[2].trim(), parts[1].toLowerCase().trim().equals("not"), parts[3].trim());
+			literal = new Literal(node, action, isNegation, parts[3].trim());
 		}
 		return literal;
+	}
+
+	boolean isValidAction(GraphNode node, String action) {
+		List<String> assertions = node.getImplictAssertions();
+		for (String asrt : assertions) {
+			if (asrt.equals(action)) {
+				return true;
+			}
+		}
+
+		return false;
 	}
 
 	/**
@@ -577,8 +589,11 @@ public class GraphGenerator {
 				node.addImplicitAssertion(ConfigReader.intermImplictFunc.get(0));
 			}
 
-			if (node.getNodeType() == NodeType.CONTROL && node.getAction_type().contains("type")) {
-				for (String funcName : ConfigReader.controlTypeImplictFunc) {
+			// if (node.getNodeType() == NodeType.CONTROL &&
+			// node.getAction_type().contains("type")) {
+			if (node.getNodeType() == NodeType.CONTROL) {
+
+				for (String funcName : ConfigReader.controlImplictFunc) {
 					node.addImplicitAssertion(funcName);
 				}
 			}
@@ -591,9 +606,6 @@ public class GraphGenerator {
 	 * Consistency check for the entire graph
 	 */
 	public void consistencyCheck() {
-
-		// 4. A control can have only one parent
-		// 5. A control can only lead to one location
 
 		// 1. Isolated nodes not allowed
 		Set<GraphNode> allNodes = graph.vertexSet();
@@ -608,14 +620,14 @@ public class GraphGenerator {
 
 		// 2. Nodes must have respective properties initialized
 		for (GraphNode node : allNodes) {
-			
+
 			// check urls
 			if (node.getNodeType() == NodeType.PAGE) {
 				if (node.getUrl() == null) {
 					throw new InvalidModelException(node.toString() + " has no url assigned");
 				}
 			}
-			
+
 			// check ids
 			// TODO: enable when all Ids are available
 			// if (node.getNodeType() != NodeType.PAGE) {
@@ -625,13 +637,31 @@ public class GraphGenerator {
 			// "+node.getNodeType()+"]");
 			// }
 			// }
-			
+
 			// check default data
 			if (node.getNodeType() == NodeType.CONTROL && node.getAction_type().contains("type")) {
 				if (node.getAction_data() == null) {
 					throw new InvalidModelException(node.toString() + " has no default data assigned");
 				}
 			}
+		}
+
+		// check if assertions use valid functions
+		for (GraphNode node : allNodes) {
+
+			if (node.getParsedPreCondition() != null) {
+				for (Clause cls : node.getParsedPreCondition().getclauses()) {
+					for (Literal ltl : cls.getLiterals()) {
+
+						if (!isValidAction(ltl.getNode(), ltl.getAction())) {
+							throw new InvalidLiteralException(
+									"The action " + ltl.getAction() + " is not defined for " + ltl.getNode());
+						}
+					}
+				}
+
+			}
+
 		}
 
 	}

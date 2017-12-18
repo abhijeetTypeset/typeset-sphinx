@@ -60,11 +60,11 @@ public class Main {
 		DefaultDirectedGraph<GraphNode, DefaultEdge> tgraph = graphGenerator.initialize();
 		graphGenerator.toDot();
 
-		// consistency checks on the graph
-		graphGenerator.consistencyCheck();
-
 		// adding implicit assertions
 		graphGenerator.addImplicitAssertions();
+		
+		// consistency checks on the graph
+		graphGenerator.consistencyCheck();
 
 		if (!ConfigReader.generateClasses) {
 			System.out.println("Stopping after graph generation. Classes will be not generated");

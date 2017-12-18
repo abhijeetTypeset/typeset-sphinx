@@ -17,8 +17,7 @@ public class ConfigReader {
 	public static boolean generateClasses = false;
 	public static List<String> pageImplictFunc = new ArrayList<String>();
 	public static List<String> intermImplictFunc = new ArrayList<String>();
-	public static List<String> controlTypeImplictFunc = new ArrayList<String>();
-
+	public static List<String> controlImplictFunc = new ArrayList<String>();
 
 	public static void read(String filename) {
 
@@ -48,12 +47,7 @@ public class ConfigReader {
 				throw new InvalidConfigException("Input directory null");
 			}
 
-			if (outputDir != null) {
-				File file = new File(outputDir);
-				if (!file.isDirectory()) {
-					throw new InvalidConfigException("Invalid output directory " + outputDir);
-				}
-			} else {
+			if (outputDir == null) {
 				throw new InvalidConfigException("Input directory null");
 			}
 
@@ -62,7 +56,7 @@ public class ConfigReader {
 			if (tempList != null) {
 				pageImplictFunc.addAll(tempList);
 			}
-			if(pageImplictFunc.size() <= 0) {
+			if (pageImplictFunc.size() <= 0) {
 				throw new InvalidConfigException("Insufficient number of page assertions provided");
 			}
 
@@ -71,27 +65,24 @@ public class ConfigReader {
 			if (tempList != null) {
 				intermImplictFunc.addAll(tempList);
 			}
-			if(intermImplictFunc.size() <= 0) {
+			if (intermImplictFunc.size() <= 0) {
 				throw new InvalidConfigException("Insufficient number of screen/app/widget assertions provided");
 			}
-			
-			implicit_str = prop.getProperty("control-type-implicit").trim();
+
+			implicit_str = prop.getProperty("control-implicit").trim();
 			tempList = listify(implicit_str);
 			if (tempList != null) {
-				controlTypeImplictFunc.addAll(tempList);
+				controlImplictFunc.addAll(tempList);
 			}
-			if(controlTypeImplictFunc.size() <= 0) {
-				throw new InvalidConfigException("Insufficient number of control(type) assertions provided");
+			if (controlImplictFunc.size() <= 0) {
+				throw new InvalidConfigException("Insufficient number of control assertions provided");
 			}
-			
-
 
 		} catch (IOException ex) {
 			ex.printStackTrace();
 		} catch (NullPointerException ex) {
 			throw new InvalidConfigException();
-		}
-		finally {
+		} finally {
 			if (input != null) {
 				try {
 					input.close();

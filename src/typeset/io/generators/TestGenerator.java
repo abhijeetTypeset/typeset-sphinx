@@ -32,6 +32,7 @@ import com.sun.codemodel.JStatement;
 import com.sun.codemodel.JType;
 import com.sun.codemodel.JVar;
 
+import typeset.io.exceptions.InvalidLiteralException;
 import typeset.io.exceptions.InvalidNodeException;
 import typeset.io.exceptions.InvalidPathException;
 import typeset.io.exceptions.TooComplexExpression;
@@ -139,11 +140,54 @@ public class TestGenerator {
 				System.out.println("Error parsing spec file : " + sf);
 			}
 		}
+		
 		return specList;
 	}
 
 	private boolean isValidSpec(Spec spec) {
-		// TODO implement spec validity checking here
+		// check if pre-condition is valid
+		State given = spec.getGiven();
+		
+		//this will throw an error if invalid screen provided
+		graphGenerator.getNodeByKey(given.getScreen());
+		
+		if (given.getParsedAssertion() != null) {
+			for (Clause cls : given.getParsedAssertion().getclauses()) {
+				for (Literal ltl : cls.getLiterals()) {
+					if(!graphGenerator.isValidAction(ltl.getNode(), ltl.getAction())){
+						throw new InvalidLiteralException(
+								"The action " + ltl.getAction() + " is not defined for " + ltl.getNode());
+					}
+
+				}
+			}
+
+		}
+		
+		
+		// check is actions is valid
+		
+		
+		// check if post condition is valid
+		State then = spec.getThen();
+		
+		//this will throw an error if invalid screen provided
+		graphGenerator.getNodeByKey(then.getScreen());
+		
+		if (then.getParsedAssertion() != null) {
+			for (Clause cls : then.getParsedAssertion().getclauses()) {
+				for (Literal ltl : cls.getLiterals()) {
+					if(!graphGenerator.isValidAction(ltl.getNode(), ltl.getAction())){
+						throw new InvalidLiteralException(
+								"The action " + ltl.getAction() + " is not defined for " + ltl.getNode());
+					}
+
+				}
+			}
+
+		}
+
+		
 		return true;
 	}
 
