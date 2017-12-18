@@ -43,6 +43,7 @@ import typeset.io.model.assertions.Clause;
 import typeset.io.model.assertions.ExplicitAssertion;
 import typeset.io.model.assertions.Literal;
 import typeset.io.model.spec.*;
+import typeset.io.readers.ConfigReader;
 import typeset.io.readers.SpecReader;
 
 public class TestGenerator {
@@ -65,11 +66,11 @@ public class TestGenerator {
 	private int MAX_LENGTH = 25;
 
 	public TestGenerator(DefaultDirectedGraph<GraphNode, DefaultEdge> graph, GraphGenerator graphGenerator,
-			ModelGenerator classGenerator, String inputDir, String outputDir) {
+			ModelGenerator classGenerator) {
 		this.graph = graph;
 		this.graphGenerator = graphGenerator;
-		this.inputDir = inputDir;
-		this.outputDir = outputDir;
+		this.inputDir = ConfigReader.inputDir;
+		this.outputDir = ConfigReader.outputDir;
 		this.classGenerator = classGenerator;
 		this.specFiles = new TreeSet<String>();
 		this.specList = new ArrayList<Spec>();

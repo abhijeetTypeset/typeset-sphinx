@@ -18,13 +18,13 @@ public class ModelReader {
 	/**
 	 * Read.
 	 *
-	 * @param inputDir the input dir
+	 * @param inputDir the input directory
 	 * @return the model
 	 * @throws IOException Signals that an I/O exception has occurred.
 	 */
-	public static Model read(String inputDir) throws IOException {
+	public static Model read() throws IOException {
 
-		String modelFile = inputDir + File.separator + "model.yml";
+		String modelFile = ConfigReader.inputDir + File.separator + "model.yml";
 		Yaml yaml = new Yaml();
 		try (InputStream in = Files.newInputStream(Paths.get(modelFile))) {
 			Model model = yaml.loadAs(in, Model.class);

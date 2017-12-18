@@ -41,6 +41,7 @@ import typeset.io.model.Widget;
 import typeset.io.model.assertions.Clause;
 import typeset.io.model.assertions.ExplicitAssertion;
 import typeset.io.model.assertions.Literal;
+import typeset.io.readers.ConfigReader;
 
 /**
  * The Class GraphGenerator. 
@@ -75,9 +76,9 @@ public class GraphGenerator {
 	 * @param model the model
 	 * @param targetDir the target dir
 	 */
-	public GraphGenerator(Model model, String targetDir) {
+	public GraphGenerator(Model model) {
 		this.model = model;
-		this.targetDir = targetDir;
+		this.targetDir = ConfigReader.outputDir;
 	}
 
 	/**

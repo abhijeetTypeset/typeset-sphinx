@@ -19,6 +19,7 @@ import org.w3c.dom.Element;
 
 import typeset.io.generators.util.GeneratorUtilities;
 import typeset.io.model.spec.Spec;
+import typeset.io.readers.ConfigReader;
 
 /**
  * The Class TestNGGenerator.
@@ -46,8 +47,8 @@ public class TestNGGenerator {
 	 * @param projectName the project name
 	 * @param homePage the home page
 	 */
-	public TestNGGenerator(String outputDir, List<Spec> specList, String projectName, String homePage) {
-		this.outputDir = outputDir;
+	public TestNGGenerator(List<Spec> specList, String projectName, String homePage) {
+		this.outputDir = ConfigReader.outputDir;
 		this.projectName = projectName;
 		this.homePage = homePage;
 		this.specList = specList;

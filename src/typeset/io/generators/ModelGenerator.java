@@ -25,6 +25,7 @@ import typeset.io.exceptions.InconsistentGraphException;
 import typeset.io.generators.util.GeneratorUtilities;
 import typeset.io.model.GraphNode;
 import typeset.io.model.NodeType;
+import typeset.io.readers.ConfigReader;
 
 /**
  * The Class ModelGenerator.
@@ -53,9 +54,9 @@ public class ModelGenerator {
 	 * @param tgraph the tgraph
 	 * @param outputDir the output dir
 	 */
-	public ModelGenerator(DefaultDirectedGraph<GraphNode, DefaultEdge> tgraph, String outputDir) {
+	public ModelGenerator(DefaultDirectedGraph<GraphNode, DefaultEdge> tgraph) {
 		this.tgraph = tgraph;
-		this.outputDir = outputDir;
+		this.outputDir = ConfigReader.outputDir;
 
 	}
 
