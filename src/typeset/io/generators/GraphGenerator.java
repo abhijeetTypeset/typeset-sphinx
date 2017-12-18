@@ -577,7 +577,6 @@ public class GraphGenerator {
 				node.addImplicitAssertion(ConfigReader.intermImplictFunc.get(0));
 			}
 
-			// TODO: set from configs
 			if (node.getNodeType() == NodeType.CONTROL && node.getAction_type().contains("type")) {
 				for (String funcName : ConfigReader.controlTypeImplictFunc) {
 					node.addImplicitAssertion(funcName);
@@ -593,10 +592,6 @@ public class GraphGenerator {
 	 */
 	public void consistencyCheck() {
 
-		// TODO: check if it is consistent
-
-		// 2. Referencing of non-existing nodes not allowed
-		// 3. Nodes must have respective properties initialized
 		// 4. A control can have only one parent
 		// 5. A control can only lead to one location
 
@@ -604,11 +599,39 @@ public class GraphGenerator {
 		Set<GraphNode> allNodes = graph.vertexSet();
 		for (GraphNode node : allNodes) {
 			GraphPath<GraphNode, DefaultEdge> path = DijkstraShortestPath.findPathBetween(graph, rootNode, node);
-			if (path == null || path.getLength() <= 0) {
-				System.out.println("No path between " + rootNode + " and " + node + " is " + path);
-				throw new InvalidModelException(node.toString()+" is isolated");
-			}
 
+			if (path == null) {
+				System.out.println("No path between " + rootNode + " and " + node + " is " + path);
+				throw new InvalidModelException(node.toString() + " is isolated");
+			}
+		}
+
+		// 2. Nodes must have respective properties initialized
+		for (GraphNode node : allNodes) {
+			
+			// check urls
+			if (node.getNodeType() == NodeType.PAGE) {
+				if (node.getUrl() == null) {
+					throw new InvalidModelException(node.toString() + " has no url assigned");
+				}
+			}
+			
+			// check ids
+			// TODO: enable when all Ids are available
+			// if (node.getNodeType() != NodeType.PAGE) {
+			// if (node.getId() == null || node.getId().get("by") == null ||
+			// node.getId().get("locator") == null) {
+			// throw new InvalidModelException(node.toString() + " has no id assigned, [type
+			// "+node.getNodeType()+"]");
+			// }
+			// }
+			
+			// check default data
+			if (node.getNodeType() == NodeType.CONTROL && node.getAction_type().contains("type")) {
+				if (node.getAction_data() == null) {
+					throw new InvalidModelException(node.toString() + " has no default data assigned");
+				}
+			}
 		}
 
 	}
