@@ -539,18 +539,16 @@ public class GraphGenerator {
 		Set<GraphNode> allNodes = graph.vertexSet();
 		for (GraphNode node : allNodes) {
 			if (node.getNodeType() == NodeType.PAGE) {
-				node.addImplicitAssertion("atPage");
+				node.addImplicitAssertion(ConfigReader.pageImplictFunc.get(0));
 			} else {
-				node.addImplicitAssertion("canSee");
+				node.addImplicitAssertion(ConfigReader.intermImplictFunc.get(0));
 			}
 
 			// TODO: set from configs
 			if (node.getNodeType() == NodeType.CONTROL && node.getAction_type().contains("type")) {
-				node.addImplicitAssertion("contains");
-				node.addImplicitAssertion("equals");
-				node.addImplicitAssertion("startsWith");
-				node.addImplicitAssertion("endsWith");
-				node.addImplicitAssertion("empty");
+				for(String funcName: ConfigReader.controlTypeImplictFunc) {
+					node.addImplicitAssertion(funcName);
+				}
 			}
 			System.out.println("Node " + node + " has assertions : " + node.getImplictAssertions());
 		}
