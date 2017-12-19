@@ -37,6 +37,7 @@ import com.sun.codemodel.JVar;
 import typeset.io.exceptions.InvalidLiteralException;
 import typeset.io.exceptions.InvalidNodeException;
 import typeset.io.exceptions.InvalidPathException;
+import typeset.io.exceptions.InvalidStackStateException;
 import typeset.io.exceptions.TooComplexExpression;
 import typeset.io.generators.ds.ScaffolingData;
 import typeset.io.generators.util.GeneratorUtilities;
@@ -379,6 +380,23 @@ public class TestGenerator {
 			GraphNode popedNode = stack.pop();
 			logger.info("Popped " + popedNode);
 		}
+		if(ConfigReader.debugMode) {
+			checkStackState();
+		}
+	}
+
+	private void checkStackState() {
+		logger.debug("running in debug mode, checking stack");
+		int lastSeen = -1;
+		for(GraphNode node: stack) {
+			int current = GeneratorUtilities.getNodeType(node.getNodeType());
+			if(lastSeen >= current) {
+				throw new InvalidStackStateException();
+			}else {
+				lastSeen = current;
+			}
+		}
+		
 	}
 
 	private void setActive(GraphNode graphNode) {
