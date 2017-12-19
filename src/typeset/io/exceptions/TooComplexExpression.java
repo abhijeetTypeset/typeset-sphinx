@@ -1,10 +1,14 @@
 package typeset.io.exceptions;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 /**
  * The Class TooComplexExpression.
  */
 public class TooComplexExpression extends RuntimeException {
-	
+	private static final Logger logger = LogManager.getLogger("TooComplexExpression");
+
 	/**
 	 * 
 	 */

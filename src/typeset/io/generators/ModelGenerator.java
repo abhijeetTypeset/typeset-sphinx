@@ -7,6 +7,8 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.jgrapht.graph.DefaultDirectedGraph;
 import org.jgrapht.graph.DefaultEdge;
 
@@ -32,7 +34,8 @@ import typeset.io.readers.ConfigReader;
  * Generate Java Classes representing product model from the graph model
  */
 public class ModelGenerator {
-	
+	private static final Logger logger = LogManager.getLogger("ModelGenerator");
+
 	/** The tgraph. */
 	private DefaultDirectedGraph<GraphNode, DefaultEdge> tgraph;
 	
@@ -69,6 +72,7 @@ public class ModelGenerator {
 	public void generateClasses() throws IOException, JClassAlreadyExistsException {
 
 		if (tgraph == null) {
+			logger.error("Cannot proceed with a null graph");
 			throw new InconsistentGraphException("Cannot proceed with a null graph");
 		}
 
@@ -77,7 +81,7 @@ public class ModelGenerator {
 		generateAbstractClasses();
 
 		// get all the nodes
-		System.out.println("Generating classes : ");
+		logger.info("Generating classes : ");
 
 		// get all the nodes
 		Set<GraphNode> allNodes = tgraph.vertexSet();
@@ -189,7 +193,7 @@ public class ModelGenerator {
 		String baseDirStructure = "res" + File.separator + "baseDirStructure";
 
 		FileUtils.copyDirectory(new File(baseDirStructure), new File(outputDir));
-		System.out.println("Copying base directory structure from " + baseDirStructure + " to " + outputDir);
+		logger.info("Copying base directory structure from " + baseDirStructure + " to " + outputDir);
 	}
 
 	/**
@@ -200,7 +204,7 @@ public class ModelGenerator {
 	 * @throws IOException Signals that an I/O exception has occurred.
 	 */
 	private void generateClassFile(GraphNode gnode) throws JClassAlreadyExistsException, IOException {
-		System.out.println("===| Generated class for " + gnode);
+		logger.info("===| Generated class for " + gnode);
 		JCodeModel cm = new JCodeModel();
 		String packageName = "model" + "." + gnode.getNodeType() + "s";
 		String className = packageName + "." + GeneratorUtilities.firstLetterCaptial(gnode.getName());
@@ -272,7 +276,7 @@ public class ModelGenerator {
 					continue;
 				}
 
-				System.out.println("target node " + targetNode);
+				logger.info("target node " + targetNode);
 				JDefinedClass exitingClassNode = nodeClassMap.get(targetNode);
 				JFieldVar field = definedClass.field(JMod.PRIVATE, exitingClassNode, "var" + targetNode.getName());
 				JExpression init = JExpr._new(exitingClassNode);
@@ -286,7 +290,7 @@ public class ModelGenerator {
 
 			// TODO: add missing variables
 			for (GraphNode noEdgeNode : gnode.getNoEdges()) {
-				System.out.println("to add edges : " + noEdgeNode.getName());
+				logger.info("to add edges : " + noEdgeNode.getName());
 				JDefinedClass exitingClassNode = nodeClassMap.get(noEdgeNode);
 				JFieldVar field = definedClass.field(JMod.PRIVATE, exitingClassNode, "var" + noEdgeNode.getName());
 				JExpression init = JExpr._new(exitingClassNode);
@@ -303,7 +307,7 @@ public class ModelGenerator {
 
 		String filepath = outputDir + File.separator + "FlyPaper" + File.separator + "src" + File.separator + "main"
 				+ File.separator + "java";
-		// System.out.println("writing file to "+filepath);
+		// logger.info("writing file to "+filepath);
 		File file = new File(filepath);
 		file.mkdirs();
 		cm.build(file);

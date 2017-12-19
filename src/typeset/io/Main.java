@@ -3,9 +3,7 @@ package typeset.io;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.TransformerException;
@@ -18,9 +16,10 @@ import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.io.FileUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.jgrapht.graph.DefaultDirectedGraph;
 import org.jgrapht.graph.DefaultEdge;
-
 import com.sun.codemodel.JClassAlreadyExistsException;
 
 import typeset.io.generators.ModelGenerator;
@@ -36,6 +35,7 @@ import typeset.io.readers.ConfigReader;
 import typeset.io.readers.ModelReader;
 
 public class Main {
+	private static final Logger logger = LogManager.getLogger("Log");
 
 	public static void main(String[] args) throws IOException, IllegalAccessException, InvocationTargetException,
 			JClassAlreadyExistsException, ParserConfigurationException, TransformerException {
@@ -43,6 +43,7 @@ public class Main {
 		// get path to config file
 		String configFile = getParameters(args);
 		if (configFile == null || !new File(configFile).isFile()) {
+			logger.error("Config file invalid");
 			throw new InvalidConfigException("Config file invalid");
 		}
 
@@ -62,12 +63,12 @@ public class Main {
 
 		// adding implicit assertions
 		graphGenerator.addImplicitAssertions();
-		
+
 		// consistency checks on the graph
 		graphGenerator.consistencyCheck();
 
 		if (!ConfigReader.generateClasses) {
-			System.out.println("Stopping after graph generation. Classes will be not generated");
+			logger.info("Stopping after graph generation. Classes will be not generated");
 			System.exit(0);
 		}
 
@@ -88,6 +89,7 @@ public class Main {
 
 	private static String getParameters(String[] args) {
 		Options options = new Options();
+		logger.debug("getting parameters");
 
 		Option input = new Option("c", "config", true, "config file");
 		input.setRequired(true);
@@ -100,7 +102,7 @@ public class Main {
 		try {
 			cmd = parser.parse(options, args);
 		} catch (ParseException e) {
-			System.out.println(e.getMessage());
+			logger.info(e.getMessage());
 			formatter.printHelp("Sphinx", options);
 			System.exit(0);
 			return null;
@@ -110,10 +112,12 @@ public class Main {
 	}
 
 	public static void cleanOutputDir() {
+		logger.debug("Cleaning output directory");
 		// clean the output directory
 		try {
 			FileUtils.deleteDirectory(new File(ConfigReader.outputDir));
 		} catch (Exception e) {
+			logger.debug("Error in cleaning directory");
 
 		}
 	}

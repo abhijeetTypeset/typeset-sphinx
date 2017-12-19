@@ -1,10 +1,14 @@
 package typeset.io.exceptions;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 /**
  * The Class InvalidModelException.
  */
 public class InvalidModelException extends RuntimeException{
-	 
+	private static final Logger logger = LogManager.getLogger("InvalidModelException");
+
  	/**
 	 * 
 	 */

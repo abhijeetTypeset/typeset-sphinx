@@ -12,6 +12,8 @@ import java.util.Stack;
 import java.util.TreeSet;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.jgrapht.GraphPath;
 import org.jgrapht.alg.shortestpath.AllDirectedPaths;
 import org.jgrapht.graph.DefaultDirectedGraph;
@@ -63,6 +65,7 @@ public class TestGenerator {
 	private JFieldVar activePageVariable = null;
 	private Map<String, GraphNode> usedPages;
 	private AllDirectedPaths<GraphNode, DefaultEdge> allDirectedPath;
+	private static final Logger logger = LogManager.getLogger("TestGenerator");
 
 	// TODO: get this some other way
 	private int MAX_LENGTH = 25;
@@ -82,25 +85,25 @@ public class TestGenerator {
 	public void parseSpecFile(String filename) {
 		File file = new File(filename);
 		if (!file.exists()) {
-			System.out.println("Spec file " + filename + " does not exist, skipping.");
+			logger.info("Spec file " + filename + " does not exist, skipping.");
 		}
 	}
 
 	public void getSpecFiles() {
 		String specDir = inputDir + File.separator + "specs";
-		System.out.println(specDir);
+		logger.info(specDir);
 		File folder = new File(specDir);
 		for (final File file : folder.listFiles()) {
 			if (file.isFile()) {
 				if (file.getAbsolutePath().endsWith(".yml")) {
-					System.out.println(file.getName() + " : " + file.getAbsolutePath());
+					logger.info(file.getName() + " : " + file.getAbsolutePath());
 					specFiles.add(file.getAbsolutePath());
 				}
 			} else {
-				System.out.println("sub-directories not monitored at the moment");
+				logger.info("sub-directories not monitored at the moment");
 			}
 		}
-		System.out.println("Found " + specFiles.size() + " spec files");
+		logger.info("Found " + specFiles.size() + " spec files");
 	}
 
 	public List<GraphPath<GraphNode, DefaultEdge>> getPaths(GraphNode sNode, GraphNode dNode, int maxLength) {
@@ -130,14 +133,14 @@ public class TestGenerator {
 				spec.getGiven().setParsedAssertion(eassertGiven);
 
 				if (isValidSpec(spec)) {
-					System.out.println("Added spec : " + spec);
+					logger.info("Added spec : " + spec);
 					specList.add(spec);
 				} else {
-					System.out.println("Invalid spec " + spec);
+					logger.info("Invalid spec " + spec);
 				}
 
 			} catch (IOException e) {
-				System.out.println("Error parsing spec file : " + sf);
+				logger.info("Error parsing spec file : " + sf);
 			}
 		}
 		
@@ -198,12 +201,12 @@ public class TestGenerator {
 		int minLength = 3;
 
 		for (int pathLength = minLength; pathLength <= MAX_LENGTH; pathLength++) {
-			System.out.println("Checking paths for length " + pathLength);
+			logger.info("Checking paths for length " + pathLength);
 			List<GraphPath<GraphNode, DefaultEdge>> paths = getPaths(rootNode, startNode, pathLength);
 			if (paths != null) {
 
 				for (GraphPath<GraphNode, DefaultEdge> path : paths) {
-					// System.out.println(path.getLength()+" paths "+path);
+					// logger.info(path.getLength()+" paths "+path);
 					if (isPathViable(path, spec)) {
 						return path;
 					}
@@ -239,9 +242,9 @@ public class TestGenerator {
 
 			if (srcNode.getNodeType() == NodeType.CONTROL) {
 				ExplicitAssertion precondition = srcNode.getParsedPreCondition();
-				// System.out.println("Constrain on " + srcNode + " ; " + precondition);
+				// logger.info("Constrain on " + srcNode + " ; " + precondition);
 				if (!satisfiesPrecondition(nodesToHere, precondition)) {
-					// System.out.println(path + " does not satisfies precondition on node " +
+					// logger.info(path + " does not satisfies precondition on node " +
 					// srcNode);
 					return false;
 				}
@@ -260,7 +263,7 @@ public class TestGenerator {
 
 			GraphNode constrainingNode = precondition.getclauses().get(0).getLiterals().get(0).getNode();
 			if (nodesToHere.contains(constrainingNode)) {
-				System.out.println("Contraint satisfied found " + constrainingNode);
+				logger.info("Contraint satisfied found " + constrainingNode);
 				return true;
 			}
 			return false;
@@ -284,13 +287,13 @@ public class TestGenerator {
 	public void generateTest() throws IOException, JClassAlreadyExistsException {
 		for (Spec spec : specList) {
 			GraphPath<GraphNode, DefaultEdge> path = getFeasiblePath(spec);
-			System.out.println("Resolving spec " + spec);
+			logger.info("Resolving spec " + spec);
 			if (path != null) {
-				System.out.println("Feasible path found " + path);
+				logger.info("Feasible path found " + path);
 				generateClasses(spec, path, spec.getName());
 
 			} else {
-				System.out.println("No feasible path found");
+				logger.info("No feasible path found");
 			}
 
 		}
@@ -300,7 +303,7 @@ public class TestGenerator {
 	private void writeTestToFile() throws IOException {
 		String filepath = outputDir + File.separator + "FlyPaper" + File.separator + "src" + File.separator + "test"
 				+ File.separator + "java";
-		System.out.println("Generating class file " + filepath);
+		logger.info("Generating class file " + filepath);
 
 		File file = new File(filepath);
 		file.mkdirs();
@@ -349,11 +352,11 @@ public class TestGenerator {
 					}
 
 					invoke_element(sdata, actionNode, actionData);
-					System.out.println("Execute " + action_tag + " " + action + " with " + actionData);
+					logger.info("Execute " + action_tag + " " + action + " with " + actionData);
 				} else {
 
 					invoke_element(sdata, actionNode, actionNode.getAction_data());
-					System.out.println("Execute " + action_tag + " " + action);
+					logger.info("Execute " + action_tag + " " + action);
 				}
 
 				// in case action leads to somewhere, update the stack
@@ -374,7 +377,7 @@ public class TestGenerator {
 		while (!stack.isEmpty() && GeneratorUtilities.getNodeType(stack.peek().getNodeType()) >= GeneratorUtilities
 				.getNodeType(nodeType)) {
 			GraphNode popedNode = stack.pop();
-			System.out.println("Popped " + popedNode);
+			logger.info("Popped " + popedNode);
 		}
 	}
 
@@ -395,9 +398,9 @@ public class TestGenerator {
 
 		lightenStack(graphNode.getNodeType());
 
-		System.out.println("Pushed to stack " + graphNode);
+		logger.info("Pushed to stack " + graphNode);
 		stack.push(graphNode);
-		System.out.println("Contents of stack " + stack);
+		logger.info("Contents of stack " + stack);
 	}
 
 	private ScaffolingData generatePostCondition(State then) {
@@ -444,7 +447,7 @@ public class TestGenerator {
 	private void generatePostExplicitAssertions(ScaffolingData sdata, ExplicitAssertion parsedEXplicit) {
 
 		Literal literal = parsedEXplicit.getclauses().get(0).getLiterals().get(0);
-		System.out.println("explicit assertion :  " + literal);
+		logger.info("explicit assertion :  " + literal);
 
 		assert_element(sdata, literal.getNode(), literal.getAction(), literal.getTextData());
 
@@ -461,7 +464,7 @@ public class TestGenerator {
 			String specAssertData) {
 		JInvocation assertStatement = sdata.getBlock().invoke(sdata.getAssertVar(), "assertTrue");
 
-		System.out.println("asserting for element " + activeNode);
+		logger.info("asserting for element " + activeNode);
 		JExpression argumentExpr = null;
 		boolean flag = true;
 
@@ -474,7 +477,7 @@ public class TestGenerator {
 			} else {
 				argumentExpr = JExpr.invoke(argumentExpr, getterName);
 			}
-			System.out.println("Obtained from the stack " + stackNode + " getter name " + getterName);
+			logger.info("Obtained from the stack " + stackNode + " getter name " + getterName);
 
 		}
 		String getterName = GeneratorUtilities.getGetterName(activeNode.getName());
@@ -548,7 +551,7 @@ public class TestGenerator {
 			invokeStatement.arg(argumentExpr);
 		}
 
-		System.out.println("Invoked " + activeNode);
+		logger.info("Invoked " + activeNode);
 		if (activeNode.getWait_time() != null) {
 			generateWait(sdata, activeNode.getWait_time());
 		}
@@ -592,11 +595,11 @@ public class TestGenerator {
 		String lastScreen = spec.getThen().getScreen();
 		String lastPage = graphGenerator.getScreenToPage().get(lastScreen);
 
-		System.out.println("last page node is " + lastPage);
+		logger.info("last page node is " + lastPage);
 		usedPages.put(graphGenerator.getNodeByKey(lastScreen).getName(), graphGenerator.getNodeByKey(lastPage));
 
 		for (String screen : usedPages.keySet()) {
-			System.out.println("used screen " + screen + " used page " + usedPages.get(screen));
+			logger.info("used screen " + screen + " used page " + usedPages.get(screen));
 		}
 
 		return usedPages;
@@ -683,7 +686,7 @@ public class TestGenerator {
 		if (path == null) {
 			throw new InvalidPathException();
 		}
-		System.out.println("===| Generated class for " + GeneratorUtilities.firstLetterCaptial(testName));
+		logger.info("===| Generated class for " + GeneratorUtilities.firstLetterCaptial(testName));
 		this.codeModel = new JCodeModel();
 		String packageName = "tests";
 		String className = packageName + "." + GeneratorUtilities.firstLetterCaptial(testName);
@@ -703,23 +706,23 @@ public class TestGenerator {
 		ScaffolingData givenSdata = generatePrecondition(path);
 
 		call(sdata, givenSdata);
-		System.out.println("=========== pre condtion generated ===========");
+		logger.info("=========== pre condtion generated ===========");
 
 		// generate WHEN
 		ScaffolingData whenSdata = generateSpecActions(spec.getWhen());
 
 		call(sdata, whenSdata);
-		System.out.println("=========== action generated ===========");
+		logger.info("=========== action generated ===========");
 
 		// generate WAIT
 		generateWait(sdata, spec.getWait());
-		System.out.println("=========== wait generated ===========");
+		logger.info("=========== wait generated ===========");
 
 		// generate THEN
 		ScaffolingData thenSdata = generatePostCondition(spec.getThen());
 
 		call(sdata, thenSdata);
-		System.out.println("=========== post condtion generated ===========");
+		logger.info("=========== post condtion generated ===========");
 
 		writeTestToFile();
 

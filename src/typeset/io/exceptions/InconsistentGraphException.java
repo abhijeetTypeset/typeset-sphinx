@@ -1,5 +1,8 @@
 package typeset.io.exceptions;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 /**
  * The Class InconsistentGraphException.
  */
@@ -9,6 +12,7 @@ public class InconsistentGraphException extends RuntimeException {
 	 * 
 	 */
 	private static final long serialVersionUID = 4488498094809092833L;
+	private static final Logger logger = LogManager.getLogger("InconsistentGraphException");
 
 	/**
 	 * Instantiates a new inconsistent graph exception.

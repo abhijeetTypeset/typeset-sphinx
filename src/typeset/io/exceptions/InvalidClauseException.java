@@ -1,5 +1,7 @@
 package typeset.io.exceptions;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * The Class InvalidClauseException.
@@ -10,6 +12,7 @@ public class InvalidClauseException extends RuntimeException {
 	 * 
 	 */
 	private static final long serialVersionUID = -5459005943556781007L;
+	private static final Logger logger = LogManager.getLogger("InvalidClauseException");
 
 	/**
 	 * Instantiates a new invalid clause exception.

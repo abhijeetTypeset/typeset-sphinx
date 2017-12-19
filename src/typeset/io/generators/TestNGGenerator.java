@@ -13,7 +13,8 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
-
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -26,6 +27,7 @@ import typeset.io.readers.ConfigReader;
  * Generates testng xml - used for co-ordinating tests
  */
 public class TestNGGenerator {
+	private static final Logger logger = LogManager.getLogger("TestNGGenerator");
 
 	/** The output dir. */
 	private String outputDir;
@@ -62,7 +64,7 @@ public class TestNGGenerator {
 	 */
 	public void generateXML() throws ParserConfigurationException, TransformerException {
 
-		System.out.println("Generating testNG XMl config file");
+		logger.info("Generating testNG XMl config file");
 
 		DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
 		DocumentBuilder docBuilder = docFactory.newDocumentBuilder();

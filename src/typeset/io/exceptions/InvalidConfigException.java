@@ -1,5 +1,7 @@
 package typeset.io.exceptions;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * The Class InvalidConfigException.
@@ -7,7 +9,7 @@ package typeset.io.exceptions;
 public class InvalidConfigException extends RuntimeException {
 	
 
-
+	private static final Logger logger = LogManager.getLogger("InvalidConfigException");
 	/**
 	 * 
 	 */

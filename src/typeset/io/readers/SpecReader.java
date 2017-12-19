@@ -5,6 +5,8 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.yaml.snakeyaml.Yaml;
 
 import typeset.io.model.spec.Spec;
@@ -13,6 +15,7 @@ import typeset.io.model.spec.Spec;
  * The Class for Specification Reader.
  */
 public class SpecReader {
+	private static final Logger logger = LogManager.getLogger("SpecReader");
 
 	/**
 	 * Read.

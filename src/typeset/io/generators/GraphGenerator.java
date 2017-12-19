@@ -13,6 +13,8 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.beanutils.BeanUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.jgrapht.GraphPath;
 
 import org.jgrapht.alg.shortestpath.DijkstraShortestPath;
@@ -45,6 +47,8 @@ import typeset.io.readers.ConfigReader;
  * The Class GraphGenerator. Converts yml model into a graph.
  */
 public class GraphGenerator {
+
+	private static final Logger logger = LogManager.getLogger("GraphGenerator");
 
 	/** The model of the product extracted from yml */
 	private Model model;
@@ -92,7 +96,7 @@ public class GraphGenerator {
 		if (node != null) {
 			return node;
 		}
-
+		logger.error("No such symbol as " + key);
 		throw new InvalidLiteralException("No such symbol as " + key);
 	}
 
@@ -107,7 +111,11 @@ public class GraphGenerator {
 	 */
 	public DefaultDirectedGraph<GraphNode, DefaultEdge> initialize()
 			throws IllegalAccessException, InvocationTargetException {
+
+		logger.debug("Initializing graph");
+
 		if (model == null) {
+			logger.error("model cannot be null");
 			throw new InvalidModelException("model cannot be null");
 		}
 		graph = new DefaultDirectedGraph<>(DefaultEdge.class);
@@ -116,39 +124,39 @@ public class GraphGenerator {
 		screenToPage = new HashMap<>();
 
 		// add all the vertices
-
+		logger.debug("Adding vertices");
 		for (String c : model.getControls().keySet()) {
-			System.out.println("Adding control " + c);
+			logger.info("Adding control " + c);
 			GraphNode v = createNewVertex(model.getControls().get(c), NodeType.CONTROL);
 			graph.addVertex(v);
 			addToMap(c, v);
 		}
 		for (String w : model.getWidgets().keySet()) {
-			System.out.println("Adding widget " + w);
+			logger.info("Adding widget " + w);
 			GraphNode v = createNewVertex(model.getWidgets().get(w), NodeType.WIDGET);
 			graph.addVertex(v);
 			nameNodeMap.put(w, v);
 		}
 		for (String a : model.getApps().keySet()) {
-			System.out.println("Adding app " + a);
+			logger.info("Adding app " + a);
 			GraphNode v = createNewVertex(model.getApps().get(a), NodeType.APP);
 			graph.addVertex(v);
 			addToMap(a, v);
 		}
 		for (String s : model.getScreens().keySet()) {
-			System.out.println("Adding screen " + s);
+			logger.info("Adding screen " + s);
 			GraphNode v = createNewVertex(model.getScreens().get(s), NodeType.SCREEN);
 			graph.addVertex(v);
 			addToMap(s, v);
 		}
 		for (String p : model.getPages().keySet()) {
-			System.out.println("Adding page " + p);
+			logger.info("Adding page " + p);
 			GraphNode v = createNewVertex(model.getPages().get(p), NodeType.PAGE);
 			graph.addVertex(v);
 			addToMap(p, v);
 		}
 
-		System.out.println("number of vertices : " + graph.vertexSet().size());
+		logger.info("number of vertices : " + graph.vertexSet().size());
 
 		// add the edges
 
@@ -160,7 +168,7 @@ public class GraphGenerator {
 			String leadsto = controlNode.getLeadsto();
 			if (leadsto != null) {
 				GraphNode screenNode = getNodeByKey(leadsto);
-				System.out.println("Adding edge from control " + controlNode + " to screen " + screenNode);
+				logger.info("Adding edge from control " + controlNode + " to screen " + screenNode);
 				graph.addEdge(controlNode, screenNode);
 			} else {
 				// add edge back to parent
@@ -171,11 +179,11 @@ public class GraphGenerator {
 		for (String w : model.getWidgets().keySet()) {
 			GraphNode widgetNode = getNodeByKey(w);
 			List<String> controlList = widgetNode.getControls();
-			System.out.println("Widget " + w + " ; " + controlList);
+			logger.info("Widget " + w + " ; " + controlList);
 			if (controlList != null) {
 				for (String c : controlList) {
 					GraphNode controlNode = getNodeByKey(c);
-					System.out.println("Adding edge from widget " + widgetNode + " to control " + controlNode);
+					logger.info("Adding edge from widget " + widgetNode + " to control " + controlNode);
 					graph.addEdge(widgetNode, controlNode);
 				}
 			}
@@ -188,7 +196,7 @@ public class GraphGenerator {
 			if (widgetList != null) {
 				for (String w : widgetList) {
 					GraphNode widgetNode = getNodeByKey(w);
-					System.out.println("Adding edge from app " + appNode + " to widget " + appNode);
+					logger.info("Adding edge from app " + appNode + " to widget " + appNode);
 					graph.addEdge(appNode, widgetNode);
 				}
 			}
@@ -196,7 +204,7 @@ public class GraphGenerator {
 			if (controlList != null) {
 				for (String c : controlList) {
 					GraphNode controlNode = getNodeByKey(c);
-					System.out.println("Adding edge from app " + appNode + " to control " + controlNode);
+					logger.info("Adding edge from app " + appNode + " to control " + controlNode);
 					graph.addEdge(appNode, controlNode);
 				}
 			}
@@ -212,7 +220,7 @@ public class GraphGenerator {
 				for (String a : appList) {
 					GraphNode appNode = getNodeByKey(a);
 					if (doesNotHaveIncomingEdges(appNode)) {
-						System.out.println("Adding edge from screen " + screenNode + " to app " + appNode);
+						logger.info("Adding edge from screen " + screenNode + " to app " + appNode);
 						graph.addEdge(screenNode, appNode);
 					} else {
 						screenNode.addNoEdges(appNode);
@@ -224,7 +232,7 @@ public class GraphGenerator {
 				for (String w : widgetList) {
 					GraphNode widgetNode = getNodeByKey(w);
 					if (doesNotHaveIncomingEdges(widgetNode)) {
-						System.out.println("Adding edge from screen " + screenNode + " to widget " + widgetNode);
+						logger.info("Adding edge from screen " + screenNode + " to widget " + widgetNode);
 						graph.addEdge(screenNode, widgetNode);
 					} else {
 						screenNode.addNoEdges(widgetNode);
@@ -236,7 +244,7 @@ public class GraphGenerator {
 				for (String c : controlList) {
 					GraphNode controlNode = getNodeByKey(c);
 					if (doesNotHaveIncomingEdges(controlNode)) {
-						System.out.println("Adding edge from screen " + screenNode + " to control " + controlNode);
+						logger.info("Adding edge from screen " + screenNode + " to control " + controlNode);
 						graph.addEdge(screenNode, controlNode);
 					} else {
 						screenNode.addNoEdges(controlNode);
@@ -260,7 +268,7 @@ public class GraphGenerator {
 				for (String s : screenList) {
 					GraphNode screenNode = getNodeByKey(s);
 					if (doesNotHaveIncomingEdges(screenNode)) {
-						System.out.println("Adding edge from page " + pageNode + " to screen " + screenNode);
+						logger.info("Adding edge from page " + pageNode + " to screen " + screenNode);
 						graph.addEdge(pageNode, screenNode);
 					} else {
 						pageNode.addNoEdges(screenNode);
@@ -273,7 +281,7 @@ public class GraphGenerator {
 				for (String a : appList) {
 					GraphNode appNode = getNodeByKey(a);
 					if (doesNotHaveIncomingEdges(appNode)) {
-						System.out.println("Adding edge from page " + pageNode + " to app " + appNode);
+						logger.info("Adding edge from page " + pageNode + " to app " + appNode);
 						graph.addEdge(pageNode, appNode);
 					} else {
 						pageNode.addNoEdges(appNode);
@@ -285,7 +293,7 @@ public class GraphGenerator {
 				for (String w : widgetList) {
 					GraphNode widgetNode = getNodeByKey(w);
 					if (doesNotHaveIncomingEdges(widgetNode)) {
-						System.out.println("Adding edge from page " + pageNode + " to widget " + widgetNode);
+						logger.info("Adding edge from page " + pageNode + " to widget " + widgetNode);
 						graph.addEdge(pageNode, widgetNode);
 					} else {
 						pageNode.addNoEdges(widgetNode);
@@ -297,7 +305,7 @@ public class GraphGenerator {
 				for (String c : controlList) {
 					GraphNode controlNode = getNodeByKey(c);
 					if (doesNotHaveIncomingEdges(controlNode)) {
-						System.out.println("Adding edge from page " + pageNode + " to control " + controlNode);
+						logger.info("Adding edge from page " + pageNode + " to control " + controlNode);
 						graph.addEdge(pageNode, controlNode);
 					} else {
 						pageNode.addNoEdges(controlNode);
@@ -315,14 +323,13 @@ public class GraphGenerator {
 			// note that the edges here should not be more that one
 
 			for (DefaultEdge edge : edges) {
-				System.out.println("Incoming edges to control " + controlNode + " from " + graph.getEdgeSource(edge));
+				logger.info("Incoming edges to control " + controlNode + " from " + graph.getEdgeSource(edge));
 				graph.addEdge(controlNode, graph.getEdgeSource(edge));
 			}
 
 		}
 
 		// resolve preconditions
-
 		resolvePreconditions();
 
 		return graph;
@@ -410,7 +417,7 @@ public class GraphGenerator {
 		if (precodtionString == null) {
 			return null;
 		}
-		// System.out.println("pre-condition " + precodtionString);
+		// logger.info("pre-condition " + precodtionString);
 		ExplicitAssertion explicitAssertion = new ExplicitAssertion();
 		for (String precs : precodtionString) {
 			Clause clause = parseClause(precs);
@@ -430,7 +437,7 @@ public class GraphGenerator {
 
 			ExplicitAssertion parsedPrecondition = parsePrecondition(precondtionString);
 			node.setParsedPreCondition(parsedPrecondition);
-			System.out.println(parsedPrecondition);
+			logger.info(parsedPrecondition);
 		}
 	}
 
@@ -597,7 +604,7 @@ public class GraphGenerator {
 					node.addImplicitAssertion(funcName);
 				}
 			}
-			System.out.println("Node " + node + " has assertions : " + node.getImplictAssertions());
+			logger.info("Node " + node + " has assertions : " + node.getImplictAssertions());
 		}
 
 	}
@@ -613,7 +620,7 @@ public class GraphGenerator {
 			GraphPath<GraphNode, DefaultEdge> path = DijkstraShortestPath.findPathBetween(graph, rootNode, node);
 
 			if (path == null) {
-				System.out.println("No path between " + rootNode + " and " + node + " is " + path);
+				logger.error("No path between " + rootNode + " and " + node + " is " + path);
 				throw new InvalidModelException(node.toString() + " is isolated");
 			}
 		}
@@ -624,6 +631,7 @@ public class GraphGenerator {
 			// check urls
 			if (node.getNodeType() == NodeType.PAGE) {
 				if (node.getUrl() == null) {
+					logger.error(node.toString() + " has no url assigned");
 					throw new InvalidModelException(node.toString() + " has no url assigned");
 				}
 			}
@@ -641,6 +649,7 @@ public class GraphGenerator {
 			// check default data
 			if (node.getNodeType() == NodeType.CONTROL && node.getAction_type().contains("type")) {
 				if (node.getAction_data() == null) {
+					logger.error(node.toString() + " has no default data assigned");
 					throw new InvalidModelException(node.toString() + " has no default data assigned");
 				}
 			}
@@ -654,6 +663,7 @@ public class GraphGenerator {
 					for (Literal ltl : cls.getLiterals()) {
 
 						if (!isValidAction(ltl.getNode(), ltl.getAction())) {
+							logger.error("The action " + ltl.getAction() + " is not defined for " + ltl.getNode());
 							throw new InvalidLiteralException(
 									"The action " + ltl.getAction() + " is not defined for " + ltl.getNode());
 						}
@@ -673,30 +683,32 @@ public class GraphGenerator {
 	 *             Signals that an I/O exception has occurred.
 	 */
 	public void toDot() throws IOException {
+		logger.debug("Generating dot file ");
 
 		String graphOutputDir = targetDir + File.separator + "graphs";
 		File file = new File(graphOutputDir);
 		file.mkdirs();
 
 		String graphFilePath = graphOutputDir + File.separator + "graph.dot";
+		
 		ComponentNameProvider<GraphNode> vertexIDProvider = new IntegerComponentNameProvider<GraphNode>();
 		ComponentNameProvider<GraphNode> vertexLabelProvider = new StringComponentNameProvider<GraphNode>();
 
 		DOTExporter<GraphNode, DefaultEdge> exporter = new DOTExporter<GraphNode, DefaultEdge>(vertexIDProvider,
 				vertexLabelProvider, null);
 
-		System.out.println("Writing graph to file " + graphFilePath);
+		logger.info("Writing graph to file " + graphFilePath);
 		exporter.exportGraph(graph, new FileWriter(graphFilePath));
 
 		try {
 			String pngFilePath = graphOutputDir + File.separator + "graph.png";
 
 			String[] command = { "dot", "-Tpng", graphFilePath, "-o", pngFilePath };
-			System.out.println("Png conversion  : " + Arrays.toString(command));
+			logger.info("Png conversion  : " + Arrays.toString(command));
 			ProcessBuilder probuilder = new ProcessBuilder(command);
 			probuilder.start();
 		} catch (Exception e) {
-			System.out.println("Error while generating the graph png");
+			logger.error("Error while generating the graph png");
 		}
 
 	}

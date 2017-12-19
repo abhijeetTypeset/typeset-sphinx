@@ -8,6 +8,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import typeset.io.exceptions.InvalidConfigException;
 
 public class ConfigReader {
@@ -15,12 +18,15 @@ public class ConfigReader {
 	public static String inputDir = null;
 	public static String outputDir = null;
 	public static boolean generateClasses = false;
+	public static boolean debugMode = false;
 	public static List<String> pageImplictFunc = new ArrayList<String>();
 	public static List<String> intermImplictFunc = new ArrayList<String>();
 	public static List<String> controlImplictFunc = new ArrayList<String>();
+	private static final Logger logger = LogManager.getLogger("ConfigReader");
 
 	public static void read(String filename) {
 
+		logger.debug("Reading config file name : "+filename);
 		Properties prop = new Properties();
 		InputStream input = null;
 
@@ -37,17 +43,28 @@ public class ConfigReader {
 			if (generateClassesStr != null && generateClassesStr.toLowerCase().equals("true")) {
 				generateClasses = true;
 			}
+			String debugModeStr = prop.getProperty("debug-mode").trim();
+			if (debugModeStr != null && debugModeStr.toLowerCase().equals("true")) {
+				debugMode = true;
+			}
+			logger.debug("Input directory : "+inputDir);
+			logger.debug("Output directory : "+outputDir);
+			logger.debug("Generate classes : "+generateClasses);
+			logger.debug("Debug mode : "+debugMode);
 
 			if (inputDir != null) {
 				File file = new File(inputDir);
 				if (!file.isDirectory()) {
+					logger.error("Invalid input directory " + inputDir);
 					throw new InvalidConfigException("Invalid input directory " + inputDir);
 				}
 			} else {
+				logger.error("Input directory null");
 				throw new InvalidConfigException("Input directory null");
 			}
 
 			if (outputDir == null) {
+				logger.debug("Input directory null");
 				throw new InvalidConfigException("Input directory null");
 			}
 
@@ -57,6 +74,7 @@ public class ConfigReader {
 				pageImplictFunc.addAll(tempList);
 			}
 			if (pageImplictFunc.size() <= 0) {
+				logger.error("Insufficient number of page assertions provided");
 				throw new InvalidConfigException("Insufficient number of page assertions provided");
 			}
 
@@ -66,6 +84,7 @@ public class ConfigReader {
 				intermImplictFunc.addAll(tempList);
 			}
 			if (intermImplictFunc.size() <= 0) {
+				logger.error("Insufficient number of screen/app/widget assertions provided");
 				throw new InvalidConfigException("Insufficient number of screen/app/widget assertions provided");
 			}
 
@@ -75,6 +94,7 @@ public class ConfigReader {
 				controlImplictFunc.addAll(tempList);
 			}
 			if (controlImplictFunc.size() <= 0) {
+				logger.error("Insufficient number of control assertions provided");
 				throw new InvalidConfigException("Insufficient number of control assertions provided");
 			}
 
