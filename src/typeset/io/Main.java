@@ -3,6 +3,7 @@ package typeset.io;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
+import java.security.spec.InvalidKeySpecException;
 import java.util.List;
 
 import javax.xml.parsers.ParserConfigurationException;
@@ -38,7 +39,7 @@ public class Main {
 	private static final Logger logger = LogManager.getLogger("Log");
 
 	public static void main(String[] args) throws IOException, IllegalAccessException, InvocationTargetException,
-			JClassAlreadyExistsException, ParserConfigurationException, TransformerException {
+			JClassAlreadyExistsException, ParserConfigurationException, TransformerException, InvalidKeySpecException {
 
 		// get path to config file
 		String configFile = getParameters(args);

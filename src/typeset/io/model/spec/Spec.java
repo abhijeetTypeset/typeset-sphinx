@@ -1,5 +1,7 @@
 package typeset.io.model.spec;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 
@@ -22,6 +24,8 @@ public class Spec {
 	
 	/** The name. */
 	private String name;
+	
+	private List<String> post;
 	
 	/**
 	 * Gets the given.
@@ -89,6 +93,7 @@ public class Spec {
 		spec += "\tWhen "+when +"\n";
 		spec += "\tWait "+wait+"\n";
 		spec += "\tThen "+then+"\n";
+		spec += "\tPost "+post+"\n";
 		return spec;
 	}
 
@@ -126,5 +131,13 @@ public class Spec {
 	 */
 	public void setWhen(Map<String, Action> when) {
 		this.when = when;
+	}
+
+	public List<String> getPost() {
+		return post;
+	}
+
+	public void setPost(List<String> postTest) {
+		this.post = postTest;
 	}
 }

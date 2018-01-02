@@ -2,6 +2,7 @@ package typeset.io.generators;
 
 import java.io.File;
 import java.io.IOException;
+import java.security.spec.InvalidKeySpecException;
 import java.util.ArrayList;
 
 import java.util.HashMap;
@@ -37,6 +38,7 @@ import com.sun.codemodel.JVar;
 import typeset.io.exceptions.InvalidLiteralException;
 import typeset.io.exceptions.InvalidNodeException;
 import typeset.io.exceptions.InvalidPathException;
+import typeset.io.exceptions.InvalidPostSpec;
 import typeset.io.exceptions.InvalidStackStateException;
 import typeset.io.exceptions.TooComplexExpression;
 import typeset.io.generators.ds.ScaffolingData;
@@ -49,24 +51,26 @@ import typeset.io.model.assertions.Literal;
 import typeset.io.model.spec.*;
 import typeset.io.readers.ConfigReader;
 import typeset.io.readers.SpecReader;
+import typeset.io.generators.ds.Packet;
 
 public class TestGenerator {
 	private String outputDir;
 	private GraphGenerator graphGenerator;
 	private DefaultDirectedGraph<GraphNode, DefaultEdge> graph;
 	private String inputDir;
-	private Set<String> specFiles;
+
 	private List<Spec> specList;
-	private JCodeModel codeModel;
-	private JDefinedClass definedClass;
+
 	private JFieldRef outVar;
 	private ModelGenerator classGenerator;
-	private Map<GraphNode, JFieldVar> definedPages = new HashMap<>();
-	private Stack<GraphNode> stack = new Stack<GraphNode>();
+	private Map<GraphNode, JFieldVar> definedPages = null;
+	private Stack<GraphNode> stack = null;
 	private JFieldVar activePageVariable = null;
 	private Map<String, GraphNode> usedPages;
 	private AllDirectedPaths<GraphNode, DefaultEdge> allDirectedPath;
 	private static final Logger logger = LogManager.getLogger("TestGenerator");
+	private Map<String, Spec> specMap = new HashMap<String, Spec>();
+	private int specChainCounter = 0;
 
 	// TODO: get this some other way
 	private int MAX_LENGTH = 25;
@@ -78,7 +82,6 @@ public class TestGenerator {
 		this.inputDir = ConfigReader.inputDir;
 		this.outputDir = ConfigReader.outputDir;
 		this.classGenerator = classGenerator;
-		this.specFiles = new TreeSet<String>();
 		this.specList = new ArrayList<Spec>();
 		this.allDirectedPath = new AllDirectedPaths<>(graph);
 	}
@@ -90,7 +93,8 @@ public class TestGenerator {
 		}
 	}
 
-	public void getSpecFiles() {
+	public Map<String, String> getSpecFiles() {
+		Map<String, String> specFiles = new HashMap<>();
 		String specDir = inputDir + File.separator + "specs";
 		logger.info(specDir);
 		File folder = new File(specDir);
@@ -98,13 +102,14 @@ public class TestGenerator {
 			if (file.isFile()) {
 				if (file.getAbsolutePath().endsWith(".yml")) {
 					logger.info(file.getName() + " : " + file.getAbsolutePath());
-					specFiles.add(file.getAbsolutePath());
+					specFiles.put(file.getName(), file.getAbsolutePath());
 				}
 			} else {
 				logger.info("sub-directories not monitored at the moment");
 			}
 		}
 		logger.info("Found " + specFiles.size() + " spec files");
+		return specFiles;
 	}
 
 	public List<GraphPath<GraphNode, DefaultEdge>> getPaths(GraphNode sNode, GraphNode dNode, int maxLength) {
@@ -113,17 +118,18 @@ public class TestGenerator {
 			throw new InvalidNodeException("node null cannot proceed");
 		}
 
-//		AllDirectedPaths<GraphNode, DefaultEdge> allDirectedPath = new AllDirectedPaths<>(graph);
+		// AllDirectedPaths<GraphNode, DefaultEdge> allDirectedPath = new
+		// AllDirectedPaths<>(graph);
 
 		List<GraphPath<GraphNode, DefaultEdge>> paths = allDirectedPath.getAllPaths(sNode, dNode, false, maxLength);
 		return paths;
 
 	}
 
-
 	public List<Spec> getSpecs() {
-		getSpecFiles();
-		for (String sf : specFiles) {
+		Map<String, String> specFiles = getSpecFiles();
+		for (String skey : specFiles.keySet()) {
+			String sf = specFiles.get(skey);
 			try {
 				Spec spec = SpecReader.read(sf);
 
@@ -139,26 +145,26 @@ public class TestGenerator {
 				} else {
 					logger.info("Invalid spec " + spec);
 				}
-
+				specMap.put(skey, spec);
 			} catch (IOException e) {
 				logger.info("Error parsing spec file : " + sf);
 			}
 		}
-		
+
 		return specList;
 	}
 
 	private boolean isValidSpec(Spec spec) {
 		// check if pre-condition is valid
 		State given = spec.getGiven();
-		
-		//this will throw an error if invalid screen provided
+
+		// this will throw an error if invalid screen provided
 		graphGenerator.getNodeByKey(given.getScreen());
-		
+
 		if (given.getParsedAssertion() != null) {
 			for (Clause cls : given.getParsedAssertion().getclauses()) {
 				for (Literal ltl : cls.getLiterals()) {
-					if(!graphGenerator.isValidAction(ltl.getNode(), ltl.getAction())){
+					if (!graphGenerator.isValidAction(ltl.getNode(), ltl.getAction())) {
 						throw new InvalidLiteralException(
 								"The action " + ltl.getAction() + " is not defined for " + ltl.getNode());
 					}
@@ -167,21 +173,19 @@ public class TestGenerator {
 			}
 
 		}
-		
-		
+
 		// check is actions is valid
-		
-		
+
 		// check if post condition is valid
 		State then = spec.getThen();
-		
-		//this will throw an error if invalid screen provided
+
+		// this will throw an error if invalid screen provided
 		graphGenerator.getNodeByKey(then.getScreen());
-		
+
 		if (then.getParsedAssertion() != null) {
 			for (Clause cls : then.getParsedAssertion().getclauses()) {
 				for (Literal ltl : cls.getLiterals()) {
-					if(!graphGenerator.isValidAction(ltl.getNode(), ltl.getAction())){
+					if (!graphGenerator.isValidAction(ltl.getNode(), ltl.getAction())) {
 						throw new InvalidLiteralException(
 								"The action " + ltl.getAction() + " is not defined for " + ltl.getNode());
 					}
@@ -191,7 +195,6 @@ public class TestGenerator {
 
 		}
 
-		
 		return true;
 	}
 
@@ -285,7 +288,7 @@ public class TestGenerator {
 		}
 	}
 
-	public void generateTest() throws IOException, JClassAlreadyExistsException {
+	public void generateTest() throws IOException, JClassAlreadyExistsException, InvalidKeySpecException {
 		for (Spec spec : specList) {
 			GraphPath<GraphNode, DefaultEdge> path = getFeasiblePath(spec);
 			logger.info("Resolving spec " + spec);
@@ -301,30 +304,31 @@ public class TestGenerator {
 
 	}
 
-	private void writeTestToFile() throws IOException {
+	private void writeTestToFile(JCodeModel cModel) throws IOException {
 		String filepath = outputDir + File.separator + "FlyPaper" + File.separator + "src" + File.separator + "test"
 				+ File.separator + "java";
 		logger.info("Generating class file " + filepath);
 
 		File file = new File(filepath);
 		file.mkdirs();
-		this.codeModel.build(file);
+		cModel.build(file);
 
 	}
 
-	private ScaffolingData createMethodScaffolding(String methodName, boolean addAssert) {
+	private Packet createMethodScaffolding(JCodeModel codeModel, JDefinedClass definedClass, String methodName,
+			boolean addAssert) {
 		JMethod method = definedClass.method(JMod.PUBLIC, JType.parse(codeModel, "void"), methodName);
 		method._throws(InterruptedException.class);
 		method._throws(IOException.class);
 		JVar assertVar = null;
 		JBlock block = method.body();
 		if (addAssert) {
-			assertVar = block.decl(this.codeModel._ref(org.testng.asserts.SoftAssert.class), "sAssert");
-			JExpression init = JExpr._new(this.codeModel._ref(org.testng.asserts.SoftAssert.class));
+			assertVar = block.decl(codeModel._ref(org.testng.asserts.SoftAssert.class), "sAssert");
+			JExpression init = JExpr._new(codeModel._ref(org.testng.asserts.SoftAssert.class));
 			assertVar.init(init);
 		}
 
-		return new ScaffolingData(method, block, assertVar);
+		return new Packet(new ScaffolingData(method, block, assertVar), definedClass, codeModel);
 	}
 
 	private void addClosingAssert(ScaffolingData sdata) {
@@ -333,8 +337,12 @@ public class TestGenerator {
 		sdata.getBlock().invoke(outVar, "println").arg("=============" + sdata.getMethod().name() + "=============");
 	}
 
-	private ScaffolingData generateSpecActions(Map<String, Action> actions) {
-		ScaffolingData sdata = createMethodScaffolding("when", true);
+	private Packet generateSpecActions(JCodeModel codeModel, JDefinedClass definedClass, Map<String, Action> actions,
+			String methodName) {
+		Packet packet = createMethodScaffolding(codeModel, definedClass, methodName, true);
+		ScaffolingData sdata = packet.getSdata();
+		codeModel = packet.getCodeModel();
+		definedClass = packet.getDefinedClass();
 
 		if (actions != null && !actions.isEmpty()) {
 			for (String action_tag : actions.keySet()) {
@@ -371,7 +379,7 @@ public class TestGenerator {
 		// add closing asserts
 		addClosingAssert(sdata);
 
-		return sdata;
+		return new Packet(sdata, definedClass, codeModel);
 	}
 
 	private void lightenStack(NodeType nodeType) {
@@ -380,7 +388,7 @@ public class TestGenerator {
 			GraphNode popedNode = stack.pop();
 			logger.info("Popped " + popedNode);
 		}
-		if(ConfigReader.debugMode) {
+		if (ConfigReader.debugMode) {
 			checkStackState();
 		}
 	}
@@ -388,15 +396,15 @@ public class TestGenerator {
 	private void checkStackState() {
 		logger.debug("running in debug mode, checking stack");
 		int lastSeen = -1;
-		for(GraphNode node: stack) {
+		for (GraphNode node : stack) {
 			int current = GeneratorUtilities.getNodeType(node.getNodeType());
-			if(lastSeen >= current) {
+			if (lastSeen >= current) {
 				throw new InvalidStackStateException();
-			}else {
+			} else {
 				lastSeen = current;
 			}
 		}
-		
+
 	}
 
 	private void setActive(GraphNode graphNode) {
@@ -421,21 +429,24 @@ public class TestGenerator {
 		logger.info("Contents of stack " + stack);
 	}
 
-	private ScaffolingData generatePostCondition(State then) {
-		ScaffolingData sdata = createMethodScaffolding("then", true);
+	private Packet generatePostCondition(JCodeModel codeModel, JDefinedClass definedClass, State then,
+			String methodName) {
+		Packet packet = createMethodScaffolding(codeModel, definedClass, methodName, true);
+		ScaffolingData sdata = packet.getSdata();
+		codeModel = packet.getCodeModel();
+		definedClass = packet.getDefinedClass();
 
 		GraphNode pageNode = usedPages.get(graphGenerator.getNodeByKey(then.getScreen()).getName());
 		setActive(pageNode);
 		// assert that we are on page
 		assert_element(sdata, pageNode.getImplictAssertions().get(0));
 
-		
 		GraphNode screenNode = graphGenerator.getNodeByKey(then.getScreen());
 		// assert that we are on screen
-		if(needsUpdatingScreen(screenNode)) {
+		if (needsUpdatingScreen(screenNode)) {
 			setActive(screenNode);
 		}
-		
+
 		assert_element(sdata, screenNode, null, null);
 
 		List<String> explicitAssertions = then.getAssertions();
@@ -447,18 +458,18 @@ public class TestGenerator {
 		// add closing asserts
 		addClosingAssert(sdata);
 
-		return sdata;
+		return new Packet(sdata, definedClass, codeModel);
 
 	}
 
 	private boolean needsUpdatingScreen(GraphNode screenNode) {
-		
-		for(GraphNode node: stack) {
-			if(node == screenNode) {
+
+		for (GraphNode node : stack) {
+			if (node == screenNode) {
 				return false;
 			}
 		}
-		
+
 		return true;
 	}
 
@@ -602,12 +613,14 @@ public class TestGenerator {
 	private Map<String, GraphNode> getUsedPages(GraphPath<GraphNode, DefaultEdge> path, Spec spec) {
 		Map<String, GraphNode> usedPages = new HashMap<>();
 
-		for (DefaultEdge e : path.getEdgeList()) {
-			GraphNode srcNode = graph.getEdgeSource(e);
-			GraphNode dstNode = graph.getEdgeTarget(e);
+		if (path != null) {
+			for (DefaultEdge e : path.getEdgeList()) {
+				GraphNode srcNode = graph.getEdgeSource(e);
+				GraphNode dstNode = graph.getEdgeTarget(e);
 
-			if (srcNode.getNodeType() == NodeType.PAGE) {
-				usedPages.put(dstNode.getName(), srcNode);
+				if (srcNode.getNodeType() == NodeType.PAGE) {
+					usedPages.put(dstNode.getName(), srcNode);
+				}
 			}
 		}
 		String lastScreen = spec.getThen().getScreen();
@@ -624,22 +637,32 @@ public class TestGenerator {
 
 	}
 
-	private void generateFieldVariables() {
+	private JDefinedClass generateFieldVariables(JDefinedClass definedClass) {
 		for (String key : usedPages.keySet()) {
-
 			GraphNode pageNode = usedPages.get(key);
-			JDefinedClass pageClass = classGenerator.getNodeClassMap().get(pageNode);
 
-			JFieldVar pageField = this.definedClass.field(JMod.FINAL, pageClass, "field" + pageNode.getName(),
-					JExpr._new(pageClass));
-			definedPages.put(pageNode, pageField);
+			if (!definedPages.containsKey(pageNode)) {
+				JDefinedClass pageClass = classGenerator.getNodeClassMap().get(pageNode);
+
+				JFieldVar pageField = definedClass.field(JMod.FINAL, pageClass, "field" + pageNode.getName(),
+						JExpr._new(pageClass));
+				definedPages.put(pageNode, pageField);
+				logger.info("adding field variable " + pageField);
+			}
 		}
+		return definedClass;
 
 	}
 
-	private ScaffolingData generatePrecondition(GraphPath<GraphNode, DefaultEdge> path) {
+	private Packet generatePrecondition(JCodeModel codeModel, JDefinedClass definedClass,
+			GraphPath<GraphNode, DefaultEdge> path, String methodName) {
 
-		ScaffolingData sdata = createMethodScaffolding("given", true);
+		// ScaffolingData sdata = createMethodScaffolding(codeModel, definedClass,
+		// "given", true);
+		Packet packet = createMethodScaffolding(codeModel, definedClass, methodName, true);
+		ScaffolingData sdata = packet.getSdata();
+		codeModel = packet.getCodeModel();
+		definedClass = packet.getDefinedClass();
 
 		// go to homepage
 		sdata.getBlock().invoke("goToHomePage");
@@ -680,7 +703,7 @@ public class TestGenerator {
 		// add closing asserts
 		addClosingAssert(sdata);
 
-		return sdata;
+		return new Packet(sdata, definedClass, codeModel);
 	}
 
 	private void call(ScaffolingData sdata, ScaffolingData givenSdata) {
@@ -699,35 +722,17 @@ public class TestGenerator {
 
 	}
 
-	private void generateClasses(Spec spec, GraphPath<GraphNode, DefaultEdge> path, String testName)
-			throws IOException, JClassAlreadyExistsException {
-		if (path == null) {
-			throw new InvalidPathException();
-		}
-		logger.info("===| Generated class for " + GeneratorUtilities.firstLetterCaptial(testName));
-		this.codeModel = new JCodeModel();
-		String packageName = "tests";
-		String className = packageName + "." + GeneratorUtilities.firstLetterCaptial(testName);
-		this.definedClass = this.codeModel._class(className);
-		definedClass._extends(classGenerator.getActionClass());
-
-		outVar = codeModel.ref(System.class).staticRef("out");
-		usedPages = getUsedPages(path, spec);
-		generateFieldVariables();
-		ScaffolingData sdata = createMethodScaffolding("execute", false);
-
-		// add testng annotation
-		JMethod method = sdata.getMethod();
-		method.annotate(org.testng.annotations.Test.class);
-
-		// generate GIVEN
-		ScaffolingData givenSdata = generatePrecondition(path);
-
-		call(sdata, givenSdata);
-		logger.info("=========== pre condtion generated ===========");
+	private Packet generateTestCode(JCodeModel codeModel, JDefinedClass definedClass, ScaffolingData sdata, Spec spec) {
 
 		// generate WHEN
-		ScaffolingData whenSdata = generateSpecActions(spec.getWhen());
+		String methodName = "when";
+		if (specChainCounter > 0) {
+			methodName += "_"+ specChainCounter;
+		}
+		Packet whenPacket = generateSpecActions(codeModel, definedClass, spec.getWhen(), methodName);
+		ScaffolingData whenSdata = whenPacket.getSdata();
+		codeModel = whenPacket.getCodeModel();
+		definedClass = whenPacket.getDefinedClass();
 
 		call(sdata, whenSdata);
 		logger.info("=========== action generated ===========");
@@ -737,12 +742,115 @@ public class TestGenerator {
 		logger.info("=========== wait generated ===========");
 
 		// generate THEN
-		ScaffolingData thenSdata = generatePostCondition(spec.getThen());
+		methodName = "then";
+		if (specChainCounter > 0) {
+			methodName += "_"+ specChainCounter;
+		}
+		Packet thenPacket = generatePostCondition(codeModel, definedClass, spec.getThen(), methodName);
+		ScaffolingData thenSdata = thenPacket.getSdata();
+		codeModel = thenPacket.getCodeModel();
+		definedClass = thenPacket.getDefinedClass();
 
 		call(sdata, thenSdata);
 		logger.info("=========== post condtion generated ===========");
 
-		writeTestToFile();
+		return new Packet(sdata, definedClass, codeModel);
+	}
+
+	private JCodeModel generatePostSpec(JCodeModel codeModel, JDefinedClass definedClass, ScaffolingData sdata,
+			String post, State thenState) throws InvalidKeySpecException {
+		Spec postSpec = specMap.get(post);
+
+		if (postSpec == null) {
+			throw new InvalidKeySpecException("Spec " + post + " not found");
+		}
+
+		// postSpec given should be equal to spec thenState
+		if (!postSpec.getGiven().getScreen().equals(thenState.getScreen())) {
+			throw new InvalidPostSpec("Post spec " + postSpec.getName() + " must have a start screen "
+					+ thenState.getScreen() + " but found " + postSpec.getGiven().getScreen());
+		}
+
+		// get any additional pages used in the postSpec
+		Map<String, GraphNode> pagesUsedPost = getUsedPages(null, postSpec);
+		this.usedPages.putAll(pagesUsedPost);
+
+		// generate field variables
+		definedClass = generateFieldVariables(definedClass);
+
+		Packet testPacket = generateTestCode(codeModel, definedClass, sdata, postSpec);
+		sdata = testPacket.getSdata();
+		definedClass = testPacket.getDefinedClass();
+		codeModel = testPacket.getCodeModel();
+
+		if (postSpec.getPost() == null || postSpec.getPost().size() == 0) {
+			return codeModel;
+		} else {
+			for (String postPost : postSpec.getPost()) {
+				JCodeModel postCModel = generatePostSpec(codeModel, definedClass, sdata, postPost, postSpec.getThen());
+				return postCModel;
+			}
+		}
+		return codeModel;
+	}
+
+	private void generateClasses(Spec spec, GraphPath<GraphNode, DefaultEdge> path, String testName)
+			throws IOException, JClassAlreadyExistsException, InvalidKeySpecException {
+		if (path == null) {
+			throw new InvalidPathException();
+		}
+
+		definedPages = new HashMap<>();
+		stack = new Stack<GraphNode>();
+		activePageVariable = null;
+		specChainCounter = 0;
+
+		logger.info("===| Generating class for " + GeneratorUtilities.firstLetterCaptial(testName));
+		JCodeModel codeModel = new JCodeModel();
+		String packageName = "tests";
+		String className = packageName + "." + GeneratorUtilities.firstLetterCaptial(testName);
+		JDefinedClass definedClass = codeModel._class(className);
+		definedClass._extends(classGenerator.getActionClass());
+
+		outVar = codeModel.ref(System.class).staticRef("out");
+		usedPages = getUsedPages(path, spec);
+
+		// generate field variables
+		definedClass = generateFieldVariables(definedClass);
+
+		// generate method scaffolding
+		Packet packet = createMethodScaffolding(codeModel, definedClass, "execute", false);
+		ScaffolingData sdata = packet.getSdata();
+		codeModel = packet.getCodeModel();
+		definedClass = packet.getDefinedClass();
+
+		// add testng annotation
+		JMethod method = sdata.getMethod();
+		method.annotate(org.testng.annotations.Test.class);
+
+		// generate GIVEN
+		Packet givenPacket = generatePrecondition(codeModel, definedClass, path, "given");
+		ScaffolingData givenSdata = givenPacket.getSdata();
+		codeModel = givenPacket.getCodeModel();
+		definedClass = givenPacket.getDefinedClass();
+
+		call(sdata, givenSdata);
+		logger.info("=========== pre condtion generated ===========");
+
+		Packet testPacket = generateTestCode(codeModel, definedClass, sdata, spec);
+		sdata = testPacket.getSdata();
+		definedClass = testPacket.getDefinedClass();
+		codeModel = testPacket.getCodeModel();
+
+		if (spec.getPost() == null || spec.getPost().size() == 0) {
+			writeTestToFile(codeModel);
+		} else {
+			for (String post : spec.getPost()) {
+				specChainCounter += 1;
+				JCodeModel cModel = generatePostSpec(codeModel, definedClass, sdata, post, spec.getThen());
+				writeTestToFile(cModel);
+			}
+		}
 
 		updateAuxiliaryClasses();
 
