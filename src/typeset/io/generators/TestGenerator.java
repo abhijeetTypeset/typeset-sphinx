@@ -2,6 +2,7 @@ package typeset.io.generators;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.security.spec.InvalidKeySpecException;
 import java.util.ArrayList;
 
@@ -12,6 +13,7 @@ import java.util.Set;
 import java.util.Stack;
 import java.util.TreeSet;
 
+import org.apache.commons.beanutils.BeanUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -288,7 +290,7 @@ public class TestGenerator {
 		}
 	}
 
-	public void generateTest() throws IOException, JClassAlreadyExistsException, InvalidKeySpecException {
+	public void generateTest() throws IOException, JClassAlreadyExistsException, InvalidKeySpecException, IllegalAccessException, InvocationTargetException {
 		for (Spec spec : specList) {
 			GraphPath<GraphNode, DefaultEdge> path = getFeasiblePath(spec);
 			logger.info("Resolving spec " + spec);
@@ -758,7 +760,7 @@ public class TestGenerator {
 	}
 
 	private JCodeModel generatePostSpec(JCodeModel codeModel, JDefinedClass definedClass, ScaffolingData sdata,
-			String post, State thenState) throws InvalidKeySpecException {
+			String post, State thenState) throws InvalidKeySpecException, IllegalAccessException, InvocationTargetException, JClassAlreadyExistsException {
 		Spec postSpec = specMap.get(post);
 
 		if (postSpec == null) {
@@ -775,7 +777,6 @@ public class TestGenerator {
 		Map<String, GraphNode> pagesUsedPost = getUsedPages(null, postSpec);
 		this.usedPages.putAll(pagesUsedPost);
 
-		// generate field variables
 		definedClass = generateFieldVariables(definedClass);
 
 		Packet testPacket = generateTestCode(codeModel, definedClass, sdata, postSpec);
@@ -783,6 +784,12 @@ public class TestGenerator {
 		definedClass = testPacket.getDefinedClass();
 		codeModel = testPacket.getCodeModel();
 
+		String name =  definedClass.name() + GeneratorUtilities.firstLetterCaptial(postSpec.getName());
+		System.out.println("Must change name to "+name);
+		definedClass.setName(name);
+		System.out.println("After name change "+definedClass.name());
+		
+		
 		if (postSpec.getPost() == null || postSpec.getPost().size() == 0) {
 			return codeModel;
 		} else {
@@ -795,7 +802,7 @@ public class TestGenerator {
 	}
 
 	private void generateClasses(Spec spec, GraphPath<GraphNode, DefaultEdge> path, String testName)
-			throws IOException, JClassAlreadyExistsException, InvalidKeySpecException {
+			throws IOException, JClassAlreadyExistsException, InvalidKeySpecException, IllegalAccessException, InvocationTargetException {
 		if (path == null) {
 			throw new InvalidPathException();
 		}
