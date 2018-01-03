@@ -755,9 +755,6 @@ public class TestGenerator {
 		Map<String, GraphNode> pagesUsedPost = getUsedPages(null, postSpec);
 		usedPages.putAll(pagesUsedPost);
 
-		sdataOrg.getBlock().invoke(outVar, "println")
-				.arg("=============" + "Post specifcation " + postSpec.getName() + " =============");
-
 		String newFullname = definedClassOrg.fullName() + GeneratorUtilities.firstLetterCaptial(postSpec.getName());
 		System.out.println("Must change name to " + newFullname);
 
@@ -775,6 +772,9 @@ public class TestGenerator {
 		
 		ScaffolingData sdata = createMethodScaffolding(codeModel, definedClass, "post" + GeneratorUtilities.firstLetterCaptial(postSpec.getName()), false);
 
+		sdata.getBlock().invoke(outVar, "println")
+		.arg("=============" + "Post specifcation " + postSpec.getName() + " =============");
+		
 		returnedMethod.body().invoke(sdata.getMethod());
 		generateFieldVariables(definedClass);
 
