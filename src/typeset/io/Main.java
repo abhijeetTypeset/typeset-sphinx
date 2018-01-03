@@ -39,7 +39,7 @@ public class Main {
 	private static final Logger logger = LogManager.getLogger("Log");
 
 	public static void main(String[] args) throws IOException, IllegalAccessException, InvocationTargetException,
-			JClassAlreadyExistsException, ParserConfigurationException, TransformerException, InvalidKeySpecException, CloneNotSupportedException {
+			JClassAlreadyExistsException, ParserConfigurationException, TransformerException, InvalidKeySpecException, CloneNotSupportedException, ClassNotFoundException {
 
 		// get path to config file
 		String configFile = getParameters(args);
