@@ -1,4 +1,4 @@
-name: chainTest
+name: LGN
 given: 
  screen: screen_2
  assertions: 
@@ -19,4 +19,4 @@ wait: short
 then:
  screen: screen_8
  assertions: 
-post: [spec_05.yml]
+post: [spec_07.yml]

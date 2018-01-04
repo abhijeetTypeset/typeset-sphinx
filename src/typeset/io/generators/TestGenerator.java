@@ -24,7 +24,6 @@ import org.jgrapht.GraphPath;
 import org.jgrapht.alg.shortestpath.AllDirectedPaths;
 import org.jgrapht.graph.DefaultDirectedGraph;
 import org.jgrapht.graph.DefaultEdge;
-import org.openqa.selenium.InvalidElementStateException;
 
 import com.sun.codemodel.JBlock;
 import com.sun.codemodel.JClassAlreadyExistsException;
@@ -370,6 +369,10 @@ public class TestGenerator {
 
 					invoke_element(sdata, actionNode, actionNode.getAction_data());
 					logger.info("Execute " + action_tag + " " + action);
+				}
+				
+				if (actionNode.getNodeType() != NodeType.CONTROL) {
+					setActive(actionNode);
 				}
 
 				// in case action leads to somewhere, update the stack
@@ -933,7 +936,6 @@ public class TestGenerator {
 			}
 		}
 		updateAuxiliaryClasses();
-
 	}
 
 	public Map<String, String> generateTest(List<Spec> specList)
