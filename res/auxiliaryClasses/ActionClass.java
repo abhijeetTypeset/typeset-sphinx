@@ -38,7 +38,7 @@ public class ActionClass extends ConfigClass {
 		}
 		String observedContent = driver.findElement(locator).getText();
 		System.out.println("Obseved content in "+locator+"  is  "+observedContent);
-		if(observedContent.contains(expectedContent)) {
+		if(observedContent.toLowerCase().contains(expectedContent.toLowerCase())) {
 			return true;
 		}
 		
@@ -149,7 +149,7 @@ public class ActionClass extends ConfigClass {
 
 	}
 
-	public void type(By locator, String data) throws InterruptedException {
+	public void otherType(By locator, String data) throws InterruptedException {
 		System.out.println("locator " + locator.toString());
 		System.out.println("Type " + data);
 
@@ -166,18 +166,15 @@ public class ActionClass extends ConfigClass {
 		driver.findElement(locator).sendKeys(data);
 	}
 
-	public void typeInEditor(By locator, String data) throws InterruptedException {
-		// driver.findElement(locator).clear();
+	public void type(By locator, String data) throws InterruptedException {
+		
+		System.out.println("locator " + locator.toString());
+		System.out.println("Type " + data);
 		final WebDriverWait wait = new WebDriverWait(driver, 15);
 
 		final WebElement element = wait.until(ExpectedConditions.elementToBeClickable(locator));
-		try {
-			driver.findElement(locator).click();
-			waitForAShortWhile();
-		} catch (final InvalidElementStateException e) {
-			System.out.println("Exception while clearing");
-			waitForALongWhile();
-		}
+		driver.findElement(locator).click();
+		waitForAWhile();
 
 		new Actions(driver).sendKeys(driver.findElement(locator), data).perform();
 	}

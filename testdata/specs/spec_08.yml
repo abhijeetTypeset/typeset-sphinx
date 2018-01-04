@@ -1,0 +1,19 @@
+name: EDH
+given: 
+ screen: screen_5
+ assertions: 
+when:
+ action_1: 
+  action_name: control_9
+  action_type: click
+  action_data: 
+ action_2: 
+  action_name: control_29
+  action_type: type
+  action_data: Paper Heading
+wait: 
+then:
+ screen: screen_5
+ assertions: 
+ - control_29%as%contains%Paper Heading
+post: 

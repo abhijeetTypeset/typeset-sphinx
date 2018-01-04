@@ -15,4 +15,4 @@ wait: long
 then:
  screen: screen_5
  assertions: 
-post: 
+post: [spec_08.yml]
