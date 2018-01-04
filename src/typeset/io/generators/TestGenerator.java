@@ -1,6 +1,5 @@
 package typeset.io.generators;
 
-
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -64,7 +63,6 @@ public class TestGenerator {
 	private GraphGenerator graphGenerator;
 	private DefaultDirectedGraph<GraphNode, DefaultEdge> graph;
 	private String inputDir;
-
 
 	private JFieldRef outVar;
 	private ModelGenerator classGenerator;
@@ -150,10 +148,10 @@ public class TestGenerator {
 
 				if (isValidSpec(spec)) {
 					logger.info("Found spec : " + spec);
-					if(isTopLevelTest(sf)) {
+					if (isTopLevelTest(sf)) {
 						specList.add(spec);
 					}
-					
+
 				} else {
 					logger.info("Invalid spec " + spec);
 				}
@@ -167,10 +165,10 @@ public class TestGenerator {
 	}
 
 	private boolean isTopLevelTest(String sf) {
-		for(String test : ConfigReader.tests) {
+		for (String test : ConfigReader.tests) {
 			System.out.println(test + " : " + sf);
 			if (sf.endsWith(test)) {
-				return true;	
+				return true;
 			}
 		}
 		return false;
@@ -648,7 +646,7 @@ public class TestGenerator {
 				JFieldVar pageField = definedClass.field(JMod.FINAL, pageClass, "field" + pageNode.getName(),
 						JExpr._new(pageClass));
 				definedPages.put(pageNode, pageField);
-				logger.info("adding field variable " + pageField);
+				logger.info("adding field variable " + pageField.name());
 			}
 		}
 	}
@@ -747,8 +745,10 @@ public class TestGenerator {
 	}
 
 	private void generatePostSpec(JCodeModel codeModelOrg, JDefinedClass definedClassOrg, ScaffolingData sdataOrg,
-			String post, State thenState) throws InvalidKeySpecException, IllegalAccessException,
-			InvocationTargetException, JClassAlreadyExistsException, CloneNotSupportedException, ClassNotFoundException, IOException {
+			String post, State thenState)
+			throws InvalidKeySpecException, IllegalAccessException, InvocationTargetException,
+			JClassAlreadyExistsException, CloneNotSupportedException, ClassNotFoundException, IOException {
+
 		Spec postSpec = specMap.get(post);
 
 		if (postSpec == null) {
@@ -760,44 +760,57 @@ public class TestGenerator {
 			throw new InvalidPostSpec("Post spec " + postSpec.getName() + " must have a start screen "
 					+ thenState.getScreen() + " but found " + postSpec.getGiven().getScreen());
 		}
+		logger.info("Chaining with " + postSpec.getName());
 
-		// used for method naming
+		// used for method naming - should use something better
 		specChainCounter += 1;
 
 		// get any additional pages used in the postSpec
 		Map<String, GraphNode> pagesUsedPost = getUsedPages(null, postSpec);
 		usedPages.putAll(pagesUsedPost);
 
+		// get a new name for the chained test class
 		String newFullname = definedClassOrg.fullName() + GeneratorUtilities.firstLetterCaptial(postSpec.getName());
-		System.out.println("Must change name to " + newFullname);
+		logger.info("Creating class " + newFullname + " by duplication");
 
-		
 		// clone objects
 		JCodeModel codeModel = cloneCodeModel(codeModelOrg);
 		JDefinedClass definedClass = cloneDefinedClass(definedClassOrg);
 		definedClass.setName(definedClassOrg.name() + GeneratorUtilities.firstLetterCaptial(postSpec.getName()));
+
+		// show the class, as the parent would have been hidden
+		definedClass.show();
+
+		// add new class to package
 		codeModel.addClass(newFullname, definedClass);
-		
+
+		// get a reference to the last method
 		JMethod returnedMethod = definedClass.getMethod(sdataOrg.getMethod().name(), sdataOrg.getMethod().typeParams());
-		if (returnedMethod==null) {
+		if (returnedMethod == null) {
 			throw new InvalidStackStateException("Method not found");
 		}
-		
-		ScaffolingData sdata = createMethodScaffolding(codeModel, definedClass, "post" + GeneratorUtilities.firstLetterCaptial(postSpec.getName()), false);
+
+		// create a new method that will call post specification
+		ScaffolingData sdata = createMethodScaffolding(codeModel, definedClass,
+				"post" + GeneratorUtilities.firstLetterCaptial(postSpec.getName()), false);
 
 		sdata.getBlock().invoke(outVar, "println")
-		.arg("=============" + "Post specifcation " + postSpec.getName() + " =============");
-		
+				.arg("=============" + "Post specifcation " + postSpec.getName() + " =============");
+
+		// invoke the post-specification method in the last method
 		returnedMethod.body().invoke(sdata.getMethod());
 		generateFieldVariables(definedClass);
 
 		sdata = generateTestCode(codeModel, definedClass, sdata, postSpec);
 
-		if (postSpec.getPost() == null || postSpec.getPost().size() == 0) {
-			
-		} else {
+		// in case the post specification has post specifications of its own
+		if (postSpec.getPost() != null && postSpec.getPost().size() == 0) {
+
+			// hide this class as its children would be written
+			definedClass.hide();
+
 			for (String postPost : postSpec.getPost()) {
-				
+
 				// save context
 				Stack<GraphNode> originalStack = (Stack<GraphNode>) stack.clone();
 				Map<GraphNode, JFieldVar> originalDefinedPages = new HashMap();
@@ -805,23 +818,23 @@ public class TestGenerator {
 				JFieldVar originalActivePageVariable = activePageVariable;
 				Map<String, GraphNode> originalUsedPages = new HashMap();
 				originalUsedPages.putAll(usedPages);
-				
-				
+				logger.info("Saved context");
+
 				generatePostSpec(codeModel, definedClass, sdata, postPost, postSpec.getThen());
-				
+
 				// restore context
 				stack = originalStack;
 				usedPages = originalUsedPages;
 				definedPages = originalDefinedPages;
 				activePageVariable = originalActivePageVariable;
-				
+				logger.info("Restored context");
 			}
 		}
-		
+
+		// write class to file
 		writeTestToFile(codeModel);
-		//return codeModel;
 	}
-	
+
 	private JDefinedClass cloneDefinedClass(JDefinedClass jDefinedClass) throws IOException, ClassNotFoundException {
 		ByteArrayOutputStream bos = new ByteArrayOutputStream();
 		ObjectOutputStream oos = new ObjectOutputStream(bos);
@@ -830,12 +843,12 @@ public class TestGenerator {
 		oos.close();
 		bos.close();
 		byte[] byteData = bos.toByteArray();
-		
+
 		ByteArrayInputStream bais = new ByteArrayInputStream(byteData);
-		JDefinedClass copy =  (JDefinedClass) new ObjectInputStream(bais).readObject();
+		JDefinedClass copy = (JDefinedClass) new ObjectInputStream(bais).readObject();
 		return copy;
 	}
-	
+
 	private JCodeModel cloneCodeModel(JCodeModel jCodeModel) throws IOException, ClassNotFoundException {
 		ByteArrayOutputStream bos = new ByteArrayOutputStream();
 		ObjectOutputStream oos = new ObjectOutputStream(bos);
@@ -844,9 +857,9 @@ public class TestGenerator {
 		oos.close();
 		bos.close();
 		byte[] byteData = bos.toByteArray();
-		
+
 		ByteArrayInputStream bais = new ByteArrayInputStream(byteData);
-		JCodeModel copy =  (JCodeModel) new ObjectInputStream(bais).readObject();
+		JCodeModel copy = (JCodeModel) new ObjectInputStream(bais).readObject();
 		return copy;
 	}
 
@@ -893,6 +906,8 @@ public class TestGenerator {
 		if (spec.getPost() == null || spec.getPost().size() == 0) {
 			writeTestToFile(codeModel);
 		} else {
+			// hide this class as its children would be written
+			definedClass.hide();
 			for (String post : spec.getPost()) {
 
 				logger.info("Generating chained tests for " + post);
@@ -906,7 +921,6 @@ public class TestGenerator {
 				originalUsedPages.putAll(usedPages);
 
 				generatePostSpec(codeModel, definedClass, sdata, post, spec.getThen());
-				
 
 				// restore context
 				stack = originalStack;
@@ -919,11 +933,12 @@ public class TestGenerator {
 
 	}
 
-	public void generateTest(List<Spec> specList) throws IOException, JClassAlreadyExistsException, InvalidKeySpecException,
-			IllegalAccessException, InvocationTargetException, CloneNotSupportedException, ClassNotFoundException {
+	public void generateTest(List<Spec> specList)
+			throws IOException, JClassAlreadyExistsException, InvalidKeySpecException, IllegalAccessException,
+			InvocationTargetException, CloneNotSupportedException, ClassNotFoundException {
 		for (Spec spec : specList) {
 			GraphPath<GraphNode, DefaultEdge> path = getFeasiblePath(spec);
-			logger.info("Resolving spec " + spec); 
+			logger.info("Resolving spec " + spec);
 			if (path != null) {
 				logger.info("Feasible path found " + path);
 				generateClasses(spec, path, spec.getName());
