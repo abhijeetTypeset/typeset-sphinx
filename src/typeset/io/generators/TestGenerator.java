@@ -65,7 +65,6 @@ public class TestGenerator {
 	private DefaultDirectedGraph<GraphNode, DefaultEdge> graph;
 	private String inputDir;
 
-	private List<Spec> specList;
 
 	private JFieldRef outVar;
 	private ModelGenerator classGenerator;
@@ -91,7 +90,6 @@ public class TestGenerator {
 		this.inputDir = ConfigReader.inputDir;
 		this.outputDir = ConfigReader.outputDir;
 		this.classGenerator = classGenerator;
-		this.specList = new ArrayList<Spec>();
 		this.allDirectedPath = new AllDirectedPaths<>(graph);
 	}
 
@@ -136,6 +134,8 @@ public class TestGenerator {
 	}
 
 	public List<Spec> getSpecs() {
+
+		List<Spec> specList = new ArrayList<>();
 		Map<String, String> specFiles = getSpecFiles();
 		for (String skey : specFiles.keySet()) {
 			String sf = specFiles.get(skey);
@@ -149,8 +149,11 @@ public class TestGenerator {
 				spec.getGiven().setParsedAssertion(eassertGiven);
 
 				if (isValidSpec(spec)) {
-					logger.info("Added spec : " + spec);
-					specList.add(spec);
+					logger.info("Found spec : " + spec);
+					if(isTopLevelTest(sf)) {
+						specList.add(spec);
+					}
+					
 				} else {
 					logger.info("Invalid spec " + spec);
 				}
@@ -161,6 +164,16 @@ public class TestGenerator {
 		}
 
 		return specList;
+	}
+
+	private boolean isTopLevelTest(String sf) {
+		for(String test : ConfigReader.tests) {
+			System.out.println(test + " : " + sf);
+			if (sf.endsWith(test)) {
+				return true;	
+			}
+		}
+		return false;
 	}
 
 	private boolean isValidSpec(Spec spec) {
@@ -906,11 +919,11 @@ public class TestGenerator {
 
 	}
 
-	public void generateTest() throws IOException, JClassAlreadyExistsException, InvalidKeySpecException,
+	public void generateTest(List<Spec> specList) throws IOException, JClassAlreadyExistsException, InvalidKeySpecException,
 			IllegalAccessException, InvocationTargetException, CloneNotSupportedException, ClassNotFoundException {
 		for (Spec spec : specList) {
 			GraphPath<GraphNode, DefaultEdge> path = getFeasiblePath(spec);
-			logger.info("Resolving spec " + spec);
+			logger.info("Resolving spec " + spec); 
 			if (path != null) {
 				logger.info("Feasible path found " + path);
 				generateClasses(spec, path, spec.getName());

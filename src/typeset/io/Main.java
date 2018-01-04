@@ -80,7 +80,7 @@ public class Main {
 		// covert specification to feasible paths; and then eventually into classes
 		TestGenerator testGenerator = new TestGenerator(tgraph, graphGenerator, classGenerator);
 		List<Spec> specList = testGenerator.getSpecs();
-		testGenerator.generateTest();
+		testGenerator.generateTest(specList);
 
 		// generate test classes
 		TestNGGenerator testNGGenerator = new TestNGGenerator(specList, "FlyPaper", "https://typeset.io");

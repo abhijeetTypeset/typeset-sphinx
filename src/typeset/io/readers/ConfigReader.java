@@ -22,7 +22,9 @@ public class ConfigReader {
 	public static List<String> pageImplictFunc = new ArrayList<String>();
 	public static List<String> intermImplictFunc = new ArrayList<String>();
 	public static List<String> controlImplictFunc = new ArrayList<String>();
+	public static List<String> tests = new ArrayList<String>();
 	private static final Logger logger = LogManager.getLogger("ConfigReader");
+
 
 	public static void read(String filename) {
 
@@ -97,6 +99,15 @@ public class ConfigReader {
 				logger.error("Insufficient number of control assertions provided");
 				throw new InvalidConfigException("Insufficient number of control assertions provided");
 			}
+			
+			String test_str = prop.getProperty("tests").trim();
+			List<String> testList = listify(test_str);
+			if(testList != null) {
+				tests.addAll(testList);
+			}else {
+				logger.error("no tests found");
+			}
+			
 
 		} catch (IOException ex) {
 			ex.printStackTrace();
