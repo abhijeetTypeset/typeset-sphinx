@@ -2,6 +2,7 @@ package typeset.io.generators;
 
 import java.io.File;
 import java.util.List;
+import java.util.Map;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -58,11 +59,12 @@ public class TestNGGenerator {
 
 	/**
 	 * Generate testng XML.
+	 * @param generatedTests 
 	 *
 	 * @throws ParserConfigurationException the parser configuration exception
 	 * @throws TransformerException the transformer exception
 	 */
-	public void generateXML() throws ParserConfigurationException, TransformerException {
+	public void generateXML(Map<String, String> generatedTests) throws ParserConfigurationException, TransformerException {
 
 		logger.info("Generating testNG XMl config file");
 
@@ -110,9 +112,9 @@ public class TestNGGenerator {
 		Element classes = doc.createElement("classes");
 		test.appendChild(classes);
 		
-		for(Spec spec : specList) {
+		for(String testName: generatedTests.keySet()) {
 			Element specClass = doc.createElement("class");
-			specClass.setAttribute("name", "tests."+GeneratorUtilities.firstLetterCaptial(spec.getName()));
+			specClass.setAttribute("name", testName);
 			classes.appendChild(specClass);
 			
 			// add method
@@ -120,7 +122,7 @@ public class TestNGGenerator {
 			specClass.appendChild(methodClass);
 			
 			Element include = doc.createElement("include");
-			include.setAttribute("name", "execute");
+			include.setAttribute("name", generatedTests.get(testName));
 			methodClass.appendChild(include);
 		}
 

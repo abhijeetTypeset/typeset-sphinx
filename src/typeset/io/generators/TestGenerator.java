@@ -76,6 +76,7 @@ public class TestGenerator {
 	private AllDirectedPaths<GraphNode, DefaultEdge> allDirectedPath;
 	private static final Logger logger = LogManager.getLogger("TestGenerator");
 	private Map<String, Spec> specMap = new HashMap<String, Spec>();
+	private Map<String, String> generatedTests = new HashMap<>();
 	private int specChainCounter = 0;
 
 	// TODO: get this some other way
@@ -308,11 +309,13 @@ public class TestGenerator {
 		}
 	}
 
-	private void writeTestToFile(JCodeModel cModel) throws IOException {
+	private void writeTestToFile(JCodeModel cModel, JDefinedClass definedClass) throws IOException {
 		String filepath = outputDir + File.separator + "FlyPaper" + File.separator + "src" + File.separator + "test"
 				+ File.separator + "java";
 		logger.info("Generating class file " + filepath);
+		System.out.println("Generating class " + definedClass.name() + " ; " + definedClass.fullName());
 
+		generatedTests.put(definedClass.fullName(), "execute");
 		File file = new File(filepath);
 		file.mkdirs();
 		cModel.build(file);
@@ -804,7 +807,7 @@ public class TestGenerator {
 		sdata = generateTestCode(codeModel, definedClass, sdata, postSpec);
 
 		// in case the post specification has post specifications of its own
-		if (postSpec.getPost() != null && postSpec.getPost().size() == 0) {
+		if (postSpec.getPost() != null && postSpec.getPost().size() > 0) {
 
 			// hide this class as its children would be written
 			definedClass.hide();
@@ -829,10 +832,10 @@ public class TestGenerator {
 				activePageVariable = originalActivePageVariable;
 				logger.info("Restored context");
 			}
+		} else {
+			// write class to file
+			writeTestToFile(codeModel, definedClass);
 		}
-
-		// write class to file
-		writeTestToFile(codeModel);
 	}
 
 	private JDefinedClass cloneDefinedClass(JDefinedClass jDefinedClass) throws IOException, ClassNotFoundException {
@@ -904,7 +907,7 @@ public class TestGenerator {
 		sdata = generateTestCode(codeModel, definedClass, sdata, spec);
 
 		if (spec.getPost() == null || spec.getPost().size() == 0) {
-			writeTestToFile(codeModel);
+			writeTestToFile(codeModel, definedClass);
 		} else {
 			// hide this class as its children would be written
 			definedClass.hide();
@@ -933,7 +936,7 @@ public class TestGenerator {
 
 	}
 
-	public void generateTest(List<Spec> specList)
+	public Map<String, String> generateTest(List<Spec> specList)
 			throws IOException, JClassAlreadyExistsException, InvalidKeySpecException, IllegalAccessException,
 			InvocationTargetException, CloneNotSupportedException, ClassNotFoundException {
 		for (Spec spec : specList) {
@@ -947,7 +950,7 @@ public class TestGenerator {
 				logger.info("No feasible path found");
 			}
 		}
-
+		return generatedTests;
 	}
 
 }

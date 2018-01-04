@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.security.spec.InvalidKeySpecException;
 import java.util.List;
+import java.util.Map;
 
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.TransformerException;
@@ -80,11 +81,11 @@ public class Main {
 		// covert specification to feasible paths; and then eventually into classes
 		TestGenerator testGenerator = new TestGenerator(tgraph, graphGenerator, classGenerator);
 		List<Spec> specList = testGenerator.getSpecs();
-		testGenerator.generateTest(specList);
+		Map<String, String> generatedTests = testGenerator.generateTest(specList);
 
 		// generate test classes
 		TestNGGenerator testNGGenerator = new TestNGGenerator(specList, "FlyPaper", "https://typeset.io");
-		testNGGenerator.generateXML();
+		testNGGenerator.generateXML(generatedTests);
 
 	}
 

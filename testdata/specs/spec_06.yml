@@ -1,14 +1,18 @@
 name: formatSearch
 given: 
- screen: screen_8
+ screen: screen_3
  assertions: 
 when:
  action_1: 
-  action_name: control_14
+  action_name: control_5
+  action_type: type
+  action_data: 
+ action_2: 
+  action_name: control_6
   action_type: click
   action_data: 
 wait: short
 then:
- screen: screen_3
+ screen: screen_4
  assertions: 
 post: 

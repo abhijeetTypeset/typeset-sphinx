@@ -11,4 +11,4 @@ wait: short
 then:
  screen: screen_3
  assertions: 
-post: 
+post: [spec_06.yml]
