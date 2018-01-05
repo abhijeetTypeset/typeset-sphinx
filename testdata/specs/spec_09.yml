@@ -1,14 +1,14 @@
-name: EDP
+name: PRV
 given: 
  screen: screen_5
  assertions: 
 when: 
  action_1: 
-  action_name: control_30
-  action_type: type
-  action_data: a new para
-wait: short
+  action_name: control_11
+  action_type: click
+  action_data: 
+wait: long
 then:
- screen: screen_5
+ screen: screen_9
  assertions: 
 post: 
