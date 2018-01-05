@@ -104,7 +104,7 @@ public class TestNGGenerator {
 
 		Element testParameter = doc.createElement("parameter");
 		testParameter.setAttribute("name", "Browser");
-		testParameter.setAttribute("value", "firefox");
+		testParameter.setAttribute("value", "chrome");
 
 		test.appendChild(testParameter);
 		

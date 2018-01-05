@@ -181,7 +181,7 @@ public class ActionClass extends ConfigClass {
 	}
 
 	public void type(By locator, String data) throws InterruptedException {
-
+		System.out.println("locator " + locator.toString());
 		final WebDriverWait wait = new WebDriverWait(driver, 15);
 
 		final WebElement element = wait.until(ExpectedConditions.elementToBeClickable(locator));
@@ -190,7 +190,7 @@ public class ActionClass extends ConfigClass {
 
 		data = substituteKeys(data);
 
-		System.out.println("locator " + locator.toString());
+		
 		System.out.println("Type " + data);
 		new Actions(driver).sendKeys(driver.findElement(locator), data).perform();
 
