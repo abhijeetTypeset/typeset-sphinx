@@ -31,17 +31,17 @@ public class ActionClass extends ConfigClass {
 	public String textContent(By locator) {
 		return driver.findElement(locator).getText();
 	}
-	
+
 	public boolean contains(By locator, String expectedContent) {
-		if (locator==null) {
+		if (locator == null) {
 			return true;
 		}
 		String observedContent = driver.findElement(locator).getText();
-		System.out.println("Obseved content in "+locator+"  is  "+observedContent);
-		if(observedContent.toLowerCase().contains(expectedContent.toLowerCase())) {
+		System.out.println("Obseved content in " + locator + "  is  " + observedContent);
+		if (observedContent.toLowerCase().contains(expectedContent.toLowerCase())) {
 			return true;
 		}
-		
+
 		return false;
 	}
 
@@ -53,9 +53,9 @@ public class ActionClass extends ConfigClass {
 			e.printStackTrace();
 		}
 	}
-	
+
 	public boolean canSee(By locator) {
-		if (locator==null) {
+		if (locator == null) {
 			return true;
 		}
 		if (driver.findElements(locator).size() > 0) {
@@ -82,13 +82,13 @@ public class ActionClass extends ConfigClass {
 			return false;
 		}
 	}
-	
-    public void goToHomePage() throws IOException {
+
+	public void goToHomePage() throws IOException {
 		final URL url = new URL(driver.getCurrentUrl());
 		final HttpURLConnection hurcon = (HttpURLConnection) url.openConnection();
 		hurcon.setRequestMethod("GET");
 		hurcon.connect();
-		
+
 	}
 
 	public void click(By locator) // To click on a locator
@@ -166,17 +166,34 @@ public class ActionClass extends ConfigClass {
 		driver.findElement(locator).sendKeys(data);
 	}
 
+	public String substituteKeys(String textData) {
+
+		while (textData.contains("\\n")) {
+			textData = textData.replace("\\n", Keys.RETURN);
+		}
+
+		while (textData.contains("\\t")) {
+			textData = textData.replace("\\n", Keys.TAB);
+		}
+
+		return textData;
+
+	}
+
 	public void type(By locator, String data) throws InterruptedException {
-		
-		System.out.println("locator " + locator.toString());
-		System.out.println("Type " + data);
+
 		final WebDriverWait wait = new WebDriverWait(driver, 15);
 
 		final WebElement element = wait.until(ExpectedConditions.elementToBeClickable(locator));
 		driver.findElement(locator).click();
 		waitForAWhile();
 
+		data = substituteKeys(data);
+
+		System.out.println("locator " + locator.toString());
+		System.out.println("Type " + data);
 		new Actions(driver).sendKeys(driver.findElement(locator), data).perform();
+
 	}
 
 	public void waitForALongWhile() {

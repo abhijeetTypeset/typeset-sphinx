@@ -1,0 +1,14 @@
+name: EDP
+given: 
+ screen: screen_5
+ assertions: 
+when: 
+ action_1: 
+  action_name: control_30
+  action_type: type
+  action_data: a new para
+wait: short
+then:
+ screen: screen_5
+ assertions: 
+post: 

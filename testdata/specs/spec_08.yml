@@ -10,10 +10,10 @@ when:
  action_2: 
   action_name: control_29
   action_type: type
-  action_data: Paper Heading
-wait: 
+  action_data: Paper Heading\n
+wait: long
 then:
  screen: screen_5
  assertions: 
  - control_29%as%contains%Paper Heading
-post: 
+post: [spec_09.yml]
