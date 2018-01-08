@@ -5,11 +5,14 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.Set;
+import java.util.TreeSet;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.yaml.snakeyaml.Yaml;
 
+import typeset.io.exceptions.InvalidModelException;
 import typeset.io.model.Model;
 
 /**
@@ -34,8 +37,59 @@ public class ModelReader {
 		Yaml yaml = new Yaml();
 		try (InputStream in = Files.newInputStream(Paths.get(modelFile))) {
 			Model model = yaml.loadAs(in, Model.class);
+			validateModel(model);
 			return model;
 
+		}
+	}
+
+	public static void validateModel(Model model) {
+		if (model == null) {
+			logger.error("model cannot be null");
+			throw new InvalidModelException("model cannot be null");
+		}
+
+		Set<String> allKeys = new TreeSet();
+		for (String c : model.getControls().keySet()) {
+			System.out.println(" control "+c);
+			if (allKeys.contains(c)) {
+				logger.error(c + " key already used in the model");
+				throw new InvalidModelException(c + " key already used in the model");
+			} else {
+				allKeys.add(c);
+			}
+		}
+		for (String w : model.getWidgets().keySet()) {
+			if (allKeys.contains(w)) {
+				logger.error(w + " key already used in the model");
+				throw new InvalidModelException(w + " key already used in the model");
+			} else {
+				allKeys.add(w);
+			}
+		}
+		for (String a : model.getApps().keySet()) {
+			if (allKeys.contains(a)) {
+				logger.error(a + " key already used in the model");
+				throw new InvalidModelException(a + " key already used in the model");
+			} else {
+				allKeys.add(a);
+			}
+		}
+		for (String s : model.getScreens().keySet()) {
+			if (allKeys.contains(s)) {
+				logger.error(s + " key already used in the model");
+				throw new InvalidModelException(s + " key already used in the model");
+			} else {
+				allKeys.add(s);
+			}
+		}
+		for (String p : model.getPages().keySet()) {
+			if (allKeys.contains(p)) {
+				logger.error(p + " key already used in the model");
+				throw new InvalidModelException(p + " key already used in the model");
+			} else {
+				allKeys.add(p);
+			}
 		}
 	}
 
