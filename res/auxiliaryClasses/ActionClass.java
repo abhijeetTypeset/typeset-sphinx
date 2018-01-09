@@ -107,6 +107,26 @@ public class ActionClass extends ConfigClass {
 		new Actions(driver).moveToElement(element).sendKeys(movement).sendKeys(data).perform();
 	}
 	
+	public void writeAtEnd(By locator, String data, String elementNumber) throws InterruptedException {
+		int eNo = getElementNumber(elementNumber);
+		final WebDriverWait wait = new WebDriverWait(driver, 15);
+		data = substituteKeys(data);
+		System.out.println("Typing "+data);
+		
+		final WebElement element = driver.findElements(locator).get(eNo);
+
+		int length = element.getSize().getWidth();
+		String [] movement = new String[length/2];
+		for(int idx = 0; idx<length/2; idx++) {
+			movement[idx] = Keys.ARROW_RIGHT + "";
+		} 
+		new Actions(driver).moveToElement(element).sendKeys(movement).sendKeys(data).perform();
+	}
+	
+	public void writeAtMiddle(By locator, String data, String elementNumber) throws InterruptedException {
+		type(locator, data, elementNumber);
+	}
+	
 	public void selectText(By locator, String elementNumber) throws InterruptedException {
 		int eNo = getElementNumber(elementNumber);
 		final WebDriverWait wait = new WebDriverWait(driver, 15);
