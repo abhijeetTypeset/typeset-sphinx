@@ -7,14 +7,17 @@ when:
   action_name: control_2
   action_type: type
   action_data: 
+  action_no: 0
  action_2: 
   action_name: control_3
   action_type: type
-  action_data:  
+  action_data:
+  action_no: 0  
  action_3: 
   action_name: control_4
   action_type: click
-  action_data: 
+  action_data:
+  action_no: 0 
 wait: short
 then:
  screen: screen_8

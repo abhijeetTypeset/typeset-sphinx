@@ -80,6 +80,7 @@ public class TestGenerator {
 
 	// TODO: get this some other way
 	private int MAX_LENGTH = 25;
+	private String defaultElementNumber = "0";
 
 	public TestGenerator(DefaultDirectedGraph<GraphNode, DefaultEdge> graph, GraphGenerator graphGenerator,
 			ModelGenerator classGenerator) {
@@ -188,13 +189,23 @@ public class TestGenerator {
 						throw new InvalidLiteralException(
 								"The action " + ltl.getAction() + " is not defined for " + ltl.getNode());
 					}
-
 				}
 			}
 
 		}
 
 		// check is actions is valid
+		for(String key : spec.getWhen().keySet()) {
+			Action action = spec.getWhen().get(key);
+			if (action.getAction_no()==null) {
+				throw new InvalidLiteralException("no action number provided");
+			}
+			try {
+			int actionNo = Integer.parseInt(action.getAction_no());
+			}catch(Exception e) {
+				throw new InvalidLiteralException("action no is not parsable");
+			}
+		}
 
 		// check if post condition is valid
 		State then = spec.getThen();
@@ -214,6 +225,8 @@ public class TestGenerator {
 			}
 
 		}
+		
+		
 
 		return true;
 	}
@@ -354,6 +367,7 @@ public class TestGenerator {
 				GraphNode actionNode = graphGenerator.getNodeByKey(action.getAction_name());
 
 				String actionData = "";
+				String actionNumber = action.getAction_no();
 				if (action.getAction_type().toLowerCase().equals("type")) {
 					String userProvidedData = action.getAction_data();
 
@@ -363,14 +377,14 @@ public class TestGenerator {
 						actionData = graphGenerator.getNodeByKey(action.getAction_name()).getAction_data();
 					}
 
-					invoke_element(sdata, actionNode, actionData);
+					invoke_element(sdata, actionNode, actionData, actionNumber);
 					logger.info("Execute " + action_tag + " " + action + " with " + actionData);
 				} else {
 
-					invoke_element(sdata, actionNode, actionNode.getAction_data());
+					invoke_element(sdata, actionNode, actionNode.getAction_data(), actionNumber);
 					logger.info("Execute " + action_tag + " " + action);
 				}
-				
+
 				if (actionNode.getNodeType() != NodeType.CONTROL) {
 					setActive(actionNode);
 				}
@@ -451,7 +465,7 @@ public class TestGenerator {
 			setActive(screenNode);
 		}
 
-		assert_element(sdata, screenNode, null, null);
+		assert_element(sdata, screenNode, null, null, defaultElementNumber);
 
 		List<String> explicitAssertions = then.getAssertions();
 		if (explicitAssertions != null) {
@@ -482,7 +496,7 @@ public class TestGenerator {
 		Literal literal = parsedEXplicit.getclauses().get(0).getLiterals().get(0);
 		logger.info("explicit assertion :  " + literal);
 
-		assert_element(sdata, literal.getNode(), literal.getAction(), literal.getTextData());
+		assert_element(sdata, literal.getNode(), literal.getAction(), literal.getTextData(), defaultElementNumber);
 
 	}
 
@@ -494,7 +508,7 @@ public class TestGenerator {
 	}
 
 	private void assert_element(ScaffolingData sdata, GraphNode activeNode, String specAssertFunction,
-			String specAssertData) {
+			String specAssertData, String elementNumber) {
 		JInvocation assertStatement = sdata.getBlock().invoke(sdata.getAssertVar(), "assertTrue");
 
 		logger.info("asserting for element " + activeNode);
@@ -530,9 +544,9 @@ public class TestGenerator {
 
 		JExpression assertExpr = null;
 		if (requiresDataArgument(specAssertFunction)) {
-			assertExpr = JExpr.invoke(specAssertFunction).arg(argumentExpr).arg(specAssertData);
+			assertExpr = JExpr.invoke(specAssertFunction).arg(argumentExpr).arg(specAssertData).arg(elementNumber);
 		} else {
-			assertExpr = JExpr.invoke(specAssertFunction).arg(argumentExpr);
+			assertExpr = JExpr.invoke(specAssertFunction).arg(argumentExpr).arg(elementNumber);
 		}
 		assertStatement.arg(assertExpr);
 	}
@@ -557,7 +571,7 @@ public class TestGenerator {
 		return false;
 	}
 
-	private void invoke_element(ScaffolingData sdata, GraphNode activeNode, String actionData) {
+	private void invoke_element(ScaffolingData sdata, GraphNode activeNode, String actionData, String elementNumber) {
 		JInvocation invokeStatement = sdata.getBlock().invoke(activeNode.getAction_type());
 		JExpression argumentExpr = null;
 		boolean flag = true;
@@ -579,9 +593,9 @@ public class TestGenerator {
 		}
 		argumentExpr = JExpr.invoke(argumentExpr, "getId");
 		if (isTypeText(activeNode.getAction_type())) {
-			invokeStatement.arg(argumentExpr).arg(actionData);
+			invokeStatement.arg(argumentExpr).arg(actionData).arg(elementNumber);
 		} else {
-			invokeStatement.arg(argumentExpr);
+			invokeStatement.arg(argumentExpr).arg(elementNumber);
 		}
 
 		logger.info("Invoked " + activeNode);
@@ -678,25 +692,25 @@ public class TestGenerator {
 
 			} else if (srcNode.getNodeType() == NodeType.SCREEN) {
 
-				assert_element(sdata, srcNode, null, null);
+				assert_element(sdata, srcNode, null, null, defaultElementNumber);
 
 			} else if (srcNode.getNodeType() == NodeType.APP) {
 
-				assert_element(sdata, srcNode, null, null);
+				assert_element(sdata, srcNode, null, null, defaultElementNumber);
 
 			} else if (srcNode.getNodeType() == NodeType.WIDGET) {
 
-				assert_element(sdata, srcNode, null, null);
+				assert_element(sdata, srcNode, null, null, defaultElementNumber);
 
 			} else {
 
-				invoke_element(sdata, srcNode, srcNode.getAction_data());
+				invoke_element(sdata, srcNode, srcNode.getAction_data(), defaultElementNumber);
 			}
 		}
 
 		setActive(lastNode);
 
-		assert_element(sdata, lastNode, null, null);
+		assert_element(sdata, lastNode, null, null, defaultElementNumber);
 
 		// add closing asserts
 		addClosingAssert(sdata);

@@ -14,6 +14,8 @@ public class Action {
 	
 	/** The action data. */
 	private String action_data;
+	
+	private String action_no;
 
 
 	/* (non-Javadoc)
@@ -82,6 +84,16 @@ public class Action {
 	 */
 	public void setAction_data(String action_data) {
 		this.action_data = action_data;
+	}
+
+
+	public String getAction_no() {
+		return action_no;
+	}
+
+
+	public void setAction_no(String action_no) {
+		this.action_no = action_no;
 	}
 
 }

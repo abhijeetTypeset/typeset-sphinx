@@ -19,24 +19,13 @@ import utils.ConfigClass;
 
 public class ActionClass extends ConfigClass {
 
-	public String attribute(By locator, String attrName) {
-		final WebDriverWait wait = new WebDriverWait(driver, 15);
 
-		final WebElement element = driver.findElement(locator);
-
-		return element.getAttribute(attrName);
-
-	}
-
-	public String textContent(By locator) {
-		return driver.findElement(locator).getText();
-	}
-
-	public boolean contains(By locator, String expectedContent) {
+	public boolean contains(By locator, String expectedContent, String elementNumber) {
 		if (locator == null) {
 			return true;
 		}
-		String observedContent = driver.findElement(locator).getText();
+		int eNo = getElementNumber(elementNumber);
+		String observedContent = driver.findElements(locator).get(eNo).getText();
 		System.out.println("Obseved content in " + locator + "  is  " + observedContent);
 		if (observedContent.toLowerCase().contains(expectedContent.toLowerCase())) {
 			return true;
@@ -54,11 +43,12 @@ public class ActionClass extends ConfigClass {
 		}
 	}
 
-	public boolean canSee(By locator) {
+	public boolean canSee(By locator, String elementNumber) {
 		if (locator == null) {
 			return true;
 		}
-		if (driver.findElements(locator).size() > 0) {
+		int eNo = getElementNumber(elementNumber); 
+		if (driver.findElements(locator).size() >= eNo) {
 			System.out.println("Can see " + locator);
 			return true;
 		} else {
@@ -69,7 +59,7 @@ public class ActionClass extends ConfigClass {
 	}
 
 	public void visit(String url) {
-		driver.navigate().to("https://typeset.io/accounts/login/");
+		driver.navigate().to(url);
 	}
 
 	public boolean atPage(String url) {
@@ -91,53 +81,17 @@ public class ActionClass extends ConfigClass {
 
 	}
 
-	public void click(By locator) // To click on a locator
+	public void click(By locator, String elementNumber) // To click on a locator
 	{
+		int eNo = getElementNumber(elementNumber); 
 		System.out.println("Clicking " + locator.toString());
 		final WebDriverWait wait = new WebDriverWait(driver, 15);
 		final WebElement element = wait.until(ExpectedConditions.elementToBeClickable(locator));
-		// element.click();
-		driver.findElement(locator).click();
-
+		driver.findElements(locator).get(eNo).click();
 	}
 
-	public WebElement element(By locator) {
-		WebElement element;
-		try {
-			waitForElementVisible(locator);
-			element = driver.findElement(locator);
-		} catch (final NoSuchElementException e) {
-			throw new NoSuchElementException("No Such Element present  " + e.getLocalizedMessage());
-		}
-
-		return element;
-	}
-
-	public String getAllAttributes(WebElement element) {
-		final JavascriptExecutor executor = (JavascriptExecutor) driver;
-		final Object aa = executor.executeScript(
-				"var items = {}; for (index = 0; index < arguments[0].attributes.length; ++index) { items[arguments[0].attributes[index].name] = arguments[0].attributes[index].value }; return items;",
-				element);
-		System.out.println(aa.toString());
-		return aa.toString();
-	}
-
-	public void keyBoardEvent(By locator, Keys event) {
-
-		driver.findElement(locator).sendKeys(event);
-
-	}
-
-	public void Mousehovr(By hoverlocator, By clickLocator) {
-
-		final Actions builder = new Actions(driver);
-		builder.moveToElement(driver.findElement(hoverlocator)).perform();
-		waitForElementVisible(clickLocator);
-		driver.findElement(clickLocator).click();
-
-	}
-
-	public void selectText(By locator) throws InterruptedException {
+	public void selectText(By locator, String elementNumber) throws InterruptedException {
+		int eNo = getElementNumber(elementNumber); 
 		final WebDriverWait wait = new WebDriverWait(driver, 15);
 
 		final WebElement element = driver.findElement(locator);
@@ -147,23 +101,6 @@ public class ActionClass extends ConfigClass {
 		new Actions(driver).moveToElement(element).moveByOffset(-length / 2, 0).clickAndHold().moveByOffset(length, 0)
 				.release().perform();
 
-	}
-
-	public void otherType(By locator, String data) throws InterruptedException {
-		System.out.println("locator " + locator.toString());
-		System.out.println("Type " + data);
-
-		final WebDriverWait wait = new WebDriverWait(driver, 15);
-		final WebElement element = wait.until(ExpectedConditions.elementToBeClickable(locator));
-		try {
-			driver.findElement(locator).click();
-			waitForAShortWhile();
-		} catch (final InvalidElementStateException e) {
-			System.out.println("Exception while clearing");
-			waitForALongWhile();
-		}
-
-		driver.findElement(locator).sendKeys(data);
 	}
 
 	public String substituteKeys(String textData) {
@@ -180,19 +117,30 @@ public class ActionClass extends ConfigClass {
 
 	}
 
-	public void type(By locator, String data) throws InterruptedException {
+	private int getElementNumber(String elementNumber) {
+		int action_no = 0;
+		try {
+			action_no = Integer.parseInt(elementNumber);
+		} catch (Exception e) {
+			System.out.println("Error parsing action _no");
+		}
+		return action_no;
+	}
+
+	public void type(By locator, String data, String elementNumber) throws InterruptedException {
+
+		int eNo = getElementNumber(elementNumber);
 		System.out.println("locator " + locator.toString());
 		final WebDriverWait wait = new WebDriverWait(driver, 15);
 
 		final WebElement element = wait.until(ExpectedConditions.elementToBeClickable(locator));
-		driver.findElement(locator).click();
+		driver.findElements(locator).get(eNo).click();
 		waitForAWhile();
 
 		data = substituteKeys(data);
 
-		
 		System.out.println("Type " + data);
-		new Actions(driver).sendKeys(driver.findElement(locator), data).perform();
+		new Actions(driver).sendKeys(driver.findElements(locator).get(eNo), data).perform();
 
 	}
 
@@ -223,16 +171,6 @@ public class ActionClass extends ConfigClass {
 		}
 	}
 
-	public void waitForElementVisible(By locator) // Waits for an element to be
-	{
-		try {
-			final WebDriverWait wait = new WebDriverWait(driver, 40);
-			wait.until(ExpectedConditions.elementToBeClickable(driver.findElement(locator)));
-		} catch (final TimeoutException e) {
-			throw new TimeoutException("Error message:  " + e.getMessage());
-		}
-
-	}
 
 	public void waitForPage(String urlFraction) // Waits for an element to be
 	{

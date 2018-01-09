@@ -7,10 +7,12 @@ when:
   action_name: widget_1
   action_type: click
   action_data: 
+  action_no: 0
  action_2: 
   action_name: control_18
   action_type: click
-  action_data: 
+  action_data:
+  action_no: 0 
 wait: long
 then:
  screen: screen_5

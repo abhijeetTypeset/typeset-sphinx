@@ -7,6 +7,7 @@ when:
   action_name: control_14
   action_type: click
   action_data: 
+  action_no: 0
 wait: short
 then:
  screen: screen_3
