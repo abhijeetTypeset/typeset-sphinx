@@ -195,14 +195,14 @@ public class TestGenerator {
 		}
 
 		// check is actions is valid
-		for(String key : spec.getWhen().keySet()) {
+		for (String key : spec.getWhen().keySet()) {
 			Action action = spec.getWhen().get(key);
-			if (action.getAction_no()==null) {
+			if (action.getAction_no() == null) {
 				throw new InvalidLiteralException("no action number provided");
 			}
 			try {
-			int actionNo = Integer.parseInt(action.getAction_no());
-			}catch(Exception e) {
+				int actionNo = Integer.parseInt(action.getAction_no());
+			} catch (Exception e) {
 				throw new InvalidLiteralException("action no is not parsable");
 			}
 		}
@@ -225,8 +225,6 @@ public class TestGenerator {
 			}
 
 		}
-		
-		
 
 		return true;
 	}
@@ -609,23 +607,22 @@ public class TestGenerator {
 	}
 
 	private void generateWait(ScaffolingData sdata, String wait) {
-		int waitTime = 0;
+
 		if (wait != null) {
 			if (wait.toLowerCase().equals("short")) {
-				waitTime = 3;
+				sdata.getBlock().invoke(outVar, "println")
+						.arg("=============" + "Waiting for a short interval" + "=============");
+				sdata.getBlock().invoke("waitForAShortWhile");
 			} else if (wait.toLowerCase().equals("normal")) {
-				waitTime = 5;
+				sdata.getBlock().invoke(outVar, "println")
+						.arg("=============" + "Waiting for a while " + "=============");
+				sdata.getBlock().invoke("waitForAWhile");
 			} else if (wait.toLowerCase().equals("long")) {
-				waitTime = 15;
+				sdata.getBlock().invoke(outVar, "println")
+						.arg("=============" + "Waiting for a long interval" + "=============");
+				sdata.getBlock().invoke("waitForALongWhile");
 			}
 		}
-		if (waitTime > 0) {
-			sdata.getBlock().invoke(outVar, "println")
-					.arg("=============" + "Waiting for " + waitTime + " seconds " + "=============");
-			JExpression expr = JExpr.lit(waitTime);
-			sdata.getBlock().invoke("waitTime").arg(expr);
-		}
-
 	}
 
 	private Map<String, GraphNode> getUsedPages(GraphPath<GraphNode, DefaultEdge> path, Spec spec) {
