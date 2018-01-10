@@ -5,6 +5,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import org.openqa.selenium.By;
 import org.openqa.selenium.Keys;
+import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Actions;
@@ -60,7 +61,7 @@ public class ActionClass extends ConfigClass {
 
 		return false;
 	}
-	
+
 	public boolean empty(By locator, String elementNumber) {
 		if (locator == null) {
 			return true;
@@ -90,43 +91,147 @@ public class ActionClass extends ConfigClass {
 
 	}
 
-	
+	public boolean heading(By locator, String elementNumber) {
+		if (locator == null) {
+			return false;
+		}
+
+		int eNo = getElementNumber(elementNumber);
+		WebElement element = driver.findElements(locator).get(eNo);
+
+		return isChildOf(element, "h1");
+	}
+
+	public boolean subheading1(By locator, String elementNumber) {
+		if (locator == null) {
+			return false;
+		}
+
+		int eNo = getElementNumber(elementNumber);
+		WebElement element = driver.findElements(locator).get(eNo);
+
+		return isChildOf(element, "h1");
+	}
+
+	public boolean subheading2(By locator, String elementNumber) {
+		if (locator == null) {
+			return false;
+		}
+
+		int eNo = getElementNumber(elementNumber);
+		WebElement element = driver.findElements(locator).get(eNo);
+
+		return isChildOf(element, "h2");
+	}
+
+	public boolean subheading3(By locator, String elementNumber) {
+		if (locator == null) {
+			return false;
+		}
+
+		int eNo = getElementNumber(elementNumber);
+		WebElement element = driver.findElements(locator).get(eNo);
+
+		return isChildOf(element, "h3");
+	}
+
+	public boolean subheading4(By locator, String elementNumber) {
+		if (locator == null) {
+			return false;
+		}
+
+		int eNo = getElementNumber(elementNumber);
+		WebElement element = driver.findElements(locator).get(eNo);
+
+		return isChildOf(element, "h4");
+	}
+
+	public boolean subheading5(By locator, String elementNumber) {
+		if (locator == null) {
+			return false;
+		}
+
+		int eNo = getElementNumber(elementNumber);
+		WebElement element = driver.findElements(locator).get(eNo);
+
+		return isChildOf(element, "h5");
+	}
+
+	public boolean subheading6(By locator, String elementNumber) {
+		if (locator == null) {
+			return false;
+		}
+
+		int eNo = getElementNumber(elementNumber);
+		WebElement element = driver.findElements(locator).get(eNo);
+
+		return isChildOf(element, "h6");
+	}
+
+	public boolean isChildOf(WebElement element, String tagName) {
+
+		WebElement parent = getParent(element);
+		while (parent != null) {
+			if (parent.getTagName().toLowerCase().equals(tagName.toLowerCase())) {
+				return true;
+			}
+
+			try {
+				parent = getParent(parent);
+			}
+			catch (NoSuchElementException e) {
+				parent = null;
+			}
+
+		}
+
+		return false;
+	}
+
+	private WebElement getParent(WebElement element) throws NoSuchElementException {
+		if (element.getTagName().equals("html")) {
+			throw new NoSuchElementException("No parent found for this");
+		}
+		// System.out.println("Given: " + element.getTagName());
+		return element.findElement(By.xpath("./.."));
+	}
+
 	public void writeAtBegining(By locator, String data, String elementNumber) throws InterruptedException {
 		int eNo = getElementNumber(elementNumber);
 		final WebDriverWait wait = new WebDriverWait(driver, 15);
 		data = substituteKeys(data);
 		System.out.println("Typing "+data);
-		
+
 		final WebElement element = driver.findElements(locator).get(eNo);
 
 		int length = element.getSize().getWidth();
 		String [] movement = new String[length/2];
 		for(int idx = 0; idx<length/2; idx++) {
 			movement[idx] = Keys.ARROW_LEFT + "";
-		} 
+		}
 		new Actions(driver).moveToElement(element).sendKeys(movement).sendKeys(data).perform();
 	}
-	
+
 	public void writeAtEnd(By locator, String data, String elementNumber) throws InterruptedException {
 		int eNo = getElementNumber(elementNumber);
 		final WebDriverWait wait = new WebDriverWait(driver, 15);
 		data = substituteKeys(data);
 		System.out.println("Typing "+data);
-		
+
 		final WebElement element = driver.findElements(locator).get(eNo);
 
 		int length = element.getSize().getWidth();
 		String [] movement = new String[length/2];
 		for(int idx = 0; idx<length/2; idx++) {
 			movement[idx] = Keys.ARROW_RIGHT + "";
-		} 
+		}
 		new Actions(driver).moveToElement(element).sendKeys(movement).sendKeys(data).perform();
 	}
-	
+
 	public void writeAtMiddle(By locator, String data, String elementNumber) throws InterruptedException {
 		type(locator, data, elementNumber);
 	}
-	
+
 	public void selectText(By locator, String elementNumber) throws InterruptedException {
 		int eNo = getElementNumber(elementNumber);
 		final WebDriverWait wait = new WebDriverWait(driver, 15);
