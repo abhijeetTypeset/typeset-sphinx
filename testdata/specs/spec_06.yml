@@ -4,15 +4,13 @@ given:
  assertions: 
 when:
  action_1: 
-  action_name: control_5
+  action_name: control_5;0
   action_type: type
   action_data: 
-  action_no: 0
  action_2: 
-  action_name: control_6
+  action_name: control_6;0
   action_type: click
   action_data:
-  action_no: 0 
 wait: short
 then:
  screen: screen_4

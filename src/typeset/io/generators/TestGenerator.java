@@ -367,6 +367,7 @@ public class TestGenerator {
 			Map<String, Action> actions, String methodName) {
 		ScaffolingData sdata = createMethodScaffolding(codeModel, definedClass, methodName, true);
 
+		
 		if (actions != null && !actions.isEmpty()) {
 			for (String action_tag : actions.keySet()) {
 
