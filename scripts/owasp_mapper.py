@@ -7,14 +7,31 @@
 # python owasp_mapper.py <spec_file_path>
 
 import yaml
-with yaml.load('../testdata/model.yml') as f:
+import sys
+import os
+import re
+
+MODEL_FILE= 'testdata/model.yml'
+
+
+filepath = sys.argv[-1]
+
+with open(os.path.abspath(MODEL_FILE)) as f:
     model = yaml.load(f)
 mapping = {}
-def get_map(d):
-    global mapping
-    for k, v in d.items():
-        if isinstance(v, dict):
-            parent = v
-            get_map(v)
-        else:
-            print (d)
+
+for _k,_v in model.items():
+    if isinstance(_v, dict):
+        for k,v in _v.items():
+            try:
+                mapping[v['id']['locator']]=k
+            except:
+                pass
+
+with open(filepath,'r') as f:
+    content = f.read()
+    content_copy = content
+    for match in re.findall('<(.*)>', content):
+        content_copy = re.sub('<.*>', mapping[match], content_copy)
+with open(filepath, 'w+') as f:
+    f.write(content_copy)

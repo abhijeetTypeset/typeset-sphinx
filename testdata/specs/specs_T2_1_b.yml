@@ -13,7 +13,7 @@ when:
   action_type: click
   action_data: 
  action_3:
-  action_name: <>
+  action_name: control_53
   action_type: type
   action_data: Sample Heading
  
