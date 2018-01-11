@@ -22,13 +22,13 @@ public class ConfigReader {
 	public static List<String> pageImplictFunc = new ArrayList<String>();
 	public static List<String> intermImplictFunc = new ArrayList<String>();
 	public static List<String> controlImplictFunc = new ArrayList<String>();
+	public static List<String> requiresData = new ArrayList<String>();
 	public static List<String> tests = new ArrayList<String>();
 	private static final Logger logger = LogManager.getLogger("ConfigReader");
 
-
 	public static void read(String filename) {
 
-		logger.debug("Reading config file name : "+filename);
+		logger.debug("Reading config file name : " + filename);
 		Properties prop = new Properties();
 		InputStream input = null;
 
@@ -39,8 +39,8 @@ public class ConfigReader {
 			// load a properties file
 			prop.load(input);
 
-			inputDir = prop.getProperty("input-dir").trim();
-			outputDir = prop.getProperty("output-dir").trim();
+			inputDir = System.getProperty("user.dir") + File.separator + prop.getProperty("input-dir").trim();
+			outputDir = System.getProperty("user.dir") + File.separator + prop.getProperty("output-dir").trim();
 			String generateClassesStr = prop.getProperty("generate-classes").trim();
 			if (generateClassesStr != null && generateClassesStr.toLowerCase().equals("true")) {
 				generateClasses = true;
@@ -49,10 +49,10 @@ public class ConfigReader {
 			if (debugModeStr != null && debugModeStr.toLowerCase().equals("true")) {
 				debugMode = true;
 			}
-			logger.debug("Input directory : "+inputDir);
-			logger.debug("Output directory : "+outputDir);
-			logger.debug("Generate classes : "+generateClasses);
-			logger.debug("Debug mode : "+debugMode);
+			logger.debug("Input directory : " + inputDir);
+			logger.debug("Output directory : " + outputDir);
+			logger.debug("Generate classes : " + generateClasses);
+			logger.debug("Debug mode : " + debugMode);
 
 			if (inputDir != null) {
 				File file = new File(inputDir);
@@ -99,15 +99,24 @@ public class ConfigReader {
 				logger.error("Insufficient number of control assertions provided");
 				throw new InvalidConfigException("Insufficient number of control assertions provided");
 			}
-			
+
+			implicit_str = prop.getProperty("requires-data").trim();
+			tempList = listify(implicit_str);
+			if (tempList != null) {
+				requiresData.addAll(tempList);
+			}
+			if (requiresData.size() <= 0) {
+				logger.error("Insufficient number of control assertions provided");
+				throw new InvalidConfigException("Insufficient number of control assertions provided");
+			}
+
 			String test_str = prop.getProperty("tests").trim();
 			List<String> testList = listify(test_str);
-			if(testList != null) {
+			if (testList != null) {
 				tests.addAll(testList);
-			}else {
+			} else {
 				logger.error("no tests found");
 			}
-			
 
 		} catch (IOException ex) {
 			ex.printStackTrace();

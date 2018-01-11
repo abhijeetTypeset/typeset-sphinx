@@ -354,6 +354,15 @@ public class TestGenerator {
 		sdata.getBlock().invoke(outVar, "println").arg("=============" + sdata.getMethod().name() + "=============");
 	}
 
+	private boolean requiresData(String actionType) {
+		for (String rd : ConfigReader.requiresData) {
+			if (actionType.toLowerCase().equals(rd.toLowerCase())) {
+				return true;
+			}
+		}
+		return false;
+	}
+
 	private ScaffolingData generateSpecActions(JCodeModel codeModel, JDefinedClass definedClass,
 			Map<String, Action> actions, String methodName) {
 		ScaffolingData sdata = createMethodScaffolding(codeModel, definedClass, methodName, true);
@@ -366,7 +375,7 @@ public class TestGenerator {
 
 				String actionData = "";
 				String actionNumber = action.getAction_no();
-				if (action.getAction_type().toLowerCase().equals("type")) {
+				if (requiresData(action.getAction_type())) {
 					String userProvidedData = action.getAction_data();
 
 					if (userProvidedData != null && userProvidedData.trim().length() > 0) {
