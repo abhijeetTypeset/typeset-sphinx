@@ -238,6 +238,21 @@ public class ActionClass extends ConfigClass {
 		return false;
 	}
 
+	public boolean enabled(By locator, String text, String elementNumber) {
+		if (locator == null) {
+			return false;
+		}
+		int eNo = getElementNumber(elementNumber);
+		WebElement element = driver.findElements(locator).get(eNo);
+
+		String value = element.getAttribute("data-spx-state");
+		if (value.equals("enabled")) {
+			return true;
+		}
+		return false;
+
+	}
+
 	public void writeAtBegining(By locator, String data, String elementNumber) throws InterruptedException {
 		int eNo = getElementNumber(elementNumber);
 		final WebDriverWait wait = new WebDriverWait(driver, 15);
