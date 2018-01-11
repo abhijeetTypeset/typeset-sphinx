@@ -19,6 +19,8 @@ public class Literal {
 	
 	/** The text data. */
 	private String textData;
+	
+	private String literal_no;
 
 	/**
 	 * Instantiates a new literal.
@@ -27,10 +29,11 @@ public class Literal {
 	 * @param action the action
 	 * @param isNegation the is negation
 	 */
-	public Literal(GraphNode node, String action, boolean isNegation) {
+	public Literal(GraphNode node, String literal_no, String action, boolean isNegation) {
 		super();
 		this.node = node;
 		this.action = action;
+		this.literal_no = literal_no;
 		this.isNegation = isNegation;
 		this.textData = null;
 	}
@@ -43,10 +46,11 @@ public class Literal {
 	 * @param isNegation the is negation
 	 * @param textData the text data
 	 */
-	public Literal(GraphNode node, String action, boolean isNegation, String textData) {
+	public Literal(GraphNode node, String literal_no, String action,  boolean isNegation, String textData) {
 		super();
 		this.node = node;
 		this.action = action;
+		this.literal_no = literal_no;
 		this.isNegation = isNegation;
 		this.textData = textData;
 	}

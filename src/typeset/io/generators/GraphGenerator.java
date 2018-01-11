@@ -364,28 +364,43 @@ public class GraphGenerator {
 		}
 
 		Literal literal = null;
-		GraphNode node = getNodeByKey(parts[0].trim());
+		String[] temp = parts[0].trim().split(";");
+		if (temp.length > 2) {
+			throw new InvalidLiteralException("invalid literal " + parts[0].trim());
+		}
+		String literal_name = temp[0].trim();
+		String literal_number = "0";
+		if (temp.length == 2) {
+			literal_number = temp[1].trim();
+		}
+
+		GraphNode node = getNodeByKey(literal_name);
 
 		String action = parts[2].trim();
 		boolean isNegation = parts[1].toLowerCase().trim().equals("not");
 
 		if (parts.length == 3) {
-			literal = new Literal(node, action, isNegation);
+			literal = new Literal(node, literal_number, action, isNegation);
 		} else {
-			literal = new Literal(node, action, isNegation, parts[3].trim());
+			literal = new Literal(node, literal_number, action, isNegation, parts[3].trim());
 		}
 		return literal;
 	}
 
 	boolean isValidAction(GraphNode node, String action) {
-		List<String> assertions = node.getImplictAssertions();
-		for (String asrt : assertions) {
-			if (asrt.equals(action)) {
-				return true;
-			}
-		}
-
-		return false;
+		// TODO : refine and then enable
+		return true;
+//		
+//		List<String> assertions = node.getImplictAssertions();
+//		
+//		
+//		for (String asrt : assertions) {
+//			if (asrt.equals(action)) {
+//				return true;
+//			}
+//		}
+//
+//		return false;
 	}
 
 	/**
@@ -690,7 +705,7 @@ public class GraphGenerator {
 		file.mkdirs();
 
 		String graphFilePath = graphOutputDir + File.separator + "graph.dot";
-		
+
 		ComponentNameProvider<GraphNode> vertexIDProvider = new IntegerComponentNameProvider<GraphNode>();
 		ComponentNameProvider<GraphNode> vertexLabelProvider = new StringComponentNameProvider<GraphNode>();
 
