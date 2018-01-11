@@ -5,6 +5,10 @@ given:
   - control_53;0%as%canSee
 when:
  action_1: 
+  action_name: control_9;0
+  action_type: click
+  action_data: 
+ action_2: 
   action_name: control_53;0
   action_type: click
   action_data: 
@@ -12,4 +16,4 @@ wait: short
 then:
  screen: screen_5
  assertions: 
-  - widget_3%as%state%enabled
+  - widget_3%as%isEnabled

@@ -167,6 +167,9 @@ public class TestGenerator {
 
 	private boolean isTopLevelTest(String sf) {
 		for (String test : ConfigReader.tests) {
+			if (test.trim().length() <= 0) {
+				continue;
+			}
 			System.out.println(test + " : " + sf);
 			if (sf.endsWith(test)) {
 				return true;
@@ -367,7 +370,6 @@ public class TestGenerator {
 			Map<String, Action> actions, String methodName) {
 		ScaffolingData sdata = createMethodScaffolding(codeModel, definedClass, methodName, true);
 
-		
 		if (actions != null && !actions.isEmpty()) {
 			for (String action_tag : actions.keySet()) {
 
@@ -962,6 +964,10 @@ public class TestGenerator {
 	public Map<String, String> generateTest(List<Spec> specList)
 			throws IOException, JClassAlreadyExistsException, InvalidKeySpecException, IllegalAccessException,
 			InvocationTargetException, CloneNotSupportedException, ClassNotFoundException {
+		if(specList.isEmpty()) {
+			logger.info("Spec list is empty, not generating tests");
+		}
+		
 		for (Spec spec : specList) {
 			GraphPath<GraphNode, DefaultEdge> path = getFeasiblePath(spec);
 			logger.info("Resolving spec " + spec);
