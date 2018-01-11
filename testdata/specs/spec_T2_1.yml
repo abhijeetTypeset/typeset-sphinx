@@ -1,0 +1,15 @@
+name: headingTest
+given: 
+ screen: screen_5
+ assertions: 
+  - paragraph;0%as%canSee
+when:
+ action_1: 
+  action_name: paragraph;0
+  action_type: click
+  action_data: 
+wait: short
+then:
+ screen: screen_5
+ assertions: 
+  - toolbar_text-type%as%state%enabled
