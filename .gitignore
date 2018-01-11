@@ -4,3 +4,4 @@ config.properties
 output/
 res/baseDirStructure/FlyPaper/.project
 sphinx.log
+.DS_Store
