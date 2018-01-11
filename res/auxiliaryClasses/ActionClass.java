@@ -3,6 +3,9 @@ package controller;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.Iterator;
+import java.util.List;
+
 import org.openqa.selenium.By;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.NoSuchElementException;
@@ -193,6 +196,46 @@ public class ActionClass extends ConfigClass {
 		}
 		// System.out.println("Given: " + element.getTagName());
 		return element.findElement(By.xpath("./.."));
+	}
+
+	public boolean containsBold(By locator, String text, String elementNumber) {
+		if (locator == null) {
+			return false;
+		}
+		int eNo = getElementNumber(elementNumber);
+		WebElement element = driver.findElements(locator).get(eNo);
+
+		List<WebElement> spans = element.findElements(By.cssSelector("span.sc-strong"));
+
+		Iterator<WebElement> iterator = spans.iterator();
+		while (iterator.hasNext()) {
+			WebElement span = iterator.next();
+			if (span.getText().equals(text)) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	public boolean containsItalic(By locator, String text, String elementNumber) {
+		if (locator == null) {
+			return false;
+		}
+		int eNo = getElementNumber(elementNumber);
+		WebElement element = driver.findElements(locator).get(eNo);
+
+		List<WebElement> spans = element.findElements(By.cssSelector("span.sc-emphasis"));
+
+		Iterator<WebElement> iterator = spans.iterator();
+		while (iterator.hasNext()) {
+			WebElement span = iterator.next();
+			if (span.getText().equals(text)) {
+				return true;
+			}
+		}
+
+		return false;
 	}
 
 	public void writeAtBegining(By locator, String data, String elementNumber) throws InterruptedException {
