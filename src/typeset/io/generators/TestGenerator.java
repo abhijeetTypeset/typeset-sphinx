@@ -460,8 +460,8 @@ public class TestGenerator {
 		logger.info("Contents of stack " + stack);
 	}
 
-	private ScaffolingData generatePostCondition(JCodeModel codeModel, JDefinedClass definedClass, State then,
-			String methodName) {
+	private ScaffolingData generatePostCondition(Spec spec, JCodeModel codeModel, JDefinedClass definedClass,
+			State then, String methodName) {
 		ScaffolingData sdata = createMethodScaffolding(codeModel, definedClass, methodName, true);
 
 		GraphNode pageNode = usedPages.get(graphGenerator.getNodeByKey(then.getScreen()).getName());
@@ -480,7 +480,7 @@ public class TestGenerator {
 		List<String> explicitAssertions = then.getAssertions();
 		if (explicitAssertions != null) {
 			ExplicitAssertion parsedEXplicit = graphGenerator.parsePrecondition(explicitAssertions);
-			generatePostExplicitAssertions(sdata, parsedEXplicit);
+			generateExplicitAssertions(sdata, parsedEXplicit);
 		}
 
 		// add closing asserts
@@ -501,12 +501,17 @@ public class TestGenerator {
 		return true;
 	}
 
-	private void generatePostExplicitAssertions(ScaffolingData sdata, ExplicitAssertion parsedEXplicit) {
+	private void generateExplicitAssertions(ScaffolingData sdata, ExplicitAssertion parsedEXplicit) {
 
-		Literal literal = parsedEXplicit.getclauses().get(0).getLiterals().get(0);
-		logger.info("explicit assertion :  " + literal);
+		for (Clause clause : parsedEXplicit.getclauses()) {
+			for (Literal literal : clause.getLiterals()) {
+				logger.info("explicit assertion :  " + literal);
+				assert_element(sdata, literal.getNode(), literal.getAction(), literal.getTextData(),
+						defaultElementNumber);
 
-		assert_element(sdata, literal.getNode(), literal.getAction(), literal.getTextData(), defaultElementNumber);
+			}
+
+		}
 
 	}
 
@@ -542,7 +547,7 @@ public class TestGenerator {
 			argumentExpr = JExpr.invoke(activePageVariable, getterName);
 		}
 
-		if (activeNode.getNodeType() == NodeType.CONTROL) {
+		if (activeNode.getNodeType() == NodeType.CONTROL || activeNode.getNodeType() == NodeType.WIDGET) {
 			argumentExpr = JExpr.invoke(argumentExpr, getterName);
 		}
 
@@ -680,7 +685,7 @@ public class TestGenerator {
 		}
 	}
 
-	private ScaffolingData generatePrecondition(JCodeModel codeModel, JDefinedClass definedClass,
+	private ScaffolingData generatePrecondition(Spec spec, JCodeModel codeModel, JDefinedClass definedClass,
 			GraphPath<GraphNode, DefaultEdge> path, String methodName) {
 
 		ScaffolingData sdata = createMethodScaffolding(codeModel, definedClass, methodName, true);
@@ -720,6 +725,14 @@ public class TestGenerator {
 		setActive(lastNode);
 
 		assert_element(sdata, lastNode, null, null, defaultElementNumber);
+
+		// ExplicitAssertion eassert = spec.getGiven().getParsedAssertion();
+		// for (Clause clause : eassert.getclauses()) {
+		// for(Literal literal : clause.getLiterals()) {
+		// assert_element(sdata, literal.getNode(), literal.getAction(),
+		// literal.getTextData(), defaultElementNumber);
+		// }
+		// }
 
 		// add closing asserts
 		addClosingAssert(sdata);
@@ -765,7 +778,7 @@ public class TestGenerator {
 		if (specChainCounter > 0) {
 			methodName += "_" + specChainCounter;
 		}
-		ScaffolingData thenSdata = generatePostCondition(codeModel, definedClass, spec.getThen(), methodName);
+		ScaffolingData thenSdata = generatePostCondition(spec, codeModel, definedClass, spec.getThen(), methodName);
 
 		call(sdata, thenSdata);
 		logger.info("=========== post condtion generated ===========");
@@ -925,7 +938,7 @@ public class TestGenerator {
 		method.annotate(org.testng.annotations.Test.class);
 
 		// generate GIVEN
-		ScaffolingData givenSdata = generatePrecondition(codeModel, definedClass, path, "given");
+		ScaffolingData givenSdata = generatePrecondition(spec, codeModel, definedClass, path, "given");
 
 		call(sdata, givenSdata);
 		logger.info("=========== pre condtion generated ===========");
@@ -964,10 +977,10 @@ public class TestGenerator {
 	public Map<String, String> generateTest(List<Spec> specList)
 			throws IOException, JClassAlreadyExistsException, InvalidKeySpecException, IllegalAccessException,
 			InvocationTargetException, CloneNotSupportedException, ClassNotFoundException {
-		if(specList.isEmpty()) {
+		if (specList.isEmpty()) {
 			logger.info("Spec list is empty, not generating tests");
 		}
-		
+
 		for (Spec spec : specList) {
 			GraphPath<GraphNode, DefaultEdge> path = getFeasiblePath(spec);
 			logger.info("Resolving spec " + spec);

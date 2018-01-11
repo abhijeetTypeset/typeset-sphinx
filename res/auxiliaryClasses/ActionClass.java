@@ -72,7 +72,6 @@ public class ActionClass extends ConfigClass {
 		if (observedContent.length() == 0) {
 			return true;
 		}
-
 		return false;
 	}
 
