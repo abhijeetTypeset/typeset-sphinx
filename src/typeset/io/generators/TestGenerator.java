@@ -374,7 +374,7 @@ public class TestGenerator {
 			for (String action_tag : actions.keySet()) {
 
 				Action action = actions.get(action_tag);
-				String invokeFunction = action.getAction_name();
+				String invokeFunction = action.getAction_type();
 				GraphNode actionNode = graphGenerator.getNodeByKey(action.getAction_name());
 
 				String actionData = "";
