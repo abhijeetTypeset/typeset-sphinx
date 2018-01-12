@@ -238,7 +238,7 @@ public class ActionClass extends ConfigClass {
 		return false;
 	}
 
-	public boolean enabled(By locator, String text, String elementNumber) {
+	public boolean enabled(By locator, String elementNumber) {
 		if (locator == null) {
 			return false;
 		}
@@ -339,9 +339,64 @@ public class ActionClass extends ConfigClass {
 		new Actions(driver).sendKeys(driver.findElements(locator).get(eNo), data).perform();
 
 	}
-	
-	
-	public boolean hasElementsTotal(By locator, String totalCount) 
+
+	public void editComponentCaption(By locator, String data, String elementNumber) throws InterruptedException {
+
+		int eNo = getElementNumber(elementNumber);
+		final WebDriverWait wait = new WebDriverWait(driver, 15);
+
+		final WebElement element = wait.until(ExpectedConditions.elementToBeClickable(locator));
+		WebElement component = driver.findElements(locator).get(eNo);
+		By captionRelLocator = By.xpath("//span[@data-spx-ctl-id=\"editor_caption-text\"]");
+		List<WebElement> foundCaptions = component.findElements(captionRelLocator);
+		if (foundCaptions.size() == 0) {
+			System.out.println("Didn't find any captions so returning");
+			return;
+		}
+		WebElement caption = foundCaptions.get(0);
+		System.out.println("Found caption " + caption.toString());
+		System.out.println("Going to click first time");
+		caption.click();
+
+		// Extracting the component again since the table is re-rendered upon click
+		component = driver.findElements(locator).get(eNo);
+		caption = component.findElement(captionRelLocator);
+		System.out.println("Going to click second time");
+		caption.click();
+
+		data = substituteKeys(data);
+		System.out.println("Type " + data);
+		new Actions(driver).sendKeys(caption, data).perform();
+
+
+	}
+
+	public boolean componentCaptionContains(By locator, String expectedContent, String elementNumber) {
+		if (locator == null) {
+			return false;
+		}
+		int eNo = getElementNumber(elementNumber);
+
+		WebElement component = driver.findElements(locator).get(eNo);
+		By captionRelLocator = By.xpath("//span[@data-spx-ctl-id=\"editor_caption-text\"]");
+		List<WebElement> foundCaptions = component.findElements(captionRelLocator);
+		if (foundCaptions.size() == 0) {
+			System.out.println("Didn't find any captions so returning");
+			return false;
+		}
+		WebElement caption = foundCaptions.get(0);
+
+		String observedContent = caption.getText();
+		System.out.println("Obseved content in " + locator + "  caption is  " + observedContent);
+		if (observedContent.toLowerCase().contains(expectedContent.toLowerCase())) {
+			return true;
+		}
+
+		return false;
+	}
+
+
+	public boolean hasElementsTotal(By locator, String totalCount)
 	{
 		System.out.println("checking count for " + locator.toString());
 		final WebDriverWait wait = new WebDriverWait(driver, 15);
@@ -352,7 +407,7 @@ public class ActionClass extends ConfigClass {
 			return false;
 		}
 	}
-	
+
 
 	public void waitForALongWhile() {
 		try {
