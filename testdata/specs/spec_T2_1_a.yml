@@ -1,4 +1,4 @@
-name: Paragraph Type Drowdown State Test
+name: ParagraphTypeDrowdownStateTest
 given: 
  screen: screen_5
  assertions: 

@@ -1,4 +1,4 @@
-name: Paragraph Type Drowdown Heading Test
+name: ParagraphTypeDrowdownHeadingTest
 given: 
  screen: screen_5
  assertions: 
