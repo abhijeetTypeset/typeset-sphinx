@@ -51,7 +51,6 @@ public class ModelReader {
 
 		Set<String> allKeys = new TreeSet();
 		for (String c : model.getControls().keySet()) {
-			System.out.println(" control "+c);
 			if (allKeys.contains(c)) {
 				logger.error(c + " key already used in the model");
 				throw new InvalidModelException(c + " key already used in the model");

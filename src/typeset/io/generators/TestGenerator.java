@@ -374,6 +374,7 @@ public class TestGenerator {
 			for (String action_tag : actions.keySet()) {
 
 				Action action = actions.get(action_tag);
+				String invokeFunction = action.getAction_name();
 				GraphNode actionNode = graphGenerator.getNodeByKey(action.getAction_name());
 
 				String actionData = "";
@@ -387,11 +388,11 @@ public class TestGenerator {
 						actionData = graphGenerator.getNodeByKey(action.getAction_name()).getAction_data();
 					}
 
-					invoke_element(sdata, actionNode, actionData, actionNumber);
+					invoke_element(sdata, actionNode, actionData, actionNumber,invokeFunction);
 					logger.info("Execute " + action_tag + " " + action + " with " + actionData);
 				} else {
 
-					invoke_element(sdata, actionNode, actionNode.getAction_data(), actionNumber);
+					invoke_element(sdata, actionNode, actionNode.getAction_data(), actionNumber, invokeFunction);
 					logger.info("Execute " + action_tag + " " + action);
 				}
 
@@ -586,8 +587,8 @@ public class TestGenerator {
 		return false;
 	}
 
-	private void invoke_element(ScaffolingData sdata, GraphNode activeNode, String actionData, String elementNumber) {
-		JInvocation invokeStatement = sdata.getBlock().invoke(activeNode.getAction_type());
+	private void invoke_element(ScaffolingData sdata, GraphNode activeNode, String actionData, String elementNumber, String invokeFunction) {
+		JInvocation invokeStatement = sdata.getBlock().invoke(invokeFunction);
 		JExpression argumentExpr = null;
 		boolean flag = true;
 
@@ -718,7 +719,7 @@ public class TestGenerator {
 
 			} else {
 
-				invoke_element(sdata, srcNode, srcNode.getAction_data(), defaultElementNumber);
+				invoke_element(sdata, srcNode, srcNode.getAction_data(), defaultElementNumber, srcNode.getAction_type());
 			}
 		}
 
