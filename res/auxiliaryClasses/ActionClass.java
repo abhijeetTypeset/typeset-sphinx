@@ -346,7 +346,7 @@ public class ActionClass extends ConfigClass {
 		System.out.println("checking count for " + locator.toString());
 		final WebDriverWait wait = new WebDriverWait(driver, 15);
 		final WebElement element = wait.until(ExpectedConditions.elementToBeClickable(locator));
-		if (driver.findElements(locator).size() == totalCount) {
+		if (driver.findElements(locator).size() == getElementNumber(totalCount)) {
 			return true;
 		}else {
 			return false;

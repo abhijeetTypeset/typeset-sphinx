@@ -1,4 +1,4 @@
-name: Paragraph Type Drowdown Heading Test
+name: ParagraphTypeDrowdownSubheading1Test
 given: 
  screen: screen_5
  assertions: 
@@ -17,11 +17,11 @@ when:
   action_type: click
   action_data: 
  action_4: 
-  action_name: control_40
+  action_name: control_41
   action_type: click
   action_data:  
 wait: short
 then:
  screen: screen_5
  assertions: 
-  - control_40%as%contains%Sample Heading
+  - control_41;1%as%contains%Sample Heading

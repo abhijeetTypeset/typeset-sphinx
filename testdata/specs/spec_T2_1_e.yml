@@ -1,19 +1,27 @@
-name: ParagraphTypeDrowdownStateTest
+name: ParagraphTypeDrowdownSubheading3Test
 given: 
  screen: screen_5
  assertions: 
   - control_53;0%as%canSee
-when:
+when: 
  action_1: 
   action_name: control_9;0
   action_type: click
   action_data: 
  action_2: 
   action_name: control_53;0
+  action_type: type
+  action_data: Sample Heading\n
+ action_3: 
+  action_name: widget_3
   action_type: click
   action_data: 
+ action_4: 
+  action_name: control_43
+  action_type: click
+  action_data:  
 wait: short
 then:
  screen: screen_5
  assertions: 
-  - widget_3%as%isEnabled
+  - control_43;1%as%contains%Sample Heading

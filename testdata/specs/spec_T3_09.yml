@@ -1,0 +1,19 @@
+name: applySuperscriptFace
+given: 
+ screen: screen_5
+ assertions:
+when: 
+ action_3: 
+  action_name: control_53;0
+  action_type: selectText
+  action_data:
+ action_4: 
+  action_name: control_58
+  action_type: click
+  action_data:
+wait: no
+then:
+ screen: screen_5
+ assertions: 
+  - control_57;0%as%canSee
+  - control_53;0%not%canSee
