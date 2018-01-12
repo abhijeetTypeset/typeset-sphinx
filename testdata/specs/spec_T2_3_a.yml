@@ -1,4 +1,4 @@
-name: BulletPointConversionTest
+name: OrderedListItemConversionTest
 given: 
  screen: screen_5
  assertions: 
@@ -16,12 +16,12 @@ when:
   action_type: type
   action_data: bullet point 1
  action_3:
-  action_name: control_61
+  action_name: control_63
   action_type: click
   action_data: 
 wait: short
 then:
  screen: screen_5
  assertions: 
-  - control_62%as%contains%bullet point 1
+  - control_64;0%as%contains%bullet point 1
   
