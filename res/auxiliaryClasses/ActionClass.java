@@ -339,6 +339,21 @@ public class ActionClass extends ConfigClass {
 		new Actions(driver).sendKeys(driver.findElements(locator).get(eNo), data).perform();
 
 	}
+	
+	
+	public boolean hasElementsTotal(By locator, String totalCount) 
+	{
+		int eNo = getElementNumber(elementNumber);
+		System.out.println("checking count for " + locator.toString());
+		final WebDriverWait wait = new WebDriverWait(driver, 15);
+		final WebElement element = wait.until(ExpectedConditions.elementToBeClickable(locator));
+		if (driver.findElements(locator).size() == totalCount) {
+			return true;
+		}else {
+			return false;
+		}
+	}
+	
 
 	public void waitForALongWhile() {
 		try {
