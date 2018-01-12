@@ -1,0 +1,16 @@
+name: enableSubscriptFace
+given: 
+ screen: screen_5
+ assertions:
+when: 
+ action_3: 
+  action_name: control_53;0
+  action_type: selectText
+  action_data:
+
+wait: no
+then:
+ screen: screen_5
+ assertions: 
+  - control_60;0%as%enabled
+  - control_53;0%as%canSee
