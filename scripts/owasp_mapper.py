@@ -27,11 +27,15 @@ for _k,_v in model.items():
                 mapping[v['id']['locator']]=k
             except:
                 pass
+# print(mapping)
 
 with open(filepath,'r') as f:
     content = f.read()
     content_copy = content
+    match = None
     for match in re.findall('<(.*)>', content):
-        content_copy = re.sub('<.*>', mapping[match], content_copy)
+        print ("{} -> {}".format(match, mapping[match]))
+        content_copy = re.sub('<{}>'.format(match), mapping[match], content_copy)
+        print (content_copy)
 with open(filepath, 'w+') as f:
     f.write(content_copy)
