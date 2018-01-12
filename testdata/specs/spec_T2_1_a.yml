@@ -16,4 +16,4 @@ wait: short
 then:
  screen: screen_5
  assertions: 
-  - widget_3%as%isEnabled
+  - widget_3%as%enabled
