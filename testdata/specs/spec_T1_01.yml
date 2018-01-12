@@ -1,0 +1,15 @@
+name: ArticleTitle
+given: 
+ screen: screen_5
+ assertions: 
+  - control_29;0%as%canSee
+when:
+ action_1: 
+  action_name: control_29
+  action_type: type
+  action_data: "\n"
+wait: 
+then:
+ screen: screen_5
+ assertions: 
+  - control_53;0%as%canSee
