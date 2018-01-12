@@ -1,4 +1,4 @@
-name: BoldTextCursorAtEnd
+name: BoldTextCursorAtMiddle
 given: 
  screen: screen_5
  assertions: 
@@ -6,10 +6,11 @@ given:
 when:
  action_1: 
   action_name: control_54
-  action_type: writeAtEnd
+  action_type: writeAtMiddle
   action_data: "\n"
 wait: 
 then:
  screen: screen_5
  assertions: 
   - control_53;0%as%canSee
+  - control_54;1%as%canSee

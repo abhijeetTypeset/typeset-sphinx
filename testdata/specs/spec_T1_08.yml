@@ -1,11 +1,11 @@
-name: BoldTextCursorAtEnd
+name: SuperscriptTextCursorAtEnd
 given: 
  screen: screen_5
  assertions: 
-  - control_54;0%as%canSee
+  - control_57;0%as%canSee
 when:
  action_1: 
-  action_name: control_54
+  action_name: control_57
   action_type: writeAtEnd
   action_data: "\n"
 wait: 

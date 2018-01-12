@@ -1,15 +1,16 @@
-name: BoldTextCursorAtEnd
+name: ItalicTextCursorAtMiddle
 given: 
  screen: screen_5
  assertions: 
-  - control_54;0%as%canSee
+  - control_55;0%as%canSee
 when:
  action_1: 
-  action_name: control_54
-  action_type: writeAtEnd
+  action_name: control_55
+  action_type: writeAtMiddle
   action_data: "\n"
 wait: 
 then:
  screen: screen_5
  assertions: 
   - control_53;0%as%canSee
+  - control_55;1%as%canSee
