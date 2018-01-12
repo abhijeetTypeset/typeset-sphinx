@@ -8,22 +8,22 @@ when:
   action_type: click
   action_data: 
  action_1:  
-  action_name: <editor_paragraph>
+  action_name: control_53
   action_type: type
   action_data: \n
  action_2:
-  action_name: <toolbar_unordered-list>
+  action_name: control_61
   action_type: click
   action_data: 
  action_3: 
-  action_name: <editor_ul-item>;0
+  action_name: control_62;0
   action_type: type
   action_data: bullet point 1\nbullet point 2
 wait: short
 then:
  screen: screen_5
  assertions: 
-  - <editor_ul-item>;0%as%contains%bullet point 1
-  - <editor_ul-item>;1%as%contains%bullet point 2
-  - <editor_ul-item>%as%hasElementsTotal%2
+  - control_62;0%as%contains%bullet point 1
+  - control_62;1%as%contains%bullet point 2
+  - control_62%as%hasElementsTotal%2
   
