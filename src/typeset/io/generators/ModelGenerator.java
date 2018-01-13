@@ -2,7 +2,9 @@ package typeset.io.generators;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -30,32 +32,36 @@ import typeset.io.model.NodeType;
 import typeset.io.readers.ConfigReader;
 
 /**
- * The Class ModelGenerator.
- * Generate Java Classes representing product model from the graph model
+ * The Class ModelGenerator. Generate Java Classes representing product model
+ * from the graph model
  */
 public class ModelGenerator {
 	private static final Logger logger = LogManager.getLogger("ModelGenerator");
 
 	/** The tgraph. */
 	private DefaultDirectedGraph<GraphNode, DefaultEdge> tgraph;
-	
+
 	/** The node class map. */
 	private Map<GraphNode, JDefinedClass> nodeClassMap = new HashMap<>();
-	
+
 	/** The output dir. */
 	private String outputDir;
-	
+
 	/** The defined abstract node. */
 	private JDefinedClass definedAbstractNode;
-	
+
 	/** The action class. */
 	private JDefinedClass actionClass;
+
+	private Map<GraphNode, List<String>> implementedGetters = new HashMap<>();
 
 	/**
 	 * Instantiates a new model generator.
 	 *
-	 * @param tgraph the tgraph
-	 * @param outputDir the output dir
+	 * @param tgraph
+	 *            the tgraph
+	 * @param outputDir
+	 *            the output dir
 	 */
 	public ModelGenerator(DefaultDirectedGraph<GraphNode, DefaultEdge> tgraph) {
 		this.tgraph = tgraph;
@@ -66,8 +72,10 @@ public class ModelGenerator {
 	/**
 	 * Generate classes representing elements of the W.A.S.P. model.
 	 *
-	 * @throws IOException Signals that an I/O exception has occurred.
-	 * @throws JClassAlreadyExistsException the j class already exists exception
+	 * @throws IOException
+	 *             Signals that an I/O exception has occurred.
+	 * @throws JClassAlreadyExistsException
+	 *             the j class already exists exception
 	 */
 	public void generateClasses() throws IOException, JClassAlreadyExistsException {
 
@@ -132,8 +140,10 @@ public class ModelGenerator {
 	/**
 	 * Generate a bunch of auxiliary classes useful for test execution
 	 *
-	 * @throws JClassAlreadyExistsException the j class already exists exception
-	 * @throws IOException Signals that an I/O exception has occurred.
+	 * @throws JClassAlreadyExistsException
+	 *             the j class already exists exception
+	 * @throws IOException
+	 *             Signals that an I/O exception has occurred.
 	 */
 	private void generateAuxiliaryClasses() throws JClassAlreadyExistsException, IOException {
 		JCodeModel cm = new JCodeModel();
@@ -162,8 +172,10 @@ public class ModelGenerator {
 	/**
 	 * Generate abstract classes representing W.A.S.P. elements
 	 *
-	 * @throws JClassAlreadyExistsException the j class already exists exception
-	 * @throws IOException Signals that an I/O exception has occurred.
+	 * @throws JClassAlreadyExistsException
+	 *             the j class already exists exception
+	 * @throws IOException
+	 *             Signals that an I/O exception has occurred.
 	 */
 	private void generateAbstractClasses() throws JClassAlreadyExistsException, IOException {
 		JCodeModel cm = new JCodeModel();
@@ -186,7 +198,8 @@ public class ModelGenerator {
 	/**
 	 * Copy directory structure and base classes.
 	 *
-	 * @throws IOException Signals that an I/O exception has occurred.
+	 * @throws IOException
+	 *             Signals that an I/O exception has occurred.
 	 */
 	private void copyDirectoryStructure() throws IOException {
 
@@ -199,9 +212,12 @@ public class ModelGenerator {
 	/**
 	 * Generate class file for a given graph node
 	 *
-	 * @param gnode the gnode
-	 * @throws JClassAlreadyExistsException the j class already exists exception
-	 * @throws IOException Signals that an I/O exception has occurred.
+	 * @param gnode
+	 *            the gnode
+	 * @throws JClassAlreadyExistsException
+	 *             the j class already exists exception
+	 * @throws IOException
+	 *             Signals that an I/O exception has occurred.
 	 */
 	private void generateClassFile(GraphNode gnode) throws JClassAlreadyExistsException, IOException {
 		logger.info("===| Generated class for " + gnode);
@@ -281,24 +297,31 @@ public class ModelGenerator {
 				JFieldVar field = definedClass.field(JMod.PRIVATE, exitingClassNode, "var" + targetNode.getName());
 				JExpression init = JExpr._new(exitingClassNode);
 				field.init(init);
-				JMethod getterMethod = definedClass.method(JMod.PUBLIC, exitingClassNode,
-						GeneratorUtilities.getGetterName(targetNode.getName()));
+				
+				String getterName = GeneratorUtilities.getGetterName(targetNode.getName());
+				
+				JMethod getterMethod = definedClass.method(JMod.PUBLIC, exitingClassNode, getterName);
 				JBlock block = getterMethod.body();
 				block._return(field);
 
+				addGetter(gnode, getterName);
 			}
 
 			// TODO: add missing variables
 			for (GraphNode noEdgeNode : gnode.getNoEdges()) {
 				logger.info("to add edges : " + noEdgeNode.getName());
+
+				String getterName = GeneratorUtilities.getGetterName(noEdgeNode.getName());
+
 				JDefinedClass exitingClassNode = nodeClassMap.get(noEdgeNode);
 				JFieldVar field = definedClass.field(JMod.PRIVATE, exitingClassNode, "var" + noEdgeNode.getName());
 				JExpression init = JExpr._new(exitingClassNode);
 				field.init(init);
-				JMethod getterMethod = definedClass.method(JMod.PUBLIC, exitingClassNode,
-						GeneratorUtilities.getGetterName(noEdgeNode.getName()));
+				JMethod getterMethod = definedClass.method(JMod.PUBLIC, exitingClassNode, getterName);
 				JBlock block = getterMethod.body();
 				block._return(field);
+
+				addGetter(gnode, getterName);
 			}
 		}
 
@@ -313,6 +336,26 @@ public class ModelGenerator {
 		cm.build(file);
 	}
 
+	private void addGetter(GraphNode gnode, String getterName) {
+		if (implementedGetters.containsKey(gnode)) {
+			List<String> temp = implementedGetters.get(gnode);
+			temp.add(getterName);
+			implementedGetters.put(gnode, temp);
+		}else {
+			List<String> temp = new ArrayList<>();
+			temp.add(getterName);
+			implementedGetters.put(gnode, temp);
+		}
+	}
+	
+	public boolean containsGetter(GraphNode gnode, String getterName) {
+		List<String> temp = implementedGetters.get(gnode);
+		if(temp.contains(getterName)){
+			return true;
+		}
+		return false;
+	}
+
 	/**
 	 * Gets the node class map.
 	 *
@@ -325,7 +368,8 @@ public class ModelGenerator {
 	/**
 	 * Sets the node class map.
 	 *
-	 * @param nodeClassMap the node class map
+	 * @param nodeClassMap
+	 *            the node class map
 	 */
 	public void setNodeClassMap(Map<GraphNode, JDefinedClass> nodeClassMap) {
 		this.nodeClassMap = nodeClassMap;

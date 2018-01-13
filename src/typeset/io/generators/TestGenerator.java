@@ -68,6 +68,7 @@ public class TestGenerator {
 
 	// program state
 	private Map<GraphNode, JFieldVar> definedPages = null;
+	private Map<JFieldVar, GraphNode> fieldVarToNodeMap = null;
 	private Stack<GraphNode> stack = null;
 	private JFieldVar activePageVariable = null;
 	private Map<String, GraphNode> usedPages = null;
@@ -388,7 +389,7 @@ public class TestGenerator {
 						actionData = graphGenerator.getNodeByKey(action.getAction_name()).getAction_data();
 					}
 
-					invoke_element(sdata, actionNode, actionData, actionNumber,invokeFunction);
+					invoke_element(sdata, actionNode, actionData, actionNumber, invokeFunction);
 					logger.info("Execute " + action_tag + " " + action + " with " + actionData);
 				} else {
 
@@ -530,25 +531,28 @@ public class TestGenerator {
 		logger.info("asserting for element " + activeNode);
 		JExpression argumentExpr = null;
 		boolean flag = true;
-
+		GraphNode lastNodePoped = null;
 		for (GraphNode stackNode : stack) {
 			String getterName = GeneratorUtilities.getGetterName(stackNode.getName());
 			if (flag) {
-
+				checkInvocation(activePageVariable, getterName);
 				argumentExpr = JExpr.invoke(activePageVariable, getterName);
 				flag = false;
 			} else {
+				checkInvocation(lastNodePoped, getterName);
 				argumentExpr = JExpr.invoke(argumentExpr, getterName);
 			}
 			logger.info("Obtained from the stack " + stackNode + " getter name " + getterName);
-
+			lastNodePoped = stackNode;
 		}
 		String getterName = GeneratorUtilities.getGetterName(activeNode.getName());
 		if (flag) {
+			checkInvocation(activePageVariable, getterName);
 			argumentExpr = JExpr.invoke(activePageVariable, getterName);
 		}
 
 		if (activeNode.getNodeType() == NodeType.CONTROL || activeNode.getNodeType() == NodeType.WIDGET) {
+			checkInvocation(lastNodePoped, getterName);
 			argumentExpr = JExpr.invoke(argumentExpr, getterName);
 		}
 
@@ -565,6 +569,31 @@ public class TestGenerator {
 			assertExpr = JExpr.invoke(specAssertFunction).arg(argumentExpr).arg(elementNumber);
 		}
 		assertStatement.arg(assertExpr);
+	}
+
+	private void checkInvocation(GraphNode lastNodePoped, String getterName) {
+		if (lastNodePoped == null) {
+			String message = "cannot invoke " + getterName + " on node null";
+			throw new InvalidPathException(message);
+		}
+
+		if (!classGenerator.containsGetter(lastNodePoped, getterName)) {
+			String message = lastNodePoped.getName() + " does not have any getter named " + getterName;
+			throw new InvalidPathException(message);
+		} else {
+			System.out.println(lastNodePoped.getName() + " has a getter named " + getterName);
+		}
+
+	}
+
+	private void checkInvocation(JFieldVar varName, String getterName) {
+		GraphNode activeNode = fieldVarToNodeMap.get(varName);
+		if (!classGenerator.containsGetter(activeNode, getterName)) {
+			String message = activeNode.getName() + " does not have any getter named " + getterName;
+			throw new InvalidPathException(message);
+		} else {
+			System.out.println(activeNode.getName() + " has a getter named " + getterName);
+		}
 	}
 
 	private boolean requiresDataArgument(String specAssertFunction) {
@@ -587,24 +616,30 @@ public class TestGenerator {
 		return false;
 	}
 
-	private void invoke_element(ScaffolingData sdata, GraphNode activeNode, String actionData, String elementNumber, String invokeFunction) {
+	private void invoke_element(ScaffolingData sdata, GraphNode activeNode, String actionData, String elementNumber,
+			String invokeFunction) {
 		JInvocation invokeStatement = sdata.getBlock().invoke(invokeFunction);
 		JExpression argumentExpr = null;
 		boolean flag = true;
-
+		GraphNode lastNodePoped = null;
 		for (GraphNode stackNode : stack) {
 			if (flag) {
+				checkInvocation(activePageVariable, GeneratorUtilities.getGetterName(stackNode.getName()));
 				argumentExpr = JExpr.invoke(activePageVariable, GeneratorUtilities.getGetterName(stackNode.getName()));
 				flag = false;
 			} else {
+				checkInvocation(lastNodePoped, GeneratorUtilities.getGetterName(stackNode.getName()));
 				argumentExpr = JExpr.invoke(argumentExpr, GeneratorUtilities.getGetterName(stackNode.getName()));
 			}
+			lastNodePoped = stackNode;
 		}
 		String getterName = GeneratorUtilities.getGetterName(activeNode.getName());
 		if (flag) {
+			checkInvocation(activePageVariable, getterName);
 			argumentExpr = JExpr.invoke(activePageVariable, getterName);
 
 		} else {
+			checkInvocation(lastNodePoped, getterName);
 			argumentExpr = JExpr.invoke(argumentExpr, getterName);
 		}
 		argumentExpr = JExpr.invoke(argumentExpr, "getId");
@@ -681,6 +716,9 @@ public class TestGenerator {
 				JFieldVar pageField = definedClass.field(JMod.FINAL, pageClass, "field" + pageNode.getName(),
 						JExpr._new(pageClass));
 				definedPages.put(pageNode, pageField);
+
+				fieldVarToNodeMap.put(pageField, pageNode);
+
 				logger.info("adding field variable " + pageField.name());
 			}
 		}
@@ -719,7 +757,8 @@ public class TestGenerator {
 
 			} else {
 
-				invoke_element(sdata, srcNode, srcNode.getAction_data(), defaultElementNumber, srcNode.getAction_type());
+				invoke_element(sdata, srcNode, srcNode.getAction_data(), defaultElementNumber,
+						srcNode.getAction_type());
 			}
 		}
 
@@ -914,6 +953,7 @@ public class TestGenerator {
 		}
 
 		definedPages = new HashMap<>();
+		fieldVarToNodeMap = new HashMap<>();
 		stack = new Stack<GraphNode>();
 		activePageVariable = null;
 		specChainCounter = 0;
