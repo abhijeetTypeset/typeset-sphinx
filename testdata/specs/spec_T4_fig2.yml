@@ -3,7 +3,19 @@ given:
  screen: screen_5
  assertions:
 when: 
- action_1: 
+ action_0: 
+  action_name: control_9;0
+  action_type: click
+  action_data: 
+ action_1a:  
+  action_name: control_29
+  action_type: type
+  action_data: \n
+ action_1b: 
+  action_name: widget_4
+  action_type: click
+  action_data: 
+ action_1c: 
   action_name: control_65;0
   action_type: click
   action_data:
