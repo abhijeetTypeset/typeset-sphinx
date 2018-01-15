@@ -468,7 +468,7 @@ pages:
   id: 
    by: 
    locator: 
-  url: typeset.io
+  url: io.typeset.io
   screens: [screen_1]
   precondition: 
  page_2:
@@ -477,7 +477,7 @@ pages:
   id: 
    by: 
    locator: 
-  url: typeset.io/accounts/login/
+  url: io.typeset.io/accounts/login/
   screens: [screen_2]
   precondition: 
  page_3:
@@ -486,7 +486,7 @@ pages:
   id: 
    by: 
    locator: 
-  url: typeset.io/formats/all
+  url: io.typeset.io/formats/all
   screens: [screen_3, screen_4]
   precondition: 
  page_4:
@@ -495,7 +495,7 @@ pages:
   id: 
    by: 
    locator: 
-  url: typeset.io/edit/
+  url: io.typeset.io/edit/
   screens: [screen_5, screen_6, screen_7, screen_9]
   precondition: 
  page_5:
@@ -504,7 +504,7 @@ pages:
   id: 
    by: 
    locator: 
-  url: typeset.io/documents/
+  url: io.typeset.io/documents/
   screens: [screen_8]
   precondition: 
  
