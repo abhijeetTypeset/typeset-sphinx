@@ -84,7 +84,7 @@ public class Main {
 		Map<String, String> generatedTests = testGenerator.generateTest(specList);
 
 		// generate test classes
-		TestNGGenerator testNGGenerator = new TestNGGenerator(specList, "FlyPaper", "https://typeset.io");
+		TestNGGenerator testNGGenerator = new TestNGGenerator(specList, "FlyPaper", ConfigReader.homepage);
 		testNGGenerator.generateXML(generatedTests);
 
 	}

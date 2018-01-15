@@ -24,6 +24,7 @@ public class ConfigReader {
 	public static List<String> controlImplictFunc = new ArrayList<String>();
 	public static List<String> requiresData = new ArrayList<String>();
 	public static List<String> tests = new ArrayList<String>();
+	public static String homepage = null;
 	private static final Logger logger = LogManager.getLogger("ConfigReader");
 
 	public static void read(String filename) {
@@ -68,6 +69,12 @@ public class ConfigReader {
 			if (outputDir == null) {
 				logger.debug("Input directory null");
 				throw new InvalidConfigException("Input directory null");
+			}
+			
+			homepage = prop.getProperty("homepage").trim();
+			if(homepage == null) {
+				logger.error("Homepage is null");
+				throw new InvalidConfigException("Homepage is null");
 			}
 
 			String implicit_str = prop.getProperty("page-implicit").trim();
