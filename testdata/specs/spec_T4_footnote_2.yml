@@ -1,0 +1,16 @@
+name: FootnoteShowModalTest
+given:
+ screen: screen_5
+when:
+ action_1:
+  action_name: widget_4
+  action_type: click
+ action_2:
+  action_name: control_insert-dropdown_footnote
+  action_type: click
+wait: no
+then:
+ screen: screen_5
+ assertions:
+  - control_editor_click-footnote%as%canSee
+post: [spec_T4_footnote_3.yml]

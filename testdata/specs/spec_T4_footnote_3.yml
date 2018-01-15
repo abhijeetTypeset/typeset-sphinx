@@ -1,0 +1,22 @@
+name: FootnoteAddFootnotetest
+given:
+ screen: screen_5
+when:
+ action_1:
+  action_name: widget_4
+  action_type: click
+ action_2:
+  action_name: control_insert-dropdown_footnote
+  action_type: click
+ action_3:
+  action_name: widget_editor_footnote-active
+  action_type: click
+ action_4:
+  action_name: widget_editor_footnote-active
+  action_type: type
+  action_data:
+wait: no
+then:
+ screen: screen_5
+ assertions:
+  - control_editor_click-footnote%as%canSee

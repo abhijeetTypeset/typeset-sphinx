@@ -1,0 +1,14 @@
+name: FootnoteVisibleTest
+given:
+ screen: screen_5
+when:
+ action_1:
+  action_name: widget_4
+  action_type: click
+wait: no
+then:
+ screen: screen_5
+ assertions:
+  - control_insert-dropdown_footnote%as%canSee
+post: [spec_T4_footnote_2.yml]
+ 
