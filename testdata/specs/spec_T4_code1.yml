@@ -1,0 +1,31 @@
+name: addCodeSnippet
+given: 
+ screen: screen_5
+ assertions:
+when: 
+ action_0: 
+  action_name: control_9;0
+  action_type: click
+  action_data: 
+ action_1a:  
+  action_name: control_29
+  action_type: type
+  action_data: \n
+ action_1b: 
+  action_name: widget_4
+  action_type: click
+  action_data: 
+ action_1c: 
+  action_name: control_69;0
+  action_type: click
+  action_data:
+ action_3: 
+  action_name: control_70;0
+  action_type: type
+  action_data: a+b
+wait: no
+then:
+ screen: screen_5
+ assertions: 
+  - control_68;0%as%canSee
+  - control_70;0%as%canSee
