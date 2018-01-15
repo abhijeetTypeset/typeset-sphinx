@@ -25,7 +25,7 @@ when:
   action_data:
  action_3: 
   action_name: control_66;0
-  action_type: click
+  action_type: type
   action_data:
  action_4: 
   action_name: control_67;0
