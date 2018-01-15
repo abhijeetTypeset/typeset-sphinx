@@ -1,0 +1,14 @@
+name: seeFigureModel
+given: 
+ screen: screen_5
+ assertions:
+when: 
+ action_1: 
+  action_name: control_65;0
+  action_type: click
+  action_data:
+wait: no
+then:
+ screen: screen_10
+ assertions: 
+  - control_66;0%as%canSee

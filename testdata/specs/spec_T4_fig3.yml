@@ -1,0 +1,15 @@
+name: uploadFigureUsingURl
+given: 
+ screen: screen_5
+ assertions:
+  - control_66;0%as%canSee
+when: 
+ action_1: 
+  action_name: control_66;0
+  action_type: type
+  action_data: Keys.BACKSPACE
+wait: no
+then:
+ screen: screen_5
+ assertions: 
+  - control_66;0%as%canSee
