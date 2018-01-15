@@ -144,23 +144,14 @@ public class ModelGenerator {
 	 */
 	private void generateAuxiliaryClasses() throws JClassAlreadyExistsException, IOException {
 		JCodeModel cm = new JCodeModel();
-		String packageName = BASE_PACKAGE_NAME + ".utils";
+		String packageName = BASE_PACKAGE_NAME;
 		String className = packageName  + "." + "ConfigClass";
-
 		JDefinedClass configClass = cm._class(className);
-		String filepath = outputDir + File.separator + "java";
-		File file = new File(filepath);
-		file.mkdirs();
-		cm.build(file);
 
-		packageName = BASE_PACKAGE_NAME + ".controller";
+		packageName = BASE_PACKAGE_NAME;
 		className = packageName + "." + "ActionClass";
 		actionClass = cm._class(className);
 		actionClass._extends(configClass);
-		filepath = outputDir + File.separator + File.separator + "java";
-		file = new File(filepath);
-		file.mkdirs();
-		cm.build(file);
 
 	}
 
