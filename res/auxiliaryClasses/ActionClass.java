@@ -310,6 +310,10 @@ public class ActionClass extends ConfigClass {
 		while (textData.contains("\\t")) {
 			textData = textData.replace("\\n", Keys.TAB);
 		}
+		
+		while (textData.contains("\\b")) {
+			textData = textData.replace("\\b", Keys.BACK_SPACE);
+		}
 		return textData;
 	}
 
