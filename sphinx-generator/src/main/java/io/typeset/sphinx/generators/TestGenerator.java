@@ -967,7 +967,7 @@ public class TestGenerator {
 
 		logger.info("===| Generating class for " + GeneratorUtilities.firstLetterCaptial(testName));
 		JCodeModel codeModel = new JCodeModel();
-		String packageName = "tests";
+		String packageName = "io.typeset.sphinx.tests";
 		String className = packageName + "." + GeneratorUtilities.firstLetterCaptial(testName);
 		JDefinedClass definedClass = codeModel._class(className);
 		definedClass._extends(classGenerator.getActionClass());
