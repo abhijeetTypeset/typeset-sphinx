@@ -596,22 +596,11 @@ public class TestGenerator {
 		}
 	}
 
-	private boolean requiresDataArgument(String specAssertFunction) {
-
-		String[] requiresDataArg = { "contains" };
-
-		for (String func : requiresDataArg) {
-			if (func.toLowerCase().equals(specAssertFunction.toLowerCase())) {
+	private boolean requiresDataArgument(String actionType) {
+		for(String rd : ConfigReader.requiresData) {
+			if (actionType.toLowerCase().equals(rd.toLowerCase())) {
 				return true;
 			}
-		}
-
-		return false;
-	}
-
-	private boolean isTypeText(String actionType) {
-		if (actionType.toLowerCase().equals("type")) {
-			return true;
 		}
 		return false;
 	}
@@ -643,7 +632,7 @@ public class TestGenerator {
 			argumentExpr = JExpr.invoke(argumentExpr, getterName);
 		}
 		argumentExpr = JExpr.invoke(argumentExpr, "getId");
-		if (isTypeText(activeNode.getAction_type())) {
+		if (requiresDataArgument(invokeFunction)) {
 			invokeStatement.arg(argumentExpr).arg(actionData).arg(elementNumber);
 		} else {
 			invokeStatement.arg(argumentExpr).arg(elementNumber);
@@ -655,7 +644,7 @@ public class TestGenerator {
 		}
 
 		sdata.getBlock().invoke(outVar, "println")
-				.arg("=============" + activeNode.getAction_type() + " " + activeNode.getName() + "=============");
+				.arg("=============" + invokeFunction + " " + activeNode.getName() + "=============");
 
 	}
 
