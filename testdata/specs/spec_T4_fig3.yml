@@ -1,4 +1,4 @@
-name: uploadFigureUsingURl
+name: deleteFigure
 given: 
  screen: screen_5
  assertions:
@@ -7,7 +7,7 @@ when:
  action_1: 
   action_name: control_66;0
   action_type: type
-  action_data: Keys.BACKSPACE
+  action_data: \b
 wait: no
 then:
  screen: screen_5
