@@ -1,4 +1,4 @@
-package java.io.typeset.sphinx.tests;
+package io.typeset.sphinx.tests;
 
 import java.io.File;
 import java.util.Calendar;
