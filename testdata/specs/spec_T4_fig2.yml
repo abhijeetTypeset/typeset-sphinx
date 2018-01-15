@@ -12,11 +12,11 @@ when:
   action_type: click
   action_data:
  action_3: 
-  action_name: widget_66;0
+  action_name: control_66;0
   action_type: click
   action_data:
  action_4: 
-  action_name: widget_67;0
+  action_name: control_67;0
   action_type: click
   action_data:
 wait: short

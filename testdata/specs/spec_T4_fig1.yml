@@ -11,4 +11,4 @@ wait: no
 then:
  screen: screen_10
  assertions: 
-  - control_66;0%as%canSee
+  - widget_5;0%as%canSee
