@@ -5,9 +5,13 @@ given:
   - control_59;0%as%canSee
 when:
  action_1: 
+  action_name: control_9;0
+  action_type: click
+  action_data:
+ action_2: 
   action_name: control_59
   action_type: writeAtEnd
-  action_data: "\n"
+  action_data: \n
 wait: 
 then:
  screen: screen_5
