@@ -24,3 +24,4 @@ then:
  screen: screen_10
  assertions: 
   - widget_5;0%as%canSee
+
