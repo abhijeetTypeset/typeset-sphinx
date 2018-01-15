@@ -354,8 +354,7 @@ public class TestGenerator {
 	}
 
 	private void writeTestToFile(JCodeModel cModel, JDefinedClass definedClass) throws IOException {
-		String filepath = outputDir + File.separator + "FlyPaper" + File.separator + "src" + File.separator + "test"
-				+ File.separator + "java";
+		String filepath = outputDir + File.separator + "java";
 		logger.info("Generating class file " + filepath);
 		System.out.println("Generating class " + definedClass.name() + " ; " + definedClass.fullName());
 
@@ -804,17 +803,6 @@ public class TestGenerator {
 		sdata.getBlock().invoke(givenSdata.getMethod());
 	}
 
-	private void updateAuxiliaryClasses() throws IOException {
-		String dirpath = outputDir + File.separator + "FlyPaper" + File.separator + "src" + File.separator + "main"
-				+ File.separator + "java";
-
-		FileUtils.copyFile(new File("res" + File.separator + "auxiliaryClasses" + File.separator + "ConfigClass.java"),
-				new File(dirpath + File.separator + "utils" + File.separator + "ConfigClass.java"));
-		FileUtils.copyFile(new File("res" + File.separator + "auxiliaryClasses" + File.separator + "ActionClass.java"),
-				new File(dirpath + File.separator + "controller" + File.separator + "ActionClass.java"));
-
-	}
-
 	private ScaffolingData generateTestCode(JCodeModel codeModel, JDefinedClass definedClass, ScaffolingData sdata,
 			Spec spec) {
 
@@ -1031,7 +1019,6 @@ public class TestGenerator {
 				activePageVariable = originalActivePageVariable;
 			}
 		}
-		updateAuxiliaryClasses();
 	}
 
 	public Map<String, String> generateTest(List<Spec> specList)

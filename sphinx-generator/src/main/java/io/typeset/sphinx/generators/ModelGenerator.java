@@ -38,6 +38,8 @@ import io.typeset.sphinx.readers.ConfigReader;
 public class ModelGenerator {
 	private static final Logger logger = LogManager.getLogger("ModelGenerator");
 
+	private static final String BASE_PACKAGE_NAME = "io.typeset.sphinx.tests";
+
 	/** The tgraph. */
 	private DefaultDirectedGraph<GraphNode, DefaultEdge> tgraph;
 
@@ -60,13 +62,10 @@ public class ModelGenerator {
 	 *
 	 * @param tgraph
 	 *            the tgraph
-	 * @param outputDir
-	 *            the output dir
 	 */
 	public ModelGenerator(DefaultDirectedGraph<GraphNode, DefaultEdge> tgraph) {
 		this.tgraph = tgraph;
 		this.outputDir = ConfigReader.outputDir;
-
 	}
 
 	/**
@@ -83,8 +82,6 @@ public class ModelGenerator {
 			logger.error("Cannot proceed with a null graph");
 			throw new InconsistentGraphException("Cannot proceed with a null graph");
 		}
-
-		copyDirectoryStructure();
 
 		generateAbstractClasses();
 
@@ -147,22 +144,20 @@ public class ModelGenerator {
 	 */
 	private void generateAuxiliaryClasses() throws JClassAlreadyExistsException, IOException {
 		JCodeModel cm = new JCodeModel();
-		String packageName = "utils";
-		String className = packageName + "." + "ConfigClass";
+		String packageName = BASE_PACKAGE_NAME + ".utils";
+		String className = packageName  + "." + "ConfigClass";
 
 		JDefinedClass configClass = cm._class(className);
-		String filepath = outputDir + File.separator + "FlyPaper" + File.separator + "src" + File.separator + "main"
-				+ File.separator + "java";
+		String filepath = outputDir + File.separator + "java";
 		File file = new File(filepath);
 		file.mkdirs();
 		cm.build(file);
 
-		packageName = "controller";
+		packageName = BASE_PACKAGE_NAME + ".controller";
 		className = packageName + "." + "ActionClass";
 		actionClass = cm._class(className);
 		actionClass._extends(configClass);
-		filepath = outputDir + File.separator + "FlyPaper" + File.separator + "src" + File.separator + "main"
-				+ File.separator + "java";
+		filepath = outputDir + File.separator + File.separator + "java";
 		file = new File(filepath);
 		file.mkdirs();
 		cm.build(file);
@@ -179,7 +174,7 @@ public class ModelGenerator {
 	 */
 	private void generateAbstractClasses() throws JClassAlreadyExistsException, IOException {
 		JCodeModel cm = new JCodeModel();
-		String packageName = "model";
+		String packageName = BASE_PACKAGE_NAME + ".model";
 		String className = packageName + "." + "Node";
 
 		ClassType t = ClassType.CLASS;
@@ -188,25 +183,10 @@ public class ModelGenerator {
 		definedAbstractNode.method(JMod.PUBLIC | JMod.ABSTRACT, org.openqa.selenium.By.class, "getId");
 		definedAbstractNode.method(JMod.PUBLIC | JMod.ABSTRACT, String.class, "getName");
 
-		String filepath = outputDir + File.separator + "FlyPaper" + File.separator + "src" + File.separator + "main"
-				+ File.separator + "java";
+		String filepath = outputDir + File.separator + "java";
 		File file = new File(filepath);
 		file.mkdirs();
 		cm.build(file);
-	}
-
-	/**
-	 * Copy directory structure and base classes.
-	 *
-	 * @throws IOException
-	 *             Signals that an I/O exception has occurred.
-	 */
-	private void copyDirectoryStructure() throws IOException {
-
-		String baseDirStructure = "res" + File.separator + "baseDirStructure";
-
-		FileUtils.copyDirectory(new File(baseDirStructure), new File(outputDir));
-		logger.info("Copying base directory structure from " + baseDirStructure + " to " + outputDir);
 	}
 
 	/**
@@ -222,7 +202,7 @@ public class ModelGenerator {
 	private void generateClassFile(GraphNode gnode) throws JClassAlreadyExistsException, IOException {
 		logger.info("===| Generated class for " + gnode);
 		JCodeModel cm = new JCodeModel();
-		String packageName = "model" + "." + gnode.getNodeType() + "s";
+		String packageName = BASE_PACKAGE_NAME + ".model" + "." + gnode.getNodeType() + "s";
 		String className = packageName + "." + GeneratorUtilities.firstLetterCaptial(gnode.getName());
 
 		JDefinedClass definedClass = cm._class(className);
@@ -328,8 +308,7 @@ public class ModelGenerator {
 		// add it to pool of defined classes
 		nodeClassMap.put(gnode, definedClass);
 
-		String filepath = outputDir + File.separator + "FlyPaper" + File.separator + "src" + File.separator + "main"
-				+ File.separator + "java";
+		String filepath = outputDir + File.separator + "java";
 		// logger.info("writing file to "+filepath);
 		File file = new File(filepath);
 		file.mkdirs();

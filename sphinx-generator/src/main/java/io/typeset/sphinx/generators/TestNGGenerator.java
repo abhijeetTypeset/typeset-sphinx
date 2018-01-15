@@ -45,7 +45,6 @@ public class TestNGGenerator {
 	/**
 	 * Instantiates a new test NG generator.
 	 *
-	 * @param outputDir the output dir
 	 * @param specList the spec list
 	 * @param projectName the project name
 	 * @param homePage the home page
