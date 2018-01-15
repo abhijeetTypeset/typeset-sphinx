@@ -12,9 +12,10 @@ import java.security.spec.InvalidKeySpecException;
 import java.util.ArrayList;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-
+import java.util.Set;
 import java.util.Stack;
 
 import org.apache.commons.io.FileUtils;
@@ -78,10 +79,25 @@ public class TestGenerator {
 	private Map<String, Spec> specMap = new HashMap<String, Spec>();
 	private Map<String, String> generatedTests = new HashMap<>();
 	private int specChainCounter = 0;
+	private Set<String> enabledSpecs;
 
 	// TODO: get this some other way
 	private int MAX_LENGTH = 25;
 	private String defaultElementNumber = "0";
+	
+	private Set<String> getEnabledSpecs() {
+		Set<String> enabledSpecs = new HashSet<String>();
+		String enabledSpecsDir = inputDir + File.separator + "specs-enabled";
+		File folder = new File(enabledSpecsDir);
+		for (final File file: folder.listFiles()) {
+			if (file.getAbsolutePath().endsWith(".yml")) {
+				logger.info(file.getName() + ":" + file.getAbsolutePath());
+				enabledSpecs.add(file.getName());
+			}
+		}
+		logger.info("Found the following enabled specs: " + enabledSpecs);
+		return enabledSpecs;
+	}
 
 	public TestGenerator(DefaultDirectedGraph<GraphNode, DefaultEdge> graph, GraphGenerator graphGenerator,
 			ModelGenerator classGenerator) {
@@ -91,6 +107,7 @@ public class TestGenerator {
 		this.outputDir = ConfigReader.outputDir;
 		this.classGenerator = classGenerator;
 		this.allDirectedPath = new AllDirectedPaths<>(graph);
+		this.enabledSpecs = getEnabledSpecs();
 	}
 
 	public void parseSpecFile(String filename) {
@@ -150,7 +167,8 @@ public class TestGenerator {
 
 				if (isValidSpec(spec)) {
 					logger.info("Found spec : " + spec);
-					if (isTopLevelTest(sf)) {
+					if (isSpecEnabled(skey)) {
+						logger.info("Adding enabled spec to specList: " + sf);
 						specList.add(spec);
 					}
 
@@ -164,6 +182,16 @@ public class TestGenerator {
 		}
 
 		return specList;
+	}
+	
+	/**
+	 * Checks if the spec has been enabled for testing or not.
+	 * Checks if the passed in file name is found in the specs-enabled folder.
+	 * @param specFileName - the spec file name
+	 * @return whether spec is enabled or not
+	 */
+	private boolean isSpecEnabled(String specFileName) {
+		return enabledSpecs.contains(specFileName);
 	}
 
 	private boolean isTopLevelTest(String sf) {
