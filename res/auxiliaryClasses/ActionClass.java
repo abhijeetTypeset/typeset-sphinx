@@ -33,7 +33,8 @@ public class ActionClass extends ConfigClass {
 
 	public boolean atPage(String url) {
 		String pageUrl = driver.getCurrentUrl().replace("https://", "").replace("http://", "").replace("www.", "");
-		if (pageUrl.startsWith(url)) {
+		//if (pageUrl.startsWith(url)) {
+		if(pageUrl.contains(url)) {
 			System.out.println("At page " + url);
 			return true;
 		} else {

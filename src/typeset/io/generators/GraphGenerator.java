@@ -267,7 +267,7 @@ public class GraphGenerator {
 			if (screenList != null) {
 				for (String s : screenList) {
 					GraphNode screenNode = getNodeByKey(s);
-					if (doesNotHaveIncomingEdges(screenNode)) {
+					if (doesNotHaveIncomingEdges(screenNode) || screenNode.isDefaultComponent()) {
 						logger.info("Adding edge from page " + pageNode + " to screen " + screenNode);
 						graph.addEdge(pageNode, screenNode);
 					} else {

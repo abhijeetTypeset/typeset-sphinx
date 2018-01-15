@@ -31,6 +31,8 @@ public class Node {
 	/** The wait time. */
 	private String wait_time;
 	
+	private boolean defaultComponent;
+	
 	/** The implict assertions. */
 	private List<String> implictAssertions = new ArrayList<>();
 
@@ -186,6 +188,14 @@ public class Node {
 	 */
 	public void setWait_time(String wait_time) {
 		this.wait_time = wait_time;
+	}
+
+	public boolean isDefaultComponent() {
+		return defaultComponent;
+	}
+
+	public void setDefaultComponent(boolean defaultComponent) {
+		this.defaultComponent = defaultComponent;
 	}
 
 }
