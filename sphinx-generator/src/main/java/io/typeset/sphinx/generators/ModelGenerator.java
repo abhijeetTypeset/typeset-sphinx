@@ -239,7 +239,7 @@ public class ModelGenerator {
 					}else {
 						componentString = "pge";
 					}
-					locator = "data-spx-" + componentString + "-id=\"" + locator + "\"";
+					locator = "[data-spx-" + componentString + "-id=\"" + locator + "\"]";
 				}
 				init = cm.ref(org.openqa.selenium.By.class).staticInvoke(selector).arg(JExpr.lit(locator));
 				field.init(init);
