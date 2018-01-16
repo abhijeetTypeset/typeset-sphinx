@@ -562,6 +562,10 @@ public class TestGenerator {
 		boolean flag = true;
 		GraphNode lastNodePoped = null;
 		for (GraphNode stackNode : stack) {
+			if(stackNode == activeNode) {
+				System.out.println("stack node is active node, breaking");
+				break;
+			}
 			String getterName = GeneratorUtilities.getGetterName(stackNode.getName());
 			if (flag) {
 				checkInvocation(activePageVariable, getterName);
