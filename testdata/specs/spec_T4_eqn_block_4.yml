@@ -12,13 +12,13 @@ when:
   action_name: control_insert-equation_block
   action_type: click
  action_4:
-  action_name: control_editor_standalone-formula
+  action_name: control_editor_standalone-formula;0
   action_type: click
 wait: short
 then:
  screen: screen_5
  assertions:
   - widget_wiris-editor%as%canSee
-# post:
-#  - spec_T4_eqn_standalone_4.yml
+post:
+ - spec_T4_eqn_standalone_5.yml
  
