@@ -4,7 +4,9 @@
 config.properties
 .idea
 output/
-res/baseDirStructure/FlyPaper/.project
+**/*.project
+**/*.classpath
+.settings/
 sphinx.log
 .DS_Store
 .vscode/
