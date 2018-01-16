@@ -1,0 +1,15 @@
+name: EquationOptionVisibleTest
+given:
+ screen: screen_5
+when:
+ action_1:
+  action_name: widget_4
+  action_type: click
+wait: no
+then:
+ screen: screen_5
+ assertions:
+  - widget_insert-dropdown_equation%as%canSee
+post:
+ - spec_T4_eqn_standalone_2.yml
+ 
