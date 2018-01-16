@@ -1,4 +1,4 @@
-name: BlockEquationOptionVisibleTest
+name: EquationOptionAddTest
 given:
  screen: screen_5
 when:
@@ -8,13 +8,14 @@ when:
  action_2:
   action_name: widget_insert-dropdown_equation
   action_type: click
+ action_3:
+  action_name: control_insert-equation_inline
+  action_type: click
 wait: no
 then:
  screen: screen_5
  assertions:
-  - control_insert-equation_block%as%canSee
-  - control_insert-equation_inline%as%canSee
+  - control_editor_inline-formula%as%canSee
 post:
- - spec_T4_eqn_standalone_3.yml
  - spec_T4_eqn_inline_3.yml
  
