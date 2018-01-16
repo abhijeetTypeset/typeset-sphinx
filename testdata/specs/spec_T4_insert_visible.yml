@@ -20,4 +20,4 @@ then:
   - widget_4%as%canSee
 post:
  - spec_T4_footnote_1.yml
- - spec_T4_eqn_standalone_1.yml
+ - spec_T4_eqn_block_1.yml

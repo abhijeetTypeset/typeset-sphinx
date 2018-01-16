@@ -1,4 +1,4 @@
-name: EquationOptionVisibleTest
+name: BlockEquationOptionVisibleTest
 given:
  screen: screen_5
 when:
@@ -13,6 +13,6 @@ then:
  screen: screen_5
  assertions:
   - control_insert-equation_block%as%canSee
-# post:
-#  - spec_T4_eqn_standalone_2.yml
+post:
+ - spec_T4_eqn_standalone_3.yml
  
