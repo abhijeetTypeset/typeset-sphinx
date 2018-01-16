@@ -46,7 +46,7 @@ public class ConfigClass {
 
 	@BeforeMethod
 	@Parameters({ "Browser", "url", "Mode" })
-	public void Setconfiguration(String Browser, String Url) throws IOException {
+	public void Setconfiguration(String Browser, String Url, String Mode) throws IOException {
 
 		if (Browser.equalsIgnoreCase("phantom")) {
 			driver = new PhantomJSDriver();
