@@ -15,10 +15,10 @@ when:
   action_name: control_editor_standalone-formula
   action_type: click
  action_5:
-  action_name: widget_wiris-editor
+  action_name: widget_latex-editor
   action_type: click
  action_6:
-  action_name: widget_wiris-editor
+  action_name: control_latex-editor_user-input
   action_type: type
   action_data: 'a + b'
  action_7:
@@ -28,6 +28,6 @@ wait: short
 then:
  screen: screen_5
  assertions:
-  - control_editor_standalone-formula%as%canSee
+  - control_editor_standalone-formula;0%as%canSee
   # - control_editor_standalone-formula;0%contains%https://wiris-b.typeset.io/editor/render.svg?version=2.0&fontFamily=Georgia,serif&latex=a%2Bb
  
