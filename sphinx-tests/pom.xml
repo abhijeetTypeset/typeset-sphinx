@@ -67,7 +67,7 @@
                         <configuration>
                             <forkCount>0</forkCount>
                             <suiteXmlFiles>
-                                <suiteXmlFile>testng.xml</suiteXmlFile>
+                                <suiteXmlFile>${project.build.directory}/generated-test-sources/testng.xml</suiteXmlFile>
                             </suiteXmlFiles>
                         </configuration>
                     </execution>
@@ -75,7 +75,7 @@
                 <configuration>
                     <forkCount>0</forkCount>
                     <suiteXmlFiles>
-                        <suiteXmlFile>testng.xml</suiteXmlFile>
+                        <suiteXmlFile>${project.build.directory}/generated-test-sources/testng.xml</suiteXmlFile>
                     </suiteXmlFiles>
                     <systemProperties>
                         <webdriver.chrome.driver>${WEBDRIVER_CHROME}</webdriver.chrome.driver>
