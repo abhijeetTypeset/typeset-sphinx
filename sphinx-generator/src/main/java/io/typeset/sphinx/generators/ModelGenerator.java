@@ -235,7 +235,7 @@ public class ModelGenerator {
 					}else if(gnode.getNodeType() == NodeType.APP) {
 						componentString = "app";
 					}else if(gnode.getNodeType() == NodeType.SCREEN) {
-						componentString = "scr";
+						componentString = "scrn";
 					}else {
 						componentString = "pge";
 					}

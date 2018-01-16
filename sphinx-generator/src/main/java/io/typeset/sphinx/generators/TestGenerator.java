@@ -645,6 +645,10 @@ public class TestGenerator {
 		boolean flag = true;
 		GraphNode lastNodePoped = null;
 		for (GraphNode stackNode : stack) {
+			if(stackNode == activeNode) {
+				System.out.println("stack node is active node, breaking");
+				break;
+			}
 			if (flag) {
 				checkInvocation(activePageVariable, GeneratorUtilities.getGetterName(stackNode.getName()));
 				argumentExpr = JExpr.invoke(activePageVariable, GeneratorUtilities.getGetterName(stackNode.getName()));
@@ -773,11 +777,7 @@ public class TestGenerator {
 
 				assert_element(sdata, srcNode, null, null, defaultElementNumber);
 
-			} else if (srcNode.getNodeType() == NodeType.WIDGET) {
-
-				assert_element(sdata, srcNode, null, null, defaultElementNumber);
-
-			} else {
+			}  else {
 
 				invoke_element(sdata, srcNode, srcNode.getAction_data(), defaultElementNumber,
 						srcNode.getAction_type());
