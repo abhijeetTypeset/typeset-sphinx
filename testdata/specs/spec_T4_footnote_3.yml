@@ -14,7 +14,7 @@ when:
  action_4:
   action_name: widget_editor_footnote-active
   action_type: type
-  action_data:
+  action_data: 'This is footnote content'
 wait: no
 then:
  screen: screen_5
