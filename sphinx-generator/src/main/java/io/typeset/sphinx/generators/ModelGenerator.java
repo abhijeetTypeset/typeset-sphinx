@@ -222,8 +222,26 @@ public class ModelGenerator {
 			JFieldVar field = definedClass.field(JMod.PRIVATE, org.openqa.selenium.By.class, "id");
 
 			if (gnode.getId().get("by") != null && gnode.getId().get("locator") != null) {
-				JExpression init = cm.ref(org.openqa.selenium.By.class).staticInvoke(gnode.getId().get("by"))
-						.arg(JExpr.lit(gnode.getId().get("locator")));
+				String selector = gnode.getId().get("by");
+				String locator = gnode.getId().get("locator");
+				JExpression init = null;
+				if (selector.toLowerCase().contains("ctlselector")) {
+					selector = "cssSelector";
+					String componentString = null;
+					if(gnode.getNodeType() == NodeType.CONTROL) {
+						componentString = "ctl";
+					}else if(gnode.getNodeType() == NodeType.WIDGET) {
+						componentString = "wgt";
+					}else if(gnode.getNodeType() == NodeType.APP) {
+						componentString = "app";
+					}else if(gnode.getNodeType() == NodeType.SCREEN) {
+						componentString = "scr";
+					}else {
+						componentString = "pge";
+					}
+					locator = "data-spx-" + componentString + "-id=\"" + locator + "\"";
+				}
+				init = cm.ref(org.openqa.selenium.By.class).staticInvoke(selector).arg(JExpr.lit(locator));
 				field.init(init);
 			} else {
 				field.init(JExpr._null());
