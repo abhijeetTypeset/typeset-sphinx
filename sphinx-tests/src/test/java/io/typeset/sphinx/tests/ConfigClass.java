@@ -45,7 +45,7 @@ public class ConfigClass {
 	}
 
 	@BeforeMethod
-	@Parameters({ "Browser", "url" })
+	@Parameters({ "Browser", "url", "Mode" })
 	public void Setconfiguration(String Browser, String Url) throws IOException {
 
 		if (Browser.equalsIgnoreCase("phantom")) {
@@ -67,26 +67,32 @@ public class ConfigClass {
 
 		if (Browser.equalsIgnoreCase("chrome")) {
 			System.out.println("Chrome path : " + System.getProperty("webdriver.chrome.driver"));
-			driver = new ChromeDriver();
+                        final ChromeOptions chromeOptions = new ChromeOptions();
+                        if (Mode.equals("headless")) {
+                            System.out.println("Running in headless mode");
+                            chromeOptions.addArguments("headless");
+                            chromeOptions.addArguments("window-size=1200x1072");
+                        }
+			driver = new ChromeDriver(chromeOptions);
 			driver.manage().window().maximize();
 			driver.manage().timeouts().implicitlyWait(BROWSER_TIMEOUT, TimeUnit.SECONDS);
 			System.out.println("Chrome driver selected");
 			driver.get(Url);
 
 		}
-		if (Browser.equalsIgnoreCase("chrome-headless")) {
-			System.out.println("Chrome path : " + System.getProperty("webdriver.chrome.driver"));
+		// if (Browser.equalsIgnoreCase("chrome-headless")) {
+		// 	System.out.println("Chrome path : " + System.getProperty("webdriver.chrome.driver"));
 
-			final ChromeOptions options = new ChromeOptions();
-			options.addArguments("headless");
-			options.addArguments("window-size=1200x1072");
-			driver = new ChromeDriver(options);
-			driver.manage().window().maximize();
-			driver.manage().timeouts().implicitlyWait(BROWSER_TIMEOUT, TimeUnit.SECONDS);
-			System.out.println("Chrome-headless driver selected");
-			driver.get(Url);
+		// 	final ChromeOptions options = new ChromeOptions();
+		// 	options.addArguments("headless");
+		// 	options.addArguments("window-size=1200x1072");
+		// 	driver = new ChromeDriver(options);
+		// 	driver.manage().window().maximize();
+		// 	driver.manage().timeouts().implicitlyWait(BROWSER_TIMEOUT, TimeUnit.SECONDS);
+		// 	System.out.println("Chrome-headless driver selected");
+		// 	driver.get(Url);
 
-		}
+		// }
 		if (Browser.equalsIgnoreCase("iexplorer")) {
 			driver = new InternetExplorerDriver();
 			driver.manage().timeouts().implicitlyWait(BROWSER_TIMEOUT, TimeUnit.SECONDS);

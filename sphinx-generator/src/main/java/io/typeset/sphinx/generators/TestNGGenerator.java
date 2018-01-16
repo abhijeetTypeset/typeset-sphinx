@@ -79,11 +79,11 @@ public class TestNGGenerator {
 		// add listeners
 		Element listeners = doc.createElement("listeners");
 		Element listenerScreenshot = doc.createElement("listener");
-		listenerScreenshot.setAttribute("class-name", "utils.Screenshot");
+		listenerScreenshot.setAttribute("class-name", "io.typeset.sphinx.tests.Screenshot");
 		listeners.appendChild(listenerScreenshot);
 		
 		Element listenerReporter = doc.createElement("listener");
-		listenerReporter.setAttribute("class-name", "utils.ExtentReporterNG");
+		listenerReporter.setAttribute("class-name", "io.typeset.sphinx.tests.ExtentReporterNG");
 		listeners.appendChild(listenerReporter);
 
 		rootElement.appendChild(listeners);
@@ -105,8 +105,20 @@ public class TestNGGenerator {
 		testParameter.setAttribute("name", "Browser");
 		testParameter.setAttribute("value", "chrome");
 
-		test.appendChild(testParameter);
-		
+                test.appendChild(testParameter);
+
+                String testMode = System.getenv("TEST_MODE");
+                if (testMode == null) {
+                    testMode = "with-head";
+                }
+
+                Element testModeParameter = doc.createElement("parameter");
+
+                testModeParameter.setAttribute("name", "Mode");
+                testModeParameter.setAttribute("value", testMode);
+                test.appendChild(testModeParameter);
+
+
 		// add classes
 		Element classes = doc.createElement("classes");
 		test.appendChild(classes);
@@ -130,7 +142,7 @@ public class TestNGGenerator {
 		Transformer transformer = transformerFactory.newTransformer();
 		DOMSource source = new DOMSource(doc);
 
-		String filename = outputDir + File.separator + projectName + File.separator + "testng.xml";
+		String filename = outputDir + File.separator +  "testng.xml";
 
 		StreamResult result = new StreamResult(new File(filename));
 

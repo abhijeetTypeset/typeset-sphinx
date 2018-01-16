@@ -83,9 +83,9 @@ public class Main {
 		List<Spec> specList = testGenerator.getSpecs();
 		Map<String, String> generatedTests = testGenerator.generateTest(specList);
 
-//		// generate test classes
-//		TestNGGenerator testNGGenerator = new TestNGGenerator(specList, "FlyPaper", ConfigReader.homepage);
-//		testNGGenerator.generateXML(generatedTests);
+		// generate test classes
+		TestNGGenerator testNGGenerator = new TestNGGenerator(specList, "FlyPaper", ConfigReader.homepage);
+		testNGGenerator.generateXML(generatedTests);
 
 	}
 
