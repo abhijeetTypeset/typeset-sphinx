@@ -1,0 +1,37 @@
+{
+ // See https://go.microsoft.com/fwlink/?LinkId=733558
+ // for the documentation about the tasks.json format
+ "version": "2.0.0",
+ "tasks": [
+  {
+   "label": "mvn install",
+   "type": "shell",
+   "command": "mvn clean install",
+   "group": {
+    "kind": "build",
+    "isDefault": true
+   }
+  },
+  {
+   "label": "verify",
+   "type": "shell",
+   "command": "mvn -B verify",
+   "group": "build"
+  },
+  {
+   "label": "test",
+   "type": "shell",
+   "command": "mvn -B test",
+   "group": "test",
+  },
+  {
+   "label": "Generate sources",
+   "type": "shell",
+   "command": "mvn generate-test-sources",
+   "group": {
+    "kind": "test",
+    "isDefault": true
+   }
+  }
+ ]
+}
