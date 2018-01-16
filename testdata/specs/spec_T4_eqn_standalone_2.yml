@@ -5,10 +5,14 @@ when:
  action_1:
   action_name: widget_4
   action_type: click
+ action_2:
+  action_name: widget_insert-dropdown_equation
+  action_type: click
 wait: no
 then:
  screen: screen_5
  assertions:
-  - widget_insert-dropdown_equation%as%canSee
-# post: [spec_T4_footnote_2.yml]
+  - control_insert-equation_block%as%canSee
+# post:
+#  - spec_T4_eqn_standalone_2.yml
  
