@@ -16,4 +16,4 @@ then:
  screen: screen_5
  assertions: 
   - control_57;0%as%canSee
-  - control_53;0%not%canSee
+  - control_53;0%as%canSee
