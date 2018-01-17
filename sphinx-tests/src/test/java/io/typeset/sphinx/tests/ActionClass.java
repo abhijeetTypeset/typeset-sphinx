@@ -248,8 +248,10 @@ public class ActionClass extends ConfigClass {
 
 		String value = element.getAttribute("data-spx-state");
 		if (value.equals("enabled")) {
+			System.out.print(locator + " is enabled ");
 			return true;
 		}
+		System.out.print(locator + " is not enabled ");
 		return false;
 
 	}

@@ -7,7 +7,6 @@ when:
   action_name: control_53;0
   action_type: selectText
   action_data:
-
 wait: no
 then:
  screen: screen_5
