@@ -1,0 +1,21 @@
+name: TableOptionVisibleTest
+given:
+ screen: screen_5
+when:
+ action_1:
+  action_name: widget_4
+  action_type: click
+ action_2:
+  action_name: widget_insert-dropdown_table
+  action_type: click
+ action_3:
+  action_name: control_insert-dropdown_table-cell
+  action_type: select
+  action_data: 6
+wait: no
+then:
+ screen: screen_5
+ assertions:
+  - editor_table;0%as%canSee
+  - editor_table-cell;6%as%canSee
+ 
