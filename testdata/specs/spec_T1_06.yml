@@ -7,7 +7,15 @@ when:
   action_name: control_9;0
   action_type: click
   action_data:
+ action_1a:  
+  action_name: control_29
+  action_type: type
+  action_data: \n
  action_2: 
+  action_name: control_56
+  action_type: click
+  action_data:  
+ action_3: 
   action_name: control_55
   action_type: writeAtEnd
   action_data: \n
@@ -15,4 +23,4 @@ wait:
 then:
  screen: screen_5
  assertions: 
-  - control_53;0%as%canSee
+  - control_53;1%as%canSee
