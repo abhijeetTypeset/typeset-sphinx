@@ -244,7 +244,12 @@ public class ActionClass extends ConfigClass {
 			return false;
 		}
 		int eNo = getElementNumber(elementNumber);
-		WebElement element = driver.findElements(locator).get(eNo);
+		List<WebElement> elements = driver.findElements(locator);
+		if(eNo > elements.size()){
+			System.out.println("element index higher than present at the moment");
+			return false;
+		}
+		WebElement element = elements.get(eNo);
 
 		String value = element.getAttribute("data-spx-state");
 		if (value.equals("enabled")) {
