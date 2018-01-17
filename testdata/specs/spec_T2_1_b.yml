@@ -14,7 +14,7 @@ when:
  action_2: 
   action_name: control_53;0
   action_type: type
-  action_data: Sample Heading\n
+  action_data: Sample Heading
  action_3: 
   action_name: widget_3
   action_type: click
