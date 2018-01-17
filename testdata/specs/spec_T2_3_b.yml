@@ -23,7 +23,7 @@ wait: short
 then:
  screen: screen_5
  assertions: 
-  - control_64;1%as%contains%numbered item 1
-  - control_64;2%as%contains%numbered item 2
+  - control_64;0%as%contains%numbered item 1
+  - control_64;1%as%contains%numbered item 2
   - control_64%as%hasElementsTotal%2
   
