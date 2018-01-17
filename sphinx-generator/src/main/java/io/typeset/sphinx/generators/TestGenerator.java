@@ -508,7 +508,7 @@ public class TestGenerator {
 			setActive(screenNode);
 		}
 
-		assert_element(sdata, screenNode, null, null, defaultElementNumber);
+		assert_element(sdata, screenNode, null, null, defaultElementNumber, false);
 
 		ExplicitAssertion explicitAssertion = then.getParsedAssertion();
 		if (explicitAssertion != null) {
@@ -539,7 +539,7 @@ public class TestGenerator {
 			for (Literal literal : clause.getLiterals()) {
 				logger.info("explicit assertion :  " + literal);
 				assert_element(sdata, literal.getNode(), literal.getAction(), literal.getTextData(),
-						literal.getLiteral_no());
+						literal.getLiteral_no(), literal.isNegation());
 			}
 
 		}
@@ -554,8 +554,14 @@ public class TestGenerator {
 	}
 
 	private void assert_element(ScaffolingData sdata, GraphNode activeNode, String specAssertFunction,
-			String specAssertData, String elementNumber) {
-		JInvocation assertStatement = sdata.getBlock().invoke(sdata.getAssertVar(), "assertTrue");
+			String specAssertData, String elementNumber, boolean isNegation) {
+		
+		String assertMethod = "assertTrue";
+		if (isNegation) {
+			assertMethod = "assertFalse";
+		}
+		
+		JInvocation assertStatement = sdata.getBlock().invoke(sdata.getAssertVar(), assertMethod);
 
 		logger.info("asserting for element " + activeNode);
 		JExpression argumentExpr = null;
@@ -771,11 +777,11 @@ public class TestGenerator {
 
 			} else if (srcNode.getNodeType() == NodeType.SCREEN) {
 
-				assert_element(sdata, srcNode, null, null, defaultElementNumber);
+				assert_element(sdata, srcNode, null, null, defaultElementNumber, false);
 
 			} else if (srcNode.getNodeType() == NodeType.APP) {
 
-				assert_element(sdata, srcNode, null, null, defaultElementNumber);
+				assert_element(sdata, srcNode, null, null, defaultElementNumber, false);
 
 			} else {
 
@@ -786,7 +792,7 @@ public class TestGenerator {
 
 		setActive(lastNode);
 
-		assert_element(sdata, lastNode, null, null, defaultElementNumber);
+		assert_element(sdata, lastNode, null, null, defaultElementNumber, false);
 
 		// ExplicitAssertion eassert = spec.getGiven().getParsedAssertion();
 		// for (Clause clause : eassert.getclauses()) {
