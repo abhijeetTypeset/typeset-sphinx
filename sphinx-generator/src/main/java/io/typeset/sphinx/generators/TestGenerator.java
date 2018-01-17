@@ -86,12 +86,12 @@ public class TestGenerator {
 	// TODO: get this some other way
 	private int MAX_LENGTH = 25;
 	private String defaultElementNumber = "0";
-	
+
 	private Set<String> getEnabledSpecs() {
 		Set<String> enabledSpecs = new HashSet<String>();
 		String enabledSpecsDir = inputDir + File.separator + "specs-enabled";
 		File folder = new File(enabledSpecsDir);
-		for (final File file: folder.listFiles()) {
+		for (final File file : folder.listFiles()) {
 			if (file.getAbsolutePath().endsWith(".yml")) {
 				logger.info(file.getName() + ":" + file.getAbsolutePath());
 				enabledSpecs.add(file.getName());
@@ -185,11 +185,13 @@ public class TestGenerator {
 
 		return specList;
 	}
-	
+
 	/**
-	 * Checks if the spec has been enabled for testing or not.
-	 * Checks if the passed in file name is found in the specs-enabled folder.
-	 * @param specFileName - the spec file name
+	 * Checks if the spec has been enabled for testing or not. Checks if the passed
+	 * in file name is found in the specs-enabled folder.
+	 * 
+	 * @param specFileName
+	 *            - the spec file name
 	 * @return whether spec is enabled or not
 	 */
 	private boolean isSpecEnabled(String specFileName) {
@@ -366,7 +368,7 @@ public class TestGenerator {
 	}
 
 	private ScaffolingData createMethodScaffolding(JCodeModel codeModel, JDefinedClass definedClass, String methodName,
-                                                   boolean addAssert) {
+			boolean addAssert) {
 		JMethod method = definedClass.method(JMod.PUBLIC, JType.parse(codeModel, "void"), methodName);
 		method._throws(InterruptedException.class);
 		method._throws(IOException.class);
@@ -508,10 +510,9 @@ public class TestGenerator {
 
 		assert_element(sdata, screenNode, null, null, defaultElementNumber);
 
-		List<String> explicitAssertions = then.getAssertions();
-		if (explicitAssertions != null) {
-			ExplicitAssertion parsedEXplicit = graphGenerator.parsePrecondition(explicitAssertions);
-			generateExplicitAssertions(sdata, parsedEXplicit);
+		ExplicitAssertion explicitAssertion = then.getParsedAssertion();
+		if (explicitAssertion != null) {
+			generateExplicitAssertions(sdata, explicitAssertion);
 		}
 
 		// add closing asserts
@@ -538,8 +539,7 @@ public class TestGenerator {
 			for (Literal literal : clause.getLiterals()) {
 				logger.info("explicit assertion :  " + literal);
 				assert_element(sdata, literal.getNode(), literal.getAction(), literal.getTextData(),
-						defaultElementNumber);
-
+						literal.getLiteral_no());
 			}
 
 		}
@@ -562,7 +562,7 @@ public class TestGenerator {
 		boolean flag = true;
 		GraphNode lastNodePoped = null;
 		for (GraphNode stackNode : stack) {
-			if(stackNode == activeNode) {
+			if (stackNode == activeNode) {
 				System.out.println("stack node is active node, breaking");
 				break;
 			}
@@ -630,7 +630,7 @@ public class TestGenerator {
 	}
 
 	private boolean requiresDataArgument(String actionType) {
-		for(String rd : ConfigReader.requiresData) {
+		for (String rd : ConfigReader.requiresData) {
 			if (actionType.toLowerCase().equals(rd.toLowerCase())) {
 				return true;
 			}
@@ -645,7 +645,7 @@ public class TestGenerator {
 		boolean flag = true;
 		GraphNode lastNodePoped = null;
 		for (GraphNode stackNode : stack) {
-			if(stackNode == activeNode) {
+			if (stackNode == activeNode) {
 				System.out.println("stack node is active node, breaking");
 				break;
 			}
@@ -777,7 +777,7 @@ public class TestGenerator {
 
 				assert_element(sdata, srcNode, null, null, defaultElementNumber);
 
-			}  else {
+			} else {
 
 				invoke_element(sdata, srcNode, srcNode.getAction_data(), defaultElementNumber,
 						srcNode.getAction_type());

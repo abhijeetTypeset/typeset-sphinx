@@ -108,5 +108,13 @@ public class Literal {
 	public String getTextData() {
 		return textData;
 	}
+	
+	public String getLiteral_no() {
+		return literal_no;
+	}
+
+	public void setLiteral_no(String literal_no) {
+		this.literal_no = literal_no;
+	}
 
 }

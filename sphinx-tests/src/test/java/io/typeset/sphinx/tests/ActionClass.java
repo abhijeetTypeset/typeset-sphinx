@@ -401,12 +401,16 @@ public class ActionClass extends ConfigClass {
 	}
 
 
-	public boolean hasElementsTotal(By locator, String totalCount)
+	public boolean hasElementsTotal(By locator, String totalCount, String notUsed)
 	{
 		System.out.println("checking count for " + locator.toString());
 		final WebDriverWait wait = new WebDriverWait(driver, 15);
 		final WebElement element = wait.until(ExpectedConditions.elementToBeClickable(locator));
-		if (driver.findElements(locator).size() == getElementNumber(totalCount)) {
+		int elementsFound = driver.findElements(locator).size();
+		int expectedCount = getElementNumber(totalCount);
+		System.out.println("expecting " + expectedCount + ", found " + elementsFound);
+		
+		if (elementsFound == expectedCount) {
 			return true;
 		}else {
 			return false;
