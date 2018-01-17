@@ -16,6 +16,6 @@ wait: no
 then:
  screen: screen_5
  assertions:
-  - editor_table;0%as%canSee
-  - editor_table-cell;6%as%canSee
+  - control_editor_table;0%as%canSee
+  - control_editor_table-cell;6%as%canSee
  
