@@ -1,7 +1,7 @@
 package io.typeset.sphinx.tests;
 
 import java.io.File;
-
+import java.io.IOException;
 import org.apache.commons.io.FileUtils;
 import org.openqa.selenium.OutputType;
 import org.openqa.selenium.TakesScreenshot;
@@ -12,22 +12,28 @@ import org.testng.TestListenerAdapter;
 import io.typeset.sphinx.tests.ConfigClass;
 
 public class Screenshot extends TestListenerAdapter {
-	private static String fileSeperator = System.getProperty("file.separator");
+	private static String fileSeperator = File.separator;
 
 	public static String takeScreenShot(WebDriver driver, String screenShotName, String testName) {
 		try {
-			final File file = new File("Screenshots" + fileSeperator + "Results");
+			String directoryName = "Screenshots";
+			final File file = new File(directoryName);
 			if (!file.exists()) {
 				System.out.println("File created " + file);
 				file.mkdir();
 			}
 
 			final File screenshotFile = ((TakesScreenshot) driver).getScreenshotAs(OutputType.FILE);
-			final File targetFile = new File("Screenshots" + fileSeperator + "Results" + fileSeperator + testName,
-					screenShotName);
-			FileUtils.copyFile(screenshotFile, targetFile);
+			final File targetFile = new File(directoryName + fileSeperator + testName, screenShotName);
 
-			return screenShotName;
+			try {
+				FileUtils.copyFile(screenshotFile, targetFile);
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+
+			return targetFile.getAbsolutePath();
 		} catch (final Exception e) {
 			System.out.println("An exception occured while taking screenshot " + e.getCause());
 			return null;
@@ -56,9 +62,8 @@ public class Screenshot extends TestListenerAdapter {
 		final String screenShotName = testMethodName + ".png";
 
 		if (this.driver != null) {
-			final String imagePath = ".." + fileSeperator + "Screenshots" + fileSeperator + "Results" + fileSeperator
-					+ testClassName + fileSeperator + takeScreenShot(this.driver, screenShotName, testClassName);
-			System.out.println("Screenshot can be found : " + imagePath);
+			final String imagePath = takeScreenShot(this.driver, screenShotName, testClassName);
+			System.out.println("Screenshot can be found at : " + imagePath);
 		}
 	}
 
