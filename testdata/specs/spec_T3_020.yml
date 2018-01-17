@@ -20,4 +20,4 @@ then:
  screen: screen_5
  assertions: 
 post:
-- spec_T3_01.yml
+- spec_T3_02.yml
