@@ -12,5 +12,5 @@ wait: no
 then:
  screen: screen_5
  assertions: 
-  - control_60;0%as%disabled
+  - control_60;0%not%enabled
   - control_29;0%as%canSee
