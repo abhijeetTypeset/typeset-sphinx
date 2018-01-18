@@ -27,4 +27,4 @@ wait: short
 then:
  screen: screen_5
  assertions: 
-  - control_52;1%as%contains%Sample Heading
+  - control_52;0%as%contains%Sample Heading
