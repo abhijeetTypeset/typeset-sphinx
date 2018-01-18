@@ -9,9 +9,8 @@ when:
   action_name: widget_insert-dropdown_table
   action_type: click
  action_3:
-  action_name: control_insert-dropdown_table-cell
-  action_type: select
-  action_data: 6
+  action_name: control_insert-dropdown_table-cell;7
+  action_type: click
 wait: no
 then:
  screen: screen_5
