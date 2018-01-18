@@ -4,7 +4,7 @@ given:
  assertions: 
 when:
  action_1: 
-  action_name: control_59
+  action_name: control_57
   action_type: writeAtMiddle
   action_data: \n
 wait: 
@@ -12,4 +12,4 @@ then:
  screen: screen_5
  assertions: 
   - control_53;1%as%canSee
-  - control_59;1%as%canSee
+  - control_57;1%as%canSee

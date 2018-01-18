@@ -4,7 +4,7 @@ given:
  assertions: 
 when:
  action_1: 
-  action_name: control_59
+  action_name: control_57
   action_type: writeAtEnd
   action_data: \n
 wait: 
