@@ -17,3 +17,4 @@ then:
  assertions: 
   - control_57;0%as%canSee
   - control_53;0%as%canSee
+post: [spec_T1_08.yml, spec_T1_09.yml]
