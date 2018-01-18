@@ -14,4 +14,4 @@ then:
  assertions: 
   - control_58;0%as%enabled
   - control_53;0%as%canSee
-post: [spec_T1_08.yml, spec_T1_09.yml]
+post: 
