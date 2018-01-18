@@ -2,20 +2,8 @@ name: BoldTextCursorAtEnd
 given: 
  screen: screen_5
  assertions: 
-when:
+when:  
  action_1: 
-  action_name: control_9;0
-  action_type: click
-  action_data:
- action_1a:  
-  action_name: control_29
-  action_type: type
-  action_data: \n
- action_2: 
-  action_name: control_31
-  action_type: click
-  action_data:  
- action_4: 
   action_name: control_54
   action_type: writeAtEnd
   action_data: \n
