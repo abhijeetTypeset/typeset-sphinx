@@ -23,5 +23,5 @@ wait: no
 then:
  screen: screen_10
  assertions: 
-  - widget_5;0%as%canSee
+  - control_tab_by_url;0%as%canSee
 
