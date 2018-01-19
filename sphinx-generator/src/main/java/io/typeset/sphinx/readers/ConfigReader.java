@@ -39,8 +39,16 @@ public class ConfigReader {
 			// load a properties file
 			prop.load(input);
 
-			inputDir = System.getProperty("user.dir") + File.separator + prop.getProperty("input-dir").trim();
-			outputDir = System.getProperty("user.dir") + File.separator + prop.getProperty("output-dir").trim();
+			inputDir = prop.getProperty("input-dir").trim();
+			if(!inputDir.startsWith("/")) { // if not an absolute path
+				inputDir = System.getProperty("user.dir") + File.separator + inputDir;
+			}
+			
+			
+			outputDir = prop.getProperty("output-dir").trim();
+			if(!outputDir.startsWith("/")) {
+				outputDir = System.getProperty("user.dir") + File.separator + outputDir;
+			}
 			String generateClassesStr = prop.getProperty("generate-classes").trim();
 			if (generateClassesStr != null && generateClassesStr.toLowerCase().equals("true")) {
 				generateClasses = true;
