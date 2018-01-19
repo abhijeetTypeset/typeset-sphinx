@@ -29,4 +29,4 @@ then:
  assertions: 
   - control_68;0%as%canSee
   - control_70;0%as%canSee
-post: [spec_T4_code2.yml]
+post: 
