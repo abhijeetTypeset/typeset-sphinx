@@ -555,12 +555,12 @@ public class TestGenerator {
 
 	private void assert_element(ScaffolingData sdata, GraphNode activeNode, String specAssertFunction,
 			String specAssertData, String elementNumber, boolean isNegation) {
-		
+
 		String assertMethod = "assertTrue";
 		if (isNegation) {
 			assertMethod = "assertFalse";
 		}
-		
+
 		JInvocation assertStatement = sdata.getBlock().invoke(sdata.getAssertVar(), assertMethod);
 
 		logger.info("asserting for element " + activeNode);
@@ -847,7 +847,8 @@ public class TestGenerator {
 			String post, State thenState)
 			throws InvalidKeySpecException, IllegalAccessException, InvocationTargetException,
 			JClassAlreadyExistsException, CloneNotSupportedException, ClassNotFoundException, IOException {
-
+		System.out.println("####### Generating post : "+post);
+		
 		Spec postSpec = specMap.get(post);
 
 		if (postSpec == null) {
@@ -1039,6 +1040,8 @@ public class TestGenerator {
 		}
 
 		for (Spec spec : specList) {
+			System.out.println("##############################");
+			System.out.println("Generating specs for " + spec.getName());
 			GraphPath<GraphNode, DefaultEdge> path = getFeasiblePath(spec);
 			logger.info("Resolving spec " + spec);
 			if (path != null) {
