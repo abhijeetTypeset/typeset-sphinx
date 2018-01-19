@@ -40,7 +40,8 @@ public class Main {
 	private static final Logger logger = LogManager.getLogger("Log");
 
 	public static void main(String[] args) throws IOException, IllegalAccessException, InvocationTargetException,
-			JClassAlreadyExistsException, ParserConfigurationException, TransformerException, InvalidKeySpecException, CloneNotSupportedException, ClassNotFoundException {
+			JClassAlreadyExistsException, ParserConfigurationException, TransformerException, InvalidKeySpecException,
+			CloneNotSupportedException, ClassNotFoundException {
 
 		// get path to config file
 		String configFile = getParameters(args);
@@ -86,6 +87,18 @@ public class Main {
 		// generate test classes
 		TestNGGenerator testNGGenerator = new TestNGGenerator(specList, "FlyPaper", ConfigReader.homepage);
 		testNGGenerator.generateXML(generatedTests);
+
+		showStats(generatedTests);
+
+	}
+
+	private static void showStats(Map<String, String> generatedTests) {
+		System.out.println("=======================================");
+		for (String gt : generatedTests.keySet()) {
+			System.out.println(gt + ".java");
+		}
+		System.out.println("Total tests generated : " + generatedTests.size());
+		System.out.println("=======================================");
 
 	}
 

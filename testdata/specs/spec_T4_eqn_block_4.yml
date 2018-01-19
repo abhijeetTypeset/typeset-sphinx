@@ -2,15 +2,6 @@ name: EquationOptionWirisOpenedTest
 given:
  screen: screen_5
 when:
- action_1:
-  action_name: widget_4
-  action_type: click
- action_2:
-  action_name: widget_insert-dropdown_equation
-  action_type: click
- action_3:
-  action_name: control_insert-equation_block
-  action_type: click
  action_4:
   action_name: control_editor_standalone-formula;0
   action_type: click
