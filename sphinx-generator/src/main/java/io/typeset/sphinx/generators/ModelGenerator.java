@@ -54,6 +54,8 @@ public class ModelGenerator {
 
 	/** The action class. */
 	private JDefinedClass actionClass;
+	
+	private JDefinedClass retryClass;
 
 	private Map<GraphNode, List<String>> implementedGetters = new HashMap<>();
 
@@ -133,6 +135,10 @@ public class ModelGenerator {
 	public JDefinedClass getActionClass() {
 		return actionClass;
 	}
+	
+	public JDefinedClass getRetryClass() {
+		return retryClass;
+	}
 
 	/**
 	 * Generate a bunch of auxiliary classes useful for test execution
@@ -152,6 +158,11 @@ public class ModelGenerator {
 		className = packageName + "." + "ActionClass";
 		actionClass = cm._class(className);
 		actionClass._extends(configClass);
+		
+		packageName = BASE_PACKAGE_NAME;
+		className = packageName + "." + "RetryAnalyzer";
+		retryClass = cm._class(className);
+		retryClass._extends(configClass);
 
 	}
 

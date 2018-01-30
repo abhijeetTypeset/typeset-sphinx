@@ -994,7 +994,7 @@ public class TestGenerator {
 
 		// add testng annotation
 		JMethod method = sdata.getMethod();
-		method.annotate(org.testng.annotations.Test.class);
+		method.annotate(org.testng.annotations.Test.class).param("retryAnalyzer", classGenerator.getRetryClass());;
 
 		// generate GIVEN
 		ScaffolingData givenSdata = generatePrecondition(spec, codeModel, definedClass, path, "given");
