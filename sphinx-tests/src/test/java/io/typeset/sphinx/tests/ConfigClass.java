@@ -71,7 +71,7 @@ public class ConfigClass {
                         if (Mode.equals("headless")) {
                             System.out.println("Running in headless mode");
                             chromeOptions.addArguments("headless");
-                            chromeOptions.addArguments("window-size=1200x1072");
+                            chromeOptions.addArguments("window-size=1920x1080");
                         }
 			driver = new ChromeDriver(chromeOptions);
 			driver.manage().window().maximize();
