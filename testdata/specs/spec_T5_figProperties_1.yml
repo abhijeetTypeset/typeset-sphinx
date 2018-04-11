@@ -1,0 +1,16 @@
+name: FigurePropertiresOptionVisibleTest
+given:
+ screen: screen_5
+when:
+ action_1:
+  action_name: widget_editor_figure-properties
+  action_type: click
+wait: no
+then:
+ screen: screen_5
+ assertions:
+  - control_figure-width_twocolumn%as%canSee
+post:
+ - spec_T5_figProperties_2.yml
+ - spec_T5_figProperties_3.yml
+ - spec_T5_figProperties_4.yml

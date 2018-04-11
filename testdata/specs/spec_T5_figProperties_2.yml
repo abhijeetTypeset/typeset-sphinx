@@ -1,0 +1,12 @@
+name: ClosingFigurePropertiresOptionTest
+given:
+ screen: screen_5
+when:
+ action_1:
+  action_name: widget_editor_figure-properties
+  action_type: click
+wait: no
+then:
+ screen: screen_5
+ assertions:
+  - control_figure-width_twocolumn%not%canSee

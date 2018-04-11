@@ -40,3 +40,5 @@ then:
  screen: screen_5
  assertions: 
   - control_68;0%as%canSee
+post:
+ - spec_T5_figProperties_1.yml

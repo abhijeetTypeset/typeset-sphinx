@@ -1,0 +1,16 @@
+name: FigurePropertiresPositionEnabledTest
+given:
+ screen: screen_5
+ assertions:
+  - control_figure-position_toggle%as%disabled
+when:
+ action_1:
+  action_name: control_figure-position_toggle
+  action_type: click
+wait: no
+then:
+ screen: screen_5
+ assertions:
+  - control_figure-position_toggle%as%enabled
+post:
+ - spec_T5_figProperties_5.yml
