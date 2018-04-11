@@ -1,12 +1,10 @@
 name: uploadFigureUsingURl
 given: 
  screen: screen_5
- assertions:
 when: 
  action_0: 
   action_name: control_9;0
   action_type: click
-  action_data: 
  action_1a:  
   action_name: control_29
   action_type: type
@@ -14,27 +12,21 @@ when:
  action_1b: 
   action_name: widget_4
   action_type: click
-  action_data: 
  action_1c: 
   action_name: control_65;0
   action_type: click
-  action_data:
  action_2: 
   action_name: control_tab_by_url;0
   action_type: click
-  action_data:
  action_3: 
   action_name: control_66;0
   action_type: type
-  action_data:
  action_4: 
   action_name: control_67;0
   action_type: click
-  action_data:
  action_5: 
   action_name: control_9;0
   action_type: click
-  action_data:
 wait: no
 then:
  screen: screen_5
