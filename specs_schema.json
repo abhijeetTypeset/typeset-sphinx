@@ -1,0 +1,107 @@
+{
+  "$schema": "http://json-schema.org/draft-06/schema#",
+  "title": "Sphinx specs schema",
+  "description": "Schema to validate sphinx specifications",
+  "definitions": {
+    "assertions": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "spec_actions": {
+      "type": "object",
+      "properties": {
+        "action_name": {
+          "type": "string"
+        },
+        "action_type": {
+          "enum": [
+            "click",
+            "type"
+          ]
+        },
+        "action_data": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "action_name"
+      ]
+    }
+  },
+  "type": "object",
+  "properties": {
+    "name": {
+      "description": "Name of the product",
+      "type": "string"
+    },
+    "given": {
+      "description": "Set of pre-conditions for specificion, ideally assertions along with required screen added here",
+      "type": "object",
+      "properties": {
+        "screen": {
+          "type": "string",
+          "pattern": "(screen-*)"
+        },
+        "assertions": {
+          "$ref": "#definitions/assertions"
+        }
+      },
+      "required": [
+        "screen"
+      ]
+    },
+    "when": {
+      "description": "Sequence of steps to be done for the specification",
+      "type": "object",
+      "minProperties": 1,
+      "patternProperties": {
+        "action_*": {
+          "$ref": "#definitions/spec_actions"
+        }
+      },
+      "minItems": 1,
+      "uniqueItems": true
+    },
+    "wait": {
+      "enum": [
+        "no",
+        "short",
+        "normal",
+        "long"
+      ]
+    },
+    "then": {
+      "description": "Name of the product",
+      "type": "object",
+      "properties": {
+        "screen": {
+          "type": "string",
+          "pattern": "(screen-*)"
+        },
+        "assertions": {
+          "$ref": "#definitions/assertions"
+        }
+      },
+      "required": [
+        "screen",
+        "assertions"
+      ]
+    },
+    "post": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "(spec-*)"
+      }
+    }
+  },
+  "required": [
+    "name",
+    "given",
+    "when",
+    "then"
+  ],
+  "additionalProperties": false
+}
