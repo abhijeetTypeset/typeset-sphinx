@@ -1,0 +1,16 @@
+name: FigurePropertiresOrientationOptionTest
+given:
+ screen: screen_5
+ assertions:
+  - control_figure-orientation_potrait%as%enabled
+  - control_figure-orientation_landscape%as%disabled
+when:
+ action_1:
+  action_name: control_figure-orientation_landscape
+  action_type: click
+wait: no
+then:
+ screen: screen_5
+ assertions:
+  - control_figure-orientation_potrait%as%disabled
+  - control_figure-orientation_landscape%as%enabled
