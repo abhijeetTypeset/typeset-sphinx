@@ -1,12 +1,10 @@
 name: seeFigureModel
 given: 
  screen: screen_5
- assertions:
 when: 
  action_0: 
   action_name: control_9;0
   action_type: click
-  action_data: 
  action_1a:  
   action_name: control_29
   action_type: type
@@ -14,11 +12,9 @@ when:
  action_2: 
   action_name: widget_4
   action_type: click
-  action_data: 
  action_3: 
   action_name: control_65;0
   action_type: click
-  action_data:
 wait: no
 then:
  screen: screen_10
