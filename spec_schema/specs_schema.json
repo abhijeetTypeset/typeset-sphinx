@@ -8,27 +8,6 @@
       "items": {
         "type": "string"
       }
-    },
-    "spec_actions": {
-      "type": "object",
-      "properties": {
-        "action_name": {
-          "type": "string"
-        },
-        "action_type": {
-          "enum": [
-            "click",
-            "type"
-          ]
-        },
-        "action_data": {
-          "type": "string"
-        }
-      },
-      "required": [
-        "action_name",
-        "action_type"
-      ]
     }
   },
   "type": "object",
@@ -59,9 +38,17 @@
       "minProperties": 1,
       "patternProperties": {
         "action_*": {
-          "$ref": "#definitions/spec_actions"
+          "oneOf": [
+            {
+              "$ref": "action_type.json#definitions/action_type"
+            },
+            {
+              "$ref": "action_click.json#definitions/action_click"
+            }
+          ]
         }
       },
+      "additionalProperties": false,
       "minItems": 1,
       "uniqueItems": true
     },
