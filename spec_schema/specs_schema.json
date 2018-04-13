@@ -21,8 +21,7 @@
       "type": "object",
       "properties": {
         "screen": {
-          "type": "string",
-          "pattern": "(screen-*)"
+          "$ref": "screen_ids.json#definitions/screen_ids"
         },
         "assertions": {
           "$ref": "#definitions/assertions"
