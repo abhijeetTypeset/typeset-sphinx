@@ -157,12 +157,21 @@ public class ActionClass extends ConfigClass {
 		String scrollCmd = "window.scrollBy(" + scrollX + "," + scrollY + ")";
 		jse.executeScript(scrollCmd, "");
 	}
-	
 
+	private String replaceTemplates(String data) {
+		String timestamp = System.currentTimeMillis() + "";
+
+		String rep_data = data.replace("{{t}}", timestamp);
+		
+		return rep_data;
+	}
+	
 	public void type(By locator, String data) throws InterruptedException {
+		data = replaceTemplates(data);
 		System.out.println("locator " + locator.toString());
 		System.out.println("Type " + data);
 
+		data = replaceTemplates(data);
 		final WebDriverWait wait = new WebDriverWait(driver, 15);
 		final WebElement element = wait.until(ExpectedConditions.elementToBeClickable(locator));
 		try {
@@ -418,7 +427,7 @@ public class ActionClass extends ConfigClass {
 	}
 
 	public void type(By locator, String data, String elementNumber) throws InterruptedException {
-
+		data = replaceTemplates(data);
 		int eNo = getElementNumber(elementNumber);
 		System.out.println("locator " + locator.toString());
 		final WebDriverWait wait = new WebDriverWait(driver, 15);
