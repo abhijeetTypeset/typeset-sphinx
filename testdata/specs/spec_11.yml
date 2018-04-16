@@ -1,0 +1,13 @@
+name: scrollTest
+given: 
+ screen: screen_1
+ assertions: 
+when:
+ action_1: 
+  action_name: control_1;0
+  action_type: scroll_down_vertical 
+  action_data: 500 
+wait: long
+then:
+ screen: screen_1
+ assertions: 

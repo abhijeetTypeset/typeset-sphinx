@@ -14,6 +14,10 @@ import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
+import org.openqa.selenium.InvalidElementStateException;
+
+
+import org.openqa.selenium.JavascriptExecutor;
 
 import io.typeset.sphinx.tests.ConfigClass;
 
@@ -92,6 +96,93 @@ public class ActionClass extends ConfigClass {
 			return false;
 		}
 
+	}
+
+	public void scroll_down_vertical(By locator, String byPixles, String elementNumber) throws InterruptedException {
+		final WebDriverWait wait = new WebDriverWait(driver, 15);
+		JavascriptExecutor jse = (JavascriptExecutor)driver;
+		int scrollY = 250;
+		int scrollX = 0;
+		try {
+			scrollY = Integer.parseInt(byPixles);
+		}catch(Exception e) {
+			System.out.println("scroll length not integer, using default:W"
+					+ "");
+		}
+		String scrollCmd = "window.scrollBy(" + scrollX + "," + scrollY + ")";
+		jse.executeScript(scrollCmd, "");
+	}
+	
+	public void scroll_up_vertical(By locator, String byPixles, String elementNumber) throws InterruptedException {
+		final WebDriverWait wait = new WebDriverWait(driver, 15);
+		JavascriptExecutor jse = (JavascriptExecutor)driver;
+		int scrollY = -250;
+		int scrollX = 0;
+		try {
+			scrollY = Integer.parseInt(byPixles);
+		}catch(Exception e) {
+			System.out.println("scroll length not integer, using default:W"
+					+ "");
+		}
+		String scrollCmd = "window.scrollBy(" + scrollX + "," + scrollY + ")";
+		jse.executeScript(scrollCmd, "");
+	}
+	
+	public void scroll_up_horizontal(By locator, String byPixles, String elementNumber) throws InterruptedException {
+		final WebDriverWait wait = new WebDriverWait(driver, 15);
+		JavascriptExecutor jse = (JavascriptExecutor)driver;
+		int scrollX = -250;
+		int scrollY = 0;
+		try {
+			scrollX = Integer.parseInt(byPixles);
+		}catch(Exception e) {
+			System.out.println("scroll length not integer, using default:W"
+					+ "");
+		}
+		String scrollCmd = "window.scrollBy(" + scrollX + "," + scrollY + ")";
+		jse.executeScript(scrollCmd, "");
+	}
+	
+	public void scroll_down_horizontal(By locator, String byPixles, String elementNumber) throws InterruptedException {
+		final WebDriverWait wait = new WebDriverWait(driver, 15);
+		JavascriptExecutor jse = (JavascriptExecutor)driver;
+		int scrollX = 250;
+		int scrollY = 0;
+		try {
+			scrollX = Integer.parseInt(byPixles);
+		}catch(Exception e) {
+			System.out.println("scroll length not integer, using default:W"
+					+ "");
+		}
+		String scrollCmd = "window.scrollBy(" + scrollX + "," + scrollY + ")";
+		jse.executeScript(scrollCmd, "");
+	}
+
+	private String replaceTemplates(String data) {
+		String timestamp = System.currentTimeMillis() + "";
+
+		String rep_data = data.replace("{{t}}", timestamp);
+		
+		return rep_data;
+	}
+	
+	public void type(By locator, String data) throws InterruptedException {
+		data = replaceTemplates(data);
+		System.out.println("locator " + locator.toString());
+		System.out.println("Type " + data);
+
+		data = replaceTemplates(data);
+		final WebDriverWait wait = new WebDriverWait(driver, 15);
+		final WebElement element = wait.until(ExpectedConditions.elementToBeClickable(locator));
+		try {
+			driver.findElement(locator).click();
+			waitForAShortWhile();
+		} catch (final InvalidElementStateException e) {
+			System.out.println("Exception while clearing");
+			waitForALongWhile();
+		}
+
+		driver.findElement(locator).sendKeys(data);
 	}
 
 	public boolean heading(By locator, String elementNumber) {
@@ -336,7 +427,7 @@ public class ActionClass extends ConfigClass {
 	}
 
 	public void type(By locator, String data, String elementNumber) throws InterruptedException {
-
+		data = replaceTemplates(data);
 		int eNo = getElementNumber(elementNumber);
 		System.out.println("locator " + locator.toString());
 		final WebDriverWait wait = new WebDriverWait(driver, 15);
