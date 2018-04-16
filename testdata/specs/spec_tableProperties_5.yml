@@ -1,0 +1,16 @@
+name: TablePropertiesPositionOptionTest
+given:
+ screen: screen_5
+ assertions:
+  - control_table-position_toggle%as%enabled
+when:
+ action_1:
+  action_name: control_table-position_bottom
+  action_type: click
+wait: no
+then:
+ screen: screen_5
+ assertions:
+  - control_table-position_bottom%as%enabled
+  - control_table-position_here%as%disabled
+  - control_table-position_top%as%disabled

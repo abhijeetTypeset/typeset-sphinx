@@ -1,0 +1,14 @@
+name: TablePropertiesAutoBreakOptionTest
+given:
+ screen: screen_5
+ assertions:
+  - control_table-auto-break_toggle%as%disabled
+when:
+ action_1:
+  action_name: control_table-auto-break_toggle
+  action_type: click
+wait: no
+then:
+ screen: screen_5
+ assertions:
+  - control_table-auto-break_toggle%as%enabled

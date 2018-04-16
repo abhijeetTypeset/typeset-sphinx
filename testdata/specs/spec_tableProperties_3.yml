@@ -1,0 +1,16 @@
+name: TablePropertiesWidthOptionTest
+given:
+ screen: screen_5
+ assertions:
+  - control_table-width_twocolumn%as%enabled
+  - control_table-width_onecolumn%as%disabled
+when:
+ action_1:
+  action_name: control_table-width_onecolumn
+  action_type: click
+wait: no
+then:
+ screen: screen_5
+ assertions:
+  - control_table-width_twocolumn%as%disabled
+  - control_table-width_onecolumn%as%enabled

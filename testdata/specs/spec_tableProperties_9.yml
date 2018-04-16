@@ -1,0 +1,17 @@
+name: TablePropertiesAddHeaderOptionTest
+given:
+ screen: screen_5
+ assertions:
+  - control_table-header_toggle%as%disabled
+when:
+ action_1:
+  action_name: control_table-header_toggle
+  action_type: click
+ action_5: 
+  action_name: control_9;0
+  action_type: click
+wait: no
+then:
+ screen: screen_5
+ assertions:
+  - control_editor_table-header-section%as%canSee
