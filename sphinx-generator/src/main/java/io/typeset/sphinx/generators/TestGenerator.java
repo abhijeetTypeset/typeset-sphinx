@@ -91,6 +91,7 @@ public class TestGenerator {
 		Set<String> enabledSpecs = new HashSet<String>();
 		String enabledSpecsDir = inputDir + File.separator + "specs-enabled";
 		File folder = new File(enabledSpecsDir);
+    System.out.println("enabledSpecsDir..." + enabledSpecsDir);
 		for (final File file : folder.listFiles()) {
 			if (file.getAbsolutePath().endsWith(".yml")) {
 				logger.info(file.getName() + ":" + file.getAbsolutePath());
@@ -160,7 +161,6 @@ public class TestGenerator {
 			String sf = specFiles.get(skey);
 			try {
 				Spec spec = SpecReader.read(sf);
-
 				ExplicitAssertion eassertThen = graphGenerator.parsePrecondition(spec.getThen().getAssertions());
 				spec.getThen().setParsedAssertion(eassertThen);
 
