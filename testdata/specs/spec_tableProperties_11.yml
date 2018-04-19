@@ -8,7 +8,7 @@ when:
  action_5: 
   action_name: control_9;0
   action_type: click
-wait: no
+wait: long
 then:
  screen: screen_5
  assertions:

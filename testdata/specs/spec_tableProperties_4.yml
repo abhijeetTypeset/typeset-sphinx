@@ -2,7 +2,8 @@ name: TablePropertiesPositionEnabledTest
 given:
  screen: screen_5
  assertions:
-  - control_table-position_toggle%as%disabled
+  - control_table-position_toggle%as%enabled
+  - control_table-position_toggle%not%toggled
 when:
  action_1:
   action_name: control_table-position_toggle
@@ -12,5 +13,6 @@ then:
  screen: screen_5
  assertions:
   - control_table-position_toggle%as%enabled
+  - control_table-position_toggle%as%toggled
 post:
  - spec_tableProperties_5.yml

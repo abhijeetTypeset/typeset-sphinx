@@ -1,0 +1,16 @@
+name: TablePropertiesHeaderRepeatOptionTest
+given:
+ screen: screen_5
+ assertions:
+  - control_table-auto-break_toggle%as%toggled
+  - control_table-header-repeat_toggle%as%enabled
+  - control_table-header-repeat_toggle%not%toggled
+when:
+ action_1:
+  action_name: control_table-header-repeat_toggle
+  action_type: click
+wait: no
+then:
+ screen: screen_5
+ assertions:
+  - control_table-header-repeat_toggle%as%toggled

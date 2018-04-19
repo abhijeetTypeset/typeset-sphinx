@@ -2,12 +2,13 @@ name: TablePropertiesFootnoteOptionTest
 given:
  screen: screen_5
  assertions:
-  - control_table-footnote_toggle%as%disabled
+  - control_table-footnote_toggle%as%enabled
+  - control_table-footnote_toggle%not%toggled
 when:
  action_1:
   action_name: control_table-footnote_toggle
   action_type: click
- action_5: 
+ action_0: 
   action_name: control_9;0
   action_type: click
 wait: no

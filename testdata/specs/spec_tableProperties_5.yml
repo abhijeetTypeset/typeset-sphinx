@@ -12,5 +12,5 @@ then:
  screen: screen_5
  assertions:
   - control_table-position_bottom%as%enabled
-  - control_table-position_here%as%disabled
-  - control_table-position_top%as%disabled
+  - control_table-position_here%not%enabled
+  - control_table-position_top%not%enabled

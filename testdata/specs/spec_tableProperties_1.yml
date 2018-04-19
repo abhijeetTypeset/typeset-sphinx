@@ -14,8 +14,8 @@ post:
  - spec_tableProperties_2.yml
  - spec_tableProperties_3.yml
  - spec_tableProperties_4.yml
- - spec_tableProperties_5.yml
  - spec_tableProperties_6.yml
  - spec_tableProperties_7.yml
-#  - spec_tableProperties_8.yml
-#  - spec_tableProperties_9.yml
+ - spec_tableProperties_8.yml
+ - spec_tableProperties_9.yml
+ - spec_tableProperties_10.yml

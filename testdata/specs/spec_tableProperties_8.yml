@@ -2,7 +2,8 @@ name: TablePropertiesCaptionOptionTest
 given:
  screen: screen_5
  assertions:
-  - control_table-caption_toggle%as%disabled
+  - control_table-caption_toggle%as%enabled
+  - control_table-caption_toggle%as%toggled
 when:
  action_1:
   action_name: control_table-caption_toggle
@@ -10,8 +11,8 @@ when:
  action_5: 
   action_name: control_9;0
   action_type: click
-wait: no
+wait: short
 then:
  screen: screen_5
  assertions:
-  - control_editor_table-caption%as%canSee
+  - control_editor_table-caption%not%canSee
