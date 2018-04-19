@@ -1,0 +1,25 @@
+name: insertTable
+given:
+ screen: screen_insert-table_modal
+ assertions:
+  - control_modal_insert-table_total-cols%as%canSee
+  - control_modal_insert-table_total-rows%as%canSee
+  - control_modal_insert-table_caption-checkbox%as%enabled
+when:
+ action_1:
+  action_name: control_modal_insert-table_add-btn
+  action_type: click
+ action_5: 
+  action_name: control_9;0
+  action_type: click
+wait: no
+then:
+ screen: screen_5
+ assertions:
+  - control_editor_table-cell;0%as%canSee
+  - control_editor_table-caption%as%canSee
+  - widget_editor_table-properties%as%canSee
+post:
+ - spec_tableProperties_1.yml
+ - spec_tableProperties_12.yml
+ 

@@ -1,0 +1,23 @@
+{
+  "$schema": "http://json-schema.org/draft-06/schema#",
+  "definitions": {
+    "action_click": {
+      "type": "object",
+      "properties": {
+        "action_name": {
+          "type": "string"
+        },
+        "action_type": {
+          "enum": [
+            "click"
+          ]
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "action_name",
+        "action_type"
+      ]
+    }
+  }
+}

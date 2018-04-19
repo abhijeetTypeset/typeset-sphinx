@@ -1,0 +1,14 @@
+name: TablePropertiesOptionVisibleTestForDeleteTable
+given:
+ screen: screen_5
+when:
+ action_1:
+  action_name: widget_editor_table-properties
+  action_type: click
+wait: no
+then:
+ screen: screen_5
+ assertions:
+  - control_table-width_twocolumn%as%canSee
+post:
+ - spec_tableProperties_11.yml

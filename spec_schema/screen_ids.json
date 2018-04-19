@@ -1,0 +1,19 @@
+{
+  "$schema": "http://json-schema.org/draft-06/schema#",
+  "definitions": {
+    "screen_ids": {
+      "enum": [
+        "screen_1",
+        "screen_2",
+        "screen_3",
+        "screen_4",
+        "screen_5",
+        "screen_6",
+        "screen_7",
+        "screen_8",
+        "screen_9",
+        "screen_10"
+      ]
+    }
+  }
+}

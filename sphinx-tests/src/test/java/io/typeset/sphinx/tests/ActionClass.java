@@ -88,7 +88,7 @@ public class ActionClass extends ConfigClass {
 			return true;
 		}
 		int eNo = getElementNumber(elementNumber);
-		if (driver.findElements(locator).size() >= eNo) {
+		if (driver.findElements(locator).size() > eNo) {
 			System.out.println("Can see " + locator);
 			return true;
 		} else {
@@ -348,6 +348,28 @@ public class ActionClass extends ConfigClass {
 			return true;
 		}
 		System.out.print(locator + " is not enabled ");
+		return false;
+
+	}
+
+  public boolean toggled(By locator, String elementNumber) {
+		if (locator == null) {
+			return false;
+		}
+		int eNo = getElementNumber(elementNumber);
+		List<WebElement> elements = driver.findElements(locator);
+		if(eNo > elements.size()){
+			System.out.println("element index higher than present at the moment");
+			return false;
+		}
+		WebElement element = elements.get(eNo);
+
+		String value = element.getAttribute("data-spx-toggle");
+		if (value.equals("true")) {
+			System.out.print(locator + " is toggled ");
+			return true;
+		}
+		System.out.print(locator + " is not toggled ");
 		return false;
 
 	}

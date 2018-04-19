@@ -1,0 +1,15 @@
+name: TablePropertiesDeleteOptionTest
+given:
+ screen: screen_5
+when:
+ action_1:
+  action_name: control_table-delete_btn
+  action_type: click
+ action_5: 
+  action_name: control_9;0
+  action_type: click
+wait: long
+then:
+ screen: screen_5
+ assertions:
+  - control_editor_table%not%canSee
