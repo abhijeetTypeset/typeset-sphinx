@@ -5,7 +5,7 @@
         <listener class-name="io.typeset.sphinx.tests.ExtentReporterNG"></listener>
     </listeners>
 
-    <parameter name="url" value="localhost:8000" />
+    <parameter name="url" value="https://typeset.io" />
 
     <!--  <test name="FlyPaperFireFox">
         <parameter name="Browser" value="firefox" />
@@ -25,7 +25,7 @@
     </test> -->
     <test name="FlyPaperChrome">
         <parameter name="Browser" value="chrome" />
-        <parameter name="Mode" value="headfull" />
+        <parameter name="Mode" value="headless" />
         <packages>
             <package name="io.typeset.sphinx.tests">
             </package>
