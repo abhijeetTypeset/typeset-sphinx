@@ -1,0 +1,28 @@
+{
+  "files.exclude": {
+    "**/.git": true,
+    "**/.svn": true,
+    "**/.hg": true,
+    "**/CVS": true,
+    "**/.DS_Store": true,
+    "**/*.iml": true,
+    "sphinx.log": true,
+    "**/output": true,
+    "**/res": true,
+    "**/bin": true,
+    "**/target": true,
+    "**/scripts": true,
+    "**/.settings": true,
+  },
+  "editor.insertSpaces": true,
+  "editor.tabSize": 2,
+  "editor.detectIndentation": false,
+  "[yaml]": {
+    "editor.insertSpaces": true,
+    "editor.tabSize": 1,
+  },
+  "yaml.format.enable": true,
+  "yaml.schemas": {
+    "./spec_schema/specs_schema.json": "**/spec_*.yml",
+  },
+}

@@ -1,0 +1,19 @@
+name: TablePropertiesAutoBreakOptionTest
+given:
+ screen: screen_5
+ assertions:
+  - control_table-auto-break_toggle%as%enabled
+  - control_table-header-repeat_toggle%not%enabled
+  - control_table-auto-break_toggle%not%toggled
+when:
+ action_1:
+  action_name: control_table-auto-break_toggle
+  action_type: click
+wait: no
+then:
+ screen: screen_5
+ assertions:
+  - control_table-auto-break_toggle%as%toggled
+  - control_table-header-repeat_toggle%as%enabled
+post:
+ - spec_tableProperties_13.yml

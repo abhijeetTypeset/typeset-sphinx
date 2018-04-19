@@ -3,7 +3,7 @@ given:
  screen: screen_5
  assertions:
   - control_figure-width_twocolumn%as%enabled
-  - control_figure-width_onecolumn%as%disabled
+  - control_figure-width_onecolumn%not%enabled
 when:
  action_1:
   action_name: control_figure-width_onecolumn
@@ -12,5 +12,5 @@ wait: no
 then:
  screen: screen_5
  assertions:
-  - control_figure-width_twocolumn%as%disabled
+  - control_figure-width_twocolumn%not%enabled
   - control_figure-width_onecolumn%as%enabled

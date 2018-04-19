@@ -2,7 +2,7 @@ name: FigurePropertiresPositionEnabledTest
 given:
  screen: screen_5
  assertions:
-  - control_figure-position_toggle%as%disabled
+  - control_figure-position_toggle%not%enabled
 when:
  action_1:
   action_name: control_figure-position_toggle
