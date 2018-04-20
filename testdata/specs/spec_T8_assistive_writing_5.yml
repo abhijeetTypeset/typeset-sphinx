@@ -1,0 +1,17 @@
+name: AssistiveWritingEnableTest
+given:
+ screen: screen_5
+ assertions:
+  - control_assistive-writing_status_box%not%enabled
+when:
+ action_1:
+  action_name: control_assistive-writing_status_box
+  action_type: click
+ action_2:
+  action_name: control_9;0
+  action_type: click
+wait: long
+then:
+ screen: screen_5
+ assertions:
+  - control_assistive-writing_error_marker%as%canSee

@@ -1,0 +1,21 @@
+name: AssistiveWritingDisableTest
+given:
+ screen: screen_5
+ assertions:
+  - control_assistive-writing_status_box%as%enabled
+  - control_assistive-writing_error_marker%as%canSee
+when:
+ action_1:
+  action_name: control_assistive-writing_error_marker;0
+  action_type: click
+ action_2:
+  action_name: control_assistive-writing_switch
+  action_type: click
+ action_3:
+  action_name: control_9;0
+  action_type: click
+wait: no
+then:
+ screen: screen_5
+ assertions:
+  - control_assistive-writing_error_marker%not%canSee

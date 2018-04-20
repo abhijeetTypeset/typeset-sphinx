@@ -1,0 +1,16 @@
+name: AssistiveWritingSuggestionReplaceTest
+given:
+ screen: screen_5
+ assertions:
+  - widget_assistive-writing_suggestion_tooltip%as%enabled
+when:
+ action_1:
+  action_name: control_assistive-writing_suggestion;0
+  action_type: click
+ action_2:
+  action_name: control_9;0
+  action_type: click
+then:
+ screen: screen_5
+ assertions:
+  # - control_29;0%not%equals%speling error
