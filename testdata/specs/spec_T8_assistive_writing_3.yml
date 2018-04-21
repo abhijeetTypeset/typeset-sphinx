@@ -10,7 +10,9 @@ when:
  action_2:
   action_name: control_9;0
   action_type: click
+wait: normal
 then:
  screen: screen_5
  assertions:
-  # - control_29;0%not%equals%speling error
+  - control_assistive-writing_error_marker%not%canSee
+  - control_29;0%as%contains%Spelling error

@@ -11,11 +11,11 @@ when:
  action_2:
   action_name: control_assistive-writing_switch
   action_type: click
- action_3:
-  action_name: control_9;0
-  action_type: click
-wait: no
+wait: short
 then:
  screen: screen_5
  assertions:
-  - control_assistive-writing_error_marker%not%canSee
+  - control_assistive-writing_status_box%not%enabled
+post:
+ - spec_T8_assistive_writing_4_2.yml
+ - spec_T8_assistive_writing_5.yml
