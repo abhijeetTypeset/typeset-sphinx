@@ -68,14 +68,14 @@ public class ConfigClass {
 		if (Browser.equalsIgnoreCase("chrome")) {
 			System.out.println("Chrome path : " + System.getProperty("webdriver.chrome.driver"));
       final ChromeOptions chromeOptions = new ChromeOptions();
-      // chromeOptions.addArguments("--window-size=1920x1080");
-      chromeOptions.addArguments("--start-fullscreen");
+      chromeOptions.addArguments("--window-size=1920x1080");
+//       chromeOptions.addArguments("--start-fullscreen");
       if (Mode.equals("headless")) {
           System.out.println("Running in headless mode");
           chromeOptions.addArguments("headless");
       }
 			driver = new ChromeDriver(chromeOptions);
-			// driver.manage().window().maximize();
+			driver.manage().window().maximize();
 			driver.manage().timeouts().implicitlyWait(BROWSER_TIMEOUT, TimeUnit.SECONDS);
 			System.out.println("Chrome driver selected");
 			driver.get(Url);
