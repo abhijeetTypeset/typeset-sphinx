@@ -3,6 +3,7 @@ given:
  screen: screen_5
  assertions:
   - control_figure-position_toggle%not%enabled
+  - control_figure-position_toggle%not%toggled
 when:
  action_1:
   action_name: control_figure-position_toggle
@@ -12,5 +13,6 @@ then:
  screen: screen_5
  assertions:
   - control_figure-position_toggle%as%enabled
+  - control_figure-position_toggle%as%toggled
 post:
  - spec_T5_figProperties_5.yml
