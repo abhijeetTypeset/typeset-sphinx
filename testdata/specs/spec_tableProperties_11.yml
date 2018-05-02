@@ -3,6 +3,9 @@ given:
  screen: screen_5
 when:
  action_1:
+  action_name: widget_editor_table-properties
+  action_type: click
+ action_2:
   action_name: control_table-delete_btn
   action_type: click
  action_5: 
