@@ -28,7 +28,6 @@ public class InvalidConfigException extends RuntimeException {
 	 * @param s the s
 	 */
 	public InvalidConfigException(String s) {
-		super(s);
+		super("COMPILE ERROR: E101; " + s + "\nConsult https://github.com/TypesetIO/sphinx/wiki/Error-Codes for more details");
 	}
-
 }

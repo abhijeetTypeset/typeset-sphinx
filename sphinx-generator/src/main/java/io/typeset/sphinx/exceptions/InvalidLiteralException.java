@@ -27,6 +27,6 @@ public class InvalidLiteralException extends RuntimeException {
       * @param s the s
       */
      public InvalidLiteralException(String s) {
-         super(s);
+ 		super("COMPILE ERROR: E103; " + s + "\nConsult https://github.com/TypesetIO/sphinx/wiki/Error-Codes for more details");
      }
 }

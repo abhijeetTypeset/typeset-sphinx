@@ -27,7 +27,7 @@ public class InvalidClauseException extends RuntimeException {
 	 * @param s the s
 	 */
 	public InvalidClauseException(String s) {
-		super(s);
+		super("COMPILE ERROR: E102; " + s + "\nConsult https://github.com/TypesetIO/sphinx/wiki/Error-Codes for more details");
 	}
 
 }

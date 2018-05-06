@@ -27,6 +27,6 @@ public class InvalidModelException extends RuntimeException{
       * @param s the s
       */
      public InvalidModelException(String s) {
-         super(s);
+ 		super("COMPILE ERROR: E104; " + s + "\nConsult https://github.com/TypesetIO/sphinx/wiki/Error-Codes for more details");
      }
 }

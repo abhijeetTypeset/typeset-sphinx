@@ -203,7 +203,6 @@ public class TestGenerator {
 			if (test.trim().length() <= 0) {
 				continue;
 			}
-			System.out.println(test + " : " + sf);
 			if (sf.endsWith(test)) {
 				return true;
 			}
@@ -358,7 +357,6 @@ public class TestGenerator {
 	private void writeTestToFile(JCodeModel cModel, JDefinedClass definedClass) throws IOException {
 		String filepath = outputDir + File.separator + "java";
 		logger.info("Generating class file " + filepath);
-		System.out.println("Generating class " + definedClass.name() + " ; " + definedClass.fullName());
 
 		generatedTests.put(definedClass.fullName(), "execute");
 		File file = new File(filepath);
@@ -368,25 +366,31 @@ public class TestGenerator {
 	}
 
 	private ScaffolingData createMethodScaffolding(JCodeModel codeModel, JDefinedClass definedClass, String methodName,
-			boolean addAssert) {
+			boolean addAssert, String specName) {
 		JMethod method = definedClass.method(JMod.PUBLIC, JType.parse(codeModel, "void"), methodName);
 		method._throws(InterruptedException.class);
 		method._throws(IOException.class);
 		JVar assertVar = null;
 		JBlock block = method.body();
+		
 		if (addAssert) {
 			assertVar = block.decl(codeModel._ref(org.testng.asserts.SoftAssert.class), "sAssert");
 			JExpression init = JExpr._new(codeModel._ref(org.testng.asserts.SoftAssert.class));
 			assertVar.init(init);
 		}
 
-		return new ScaffolingData(method, block, assertVar);
+		ScaffolingData sdata  = new ScaffolingData(method, block, assertVar);
+		String metaMsg = "SPEC_NAME:" + specName + ";METHOD_NAME:" + sdata.getMethod().name();
+		sdata.getBlock().invoke(outVar, "println").arg("[FUNCTION_START]" + metaMsg);
+		
+		return sdata;
 	}
 
-	private void addClosingAssert(ScaffolingData sdata) {
+	private void addClosingAssert(ScaffolingData sdata, String specName) {
 		JStatement statement = sdata.getAssertVar().invoke("assertAll");
 		sdata.getBlock().add(statement);
-		sdata.getBlock().invoke(outVar, "println").arg("=============" + sdata.getMethod().name() + "=============");
+		String metaMsg = "SPEC_NAME:" + specName + ";METHOD_NAME:" + sdata.getMethod().name();
+		sdata.getBlock().invoke(outVar, "println").arg("[FUNCTION_END]" + metaMsg);
 	}
 
 	private boolean requiresData(String actionType) {
@@ -399,8 +403,8 @@ public class TestGenerator {
 	}
 
 	private ScaffolingData generateSpecActions(JCodeModel codeModel, JDefinedClass definedClass,
-			Map<String, Action> actions, String methodName) {
-		ScaffolingData sdata = createMethodScaffolding(codeModel, definedClass, methodName, true);
+			Map<String, Action> actions, String methodName, String specName) {
+		ScaffolingData sdata = createMethodScaffolding(codeModel, definedClass, methodName, true, specName);
 
 		if (actions != null && !actions.isEmpty()) {
 			for (String action_tag : actions.keySet()) {
@@ -441,7 +445,7 @@ public class TestGenerator {
 			}
 		}
 		// add closing asserts
-		addClosingAssert(sdata);
+		addClosingAssert(sdata, specName);
 
 		return sdata;
 	}
@@ -495,7 +499,7 @@ public class TestGenerator {
 
 	private ScaffolingData generatePostCondition(Spec spec, JCodeModel codeModel, JDefinedClass definedClass,
 			State then, String methodName) {
-		ScaffolingData sdata = createMethodScaffolding(codeModel, definedClass, methodName, true);
+		ScaffolingData sdata = createMethodScaffolding(codeModel, definedClass, methodName, true, spec.getName());
 
 		GraphNode pageNode = usedPages.get(graphGenerator.getNodeByKey(then.getScreen()).getName());
 		setActive(pageNode);
@@ -516,7 +520,7 @@ public class TestGenerator {
 		}
 
 		// add closing asserts
-		addClosingAssert(sdata);
+		addClosingAssert(sdata, spec.getName());
 
 		return sdata;
 
@@ -569,7 +573,6 @@ public class TestGenerator {
 		GraphNode lastNodePoped = null;
 		for (GraphNode stackNode : stack) {
 			if (stackNode == activeNode) {
-				System.out.println("stack node is active node, breaking");
 				break;
 			}
 			String getterName = GeneratorUtilities.getGetterName(stackNode.getName());
@@ -619,9 +622,8 @@ public class TestGenerator {
 		if (!classGenerator.containsGetter(lastNodePoped, getterName)) {
 			String message = lastNodePoped.getName() + " does not have any getter named " + getterName;
 			throw new InvalidPathException(message);
-		} else {
-			System.out.println(lastNodePoped.getName() + " has a getter named " + getterName);
-		}
+		} 
+
 
 	}
 
@@ -630,9 +632,8 @@ public class TestGenerator {
 		if (!classGenerator.containsGetter(activeNode, getterName)) {
 			String message = activeNode.getName() + " does not have any getter named " + getterName;
 			throw new InvalidPathException(message);
-		} else {
-			System.out.println(activeNode.getName() + " has a getter named " + getterName);
-		}
+		} 
+
 	}
 
 	private boolean requiresDataArgument(String actionType) {
@@ -652,7 +653,6 @@ public class TestGenerator {
 		GraphNode lastNodePoped = null;
 		for (GraphNode stackNode : stack) {
 			if (stackNode == activeNode) {
-				System.out.println("stack node is active node, breaking");
 				break;
 			}
 			if (flag) {
@@ -759,7 +759,7 @@ public class TestGenerator {
 	private ScaffolingData generatePrecondition(Spec spec, JCodeModel codeModel, JDefinedClass definedClass,
 			GraphPath<GraphNode, DefaultEdge> path, String methodName) {
 
-		ScaffolingData sdata = createMethodScaffolding(codeModel, definedClass, methodName, true);
+		ScaffolingData sdata = createMethodScaffolding(codeModel, definedClass, methodName, true, spec.getName());
 
 		// go to homepage
 		sdata.getBlock().invoke("goToHomePage");
@@ -803,7 +803,7 @@ public class TestGenerator {
 		// }
 
 		// add closing asserts
-		addClosingAssert(sdata);
+		addClosingAssert(sdata, spec.getName());
 
 		return sdata;
 	}
@@ -821,7 +821,7 @@ public class TestGenerator {
 		if (specChainCounter > 0) {
 			methodName += "_" + specChainCounter;
 		}
-		ScaffolingData whenSdata = generateSpecActions(codeModel, definedClass, spec.getWhen(), methodName);
+		ScaffolingData whenSdata = generateSpecActions(codeModel, definedClass, spec.getWhen(), methodName, spec.getName());
 
 		call(sdata, whenSdata);
 		logger.info("=========== action generated ===========");
@@ -847,7 +847,6 @@ public class TestGenerator {
 			String post, State thenState)
 			throws InvalidKeySpecException, IllegalAccessException, InvocationTargetException,
 			JClassAlreadyExistsException, CloneNotSupportedException, ClassNotFoundException, IOException {
-		System.out.println("####### Generating post : "+post);
 		
 		Spec postSpec = specMap.get(post);
 
@@ -892,7 +891,7 @@ public class TestGenerator {
 
 		// create a new method that will call post specification
 		ScaffolingData sdata = createMethodScaffolding(codeModel, definedClass,
-				"post" + GeneratorUtilities.firstLetterCaptial(postSpec.getName()), false);
+				"post" + GeneratorUtilities.firstLetterCaptial(postSpec.getName()), false, postSpec.getName());
 
 		sdata.getBlock().invoke(outVar, "println")
 				.arg("=============" + "Post specifcation " + postSpec.getName() + " =============");
@@ -990,7 +989,7 @@ public class TestGenerator {
 		generateFieldVariables(definedClass);
 
 		// generate method scaffolding
-		ScaffolingData sdata = createMethodScaffolding(codeModel, definedClass, "execute", false);
+		ScaffolingData sdata = createMethodScaffolding(codeModel, definedClass, "execute", false, spec.getName());
 
 		// add testng annotation
 		JMethod method = sdata.getMethod();
@@ -1040,8 +1039,7 @@ public class TestGenerator {
 		}
 
 		for (Spec spec : specList) {
-			System.out.println("##############################");
-			System.out.println("Generating specs for " + spec.getName());
+
 			GraphPath<GraphNode, DefaultEdge> path = getFeasiblePath(spec);
 			logger.info("Resolving spec " + spec);
 			if (path != null) {

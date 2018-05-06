@@ -1,82 +1,257 @@
 package io.typeset.sphinx.tests;
 
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.ByteArrayInputStream;
 import java.io.File;
-import java.util.Calendar;
-import java.util.Date;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
+import java.util.UUID;
 
 import org.testng.IReporter;
-import org.testng.IResultMap;
 import org.testng.ISuite;
-import org.testng.ISuiteResult;
-import org.testng.ITestContext;
-import org.testng.ITestResult;
 import org.testng.xml.XmlSuite;
 
-import com.relevantcodes.extentreports.ExtentReports;
-import com.relevantcodes.extentreports.ExtentTest;
-import com.relevantcodes.extentreports.LogStatus;
+import com.amazonaws.auth.AWSCredentials;
+import com.amazonaws.auth.BasicAWSCredentials;
+import com.amazonaws.services.ec2.model.ImageAttribute;
+import com.amazonaws.services.s3.AmazonS3;
+import com.amazonaws.services.s3.AmazonS3Client;
+import com.amazonaws.services.s3.model.ObjectMetadata;
+import com.amazonaws.services.s3.model.PutObjectRequest;
+import com.ullink.slack.simpleslackapi.SlackAttachment;
+import com.ullink.slack.simpleslackapi.SlackChannel;
+import com.ullink.slack.simpleslackapi.SlackSession;
+import com.ullink.slack.simpleslackapi.impl.SlackSessionFactory;
 
 public class ExtentReporterNG implements IReporter {
-	private ExtentReports extent;
 
-	private void buildTestNodes(IResultMap tests, LogStatus status) {
-		ExtentTest test;
+	String functionStart = "[FUNCTION_START]";
+	String functionEnd = "[FUNCTION_END]";
+	String testStart = "METHOD_NAME:execute";
+	String testName = "Required Test Name";
+	String screenShotName = "Screenshot can be found at";
+	private static final String S3_BUCKET_NAME = "typeset-sphinx-output";
+	private static final String SLACK_CHANNEL = "bot-test";
+	private static final String S3_LINK = "https://s3.console.aws.amazon.com/s3/buckets/";
 
-		if (tests.size() > 0) {
-			for (final ITestResult result : tests.getAllResults()) {
-				test = this.extent.startTest(result.getMethod().getMethodName());
-				final StringBuffer details = new StringBuffer();
-				test.setStartedTime(getTime(result.getStartMillis()));
-				test.setEndedTime(getTime(result.getEndMillis()));
-				final Object[] instance = result.getParameters();
-				for (int i = 0; i < instance.length; i++) {
-					details.append(instance[i]);
-					if (!(i == instance.length - 1)) {
-						details.append(",");
-					}
-				}
-
-				if (result.FAILURE > 0) {
-					test.addScreenCapture(".png");
-				}
-
-				if (result.getThrowable() != null) {
-					test.log(status, "Test Data - (" + details.toString() + ")");
-					test.log(status, result.getThrowable());
-				} else {
-					test.log(status, "Test Data - (" + details.toString() + ")");
-					test.log(status, "Test " + status.toString().toLowerCase() + "ed");
-				}
-
-				this.extent.endTest(test);
+	private List<String> readLogs(String filename) {
+		List<String> logLines = new ArrayList<String>();
+		try {
+			File f = new File(filename);
+			BufferedReader b = new BufferedReader(new FileReader(f));
+			String line = "";
+			while ((line = b.readLine()) != null) {
+				logLines.add(line);
 			}
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
+		return logLines;
 	}
 
 	public void generateReport(List<XmlSuite> xmlSuites, List<ISuite> suites, String outputDirectory) {
-		this.extent = new ExtentReports(outputDirectory + File.separator + "Extent.html", true);
-
-		for (final ISuite suite : suites) {
-			final Map<String, ISuiteResult> result = suite.getResults();
-
-			for (final ISuiteResult r : result.values()) {
-				final ITestContext context = r.getTestContext();
-
-				buildTestNodes(context.getPassedTests(), LogStatus.PASS);
-				buildTestNodes(context.getFailedTests(), LogStatus.FAIL);
-				buildTestNodes(context.getSkippedTests(), LogStatus.SKIP);
-			}
-		}
-
-		this.extent.flush();
-		this.extent.close();
+		String outputFile = System.getProperty("user.dir") + File.separator + "target" + File.separator
+				+ "surefire-reports" + File.separator + "TestSuite-output.txt";
+		List<String> logLines = readLogs(outputFile);
+		processFiles(logLines, outputFile);
 	}
 
-	private Date getTime(long millis) {
-		final Calendar calendar = Calendar.getInstance();
-		calendar.setTimeInMillis(millis);
-		return calendar.getTime();
+	private void writeProcessedOutput(List<List> content, String processedFilename, String outputFile) {
+		BufferedWriter bw = null;
+		FileWriter fw = null;
+		try {
+			fw = new FileWriter(processedFilename);
+			bw = new BufferedWriter(fw);
+			for (List<String> testLog : content) {
+				for (String line : testLog) {
+					bw.write(line + "\n");
+				}
+				bw.write("=== *** ===");
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+		} finally {
+			try {
+				if (bw != null)
+					bw.close();
+				if (fw != null)
+					fw.close();
+			} catch (IOException ex) {
+				ex.printStackTrace();
+			}
+		}
+	}
+
+	private void processFiles(List<String> logLines, String outputFile) {
+
+		List<List> allTtestLogs = new ArrayList<List>();
+
+		int fncStart = 0;
+		int fncEnd = 0;
+
+		boolean foundErrors = false;
+		List<String> imageList = new ArrayList<String>();
+		Set<String> failingSpecs = new TreeSet<String>();
+
+		List<String> testLogs = new ArrayList<String>();
+		for (String l : logLines) {
+			if (l.contains(functionStart) && l.contains(testStart)) {
+				if (testLogs.size() > 0) {
+					if (fncStart > 0 && (fncStart > fncEnd)) {
+						testLogs.add("POTENTIAL ERROR");
+					}
+					allTtestLogs.add(testLogs);
+					testLogs = new ArrayList<String>();
+					fncStart = 0;
+					fncEnd = 0;
+				}
+
+			} else {
+				if (l.contains(functionStart)) {
+					testLogs.add(prettify(l));
+					String specName = getSpecName(l);
+					if (specName != null) {
+						failingSpecs.add(specName);
+					}
+					fncStart++;
+				}
+
+				if (l.contains(functionEnd)) {
+					testLogs.add(prettify(l));
+					fncEnd++;
+				}
+
+				if (l.contains(screenShotName)) {
+					String imagePath = getImagepath(l);
+					if (imagePath != null) {
+						testLogs.add("image_" + imageList.size() + ".png");
+						imageList.add(imagePath);
+					}
+				}
+
+				if (l.contains("Error")) {
+					testLogs.add(l);
+					foundErrors = true;
+				}
+			}
+		}
+		if (testLogs.size() > 0) {
+			if (fncStart > 0 && (fncStart > fncEnd)) {
+				testLogs.add("POTENTIAL ERROR");
+				foundErrors = true;
+			}
+			allTtestLogs.add(testLogs);
+		}
+
+		String processedFilename = System.getProperty("user.dir") + File.separator + "target" + File.separator
+				+ "surefire-reports" + File.separator + "TestSuite-processed.txt";
+
+		writeProcessedOutput(allTtestLogs, processedFilename, outputFile);
+		if (foundErrors) {
+			String folderName = UUID.randomUUID().toString();
+			uploadToS3(folderName, processedFilename, outputFile, imageList);
+			String failingSpecString = "";
+			for (String s : failingSpecs) {
+				failingSpecString += s + ", ";
+			}
+			String slackMsg = "*Errors have occured in Sphinx execution.*\n" + "Potentially failing specs : "
+					+ failingSpecString + "More details, screenshots can be found at\n" + S3_LINK + S3_BUCKET_NAME + "/"
+					+ folderName + "/?region=us-west-2&tab=overview";
+			sendSlackMessage(slackMsg);
+		}
+
+	}
+
+	private String getSpecName(String l) {
+		try {
+			int idx1 = l.indexOf("SPEC_NAME:");
+			int idx2 = l.indexOf(";");
+
+			if (idx1 > -1 && idx2 > -1) {
+				return l.substring(idx1 + 10, idx2).trim();
+			}
+		} catch (Exception e) {
+
+		}
+
+		return null;
+	}
+
+	private String getImagepath(String l) {
+		int idx1 = l.indexOf("/");
+		int idx2 = l.indexOf(".png");
+
+		if (idx1 > -1 && idx2 > -1) {
+			return l.substring(idx1, idx2 + 4).trim().replace("sphinx-tests/", "");
+		}
+
+		return null;
+	}
+
+	private void sendSlackMessage(String slackMsg) {
+		try {
+			SlackSession session = SlackSessionFactory
+					.createWebSocketSlackSession("xoxb-276710034624-GyYuox2vRUJ2zbfc0l3BE6Qe");
+
+			session.connect();
+			SlackChannel channel = session.findChannelByName(SLACK_CHANNEL);
+
+			SlackAttachment arg2 = null;
+			session.sendMessage(channel, slackMsg, arg2);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+	}
+
+	public static void createFolder(String folderName, AmazonS3 client) {
+		// create meta-data for your folder and set content-length to 0
+		ObjectMetadata metadata = new ObjectMetadata();
+		metadata.setContentLength(0);
+		// create empty content
+		InputStream emptyContent = new ByteArrayInputStream(new byte[0]);
+		// create a PutObjectRequest passing the folder name suffixed by /
+		PutObjectRequest putObjectRequest = new PutObjectRequest(S3_BUCKET_NAME, folderName, emptyContent, metadata);
+		// send request to S3 to create folder
+		client.putObject(putObjectRequest);
+	}
+
+	private String uploadToS3(String folderName, String processedFilename, String outputFile, List<String> imageList) {
+		AWSCredentials credentials = new BasicAWSCredentials("AKIAJJAUVBYLZ7H2JJRQ",
+				"Bq1wg1OLSLwClcnYIBDIwl6H1ZGLsEtIbksp3cD9");
+		AmazonS3 s3client = new AmazonS3Client(credentials);
+
+		createFolder(folderName, s3client);
+
+		s3client.putObject(new PutObjectRequest(S3_BUCKET_NAME, folderName + "/processed_output.txt",
+				new File(processedFilename)));
+
+		s3client.putObject(new PutObjectRequest(S3_BUCKET_NAME, folderName + "/full_output.txt", new File(outputFile)));
+
+		int idx = 0;
+		for (String image : imageList) {
+			String imageName = folderName + "/image_" + idx + ".png";
+			idx++;
+			System.out.println("uploading image " + image);
+			s3client.putObject(new PutObjectRequest(S3_BUCKET_NAME, imageName, new File(image)));
+		}
+
+		return folderName;
+	}
+
+	private String prettify(String l) {
+		l = l.replace(functionStart, "Started executing --> ");
+		l = l.replace(functionEnd, "Finished executing --> ");
+		l = l.replace("SPEC_NAME:", " Spec ");
+		l = l.replace("METHOD_NAME:", " Method ");
+		return l;
 	}
 }

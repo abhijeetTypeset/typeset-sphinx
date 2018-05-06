@@ -27,6 +27,6 @@ public class InvalidPathException extends RuntimeException {
 	 * @param s the s
 	 */
 	public InvalidPathException(String s) {
-		super(s);
+		super("COMPILE ERROR: E106; " + s + "\nConsult https://github.com/TypesetIO/sphinx/wiki/Error-Codes for more details");
 	}
 }

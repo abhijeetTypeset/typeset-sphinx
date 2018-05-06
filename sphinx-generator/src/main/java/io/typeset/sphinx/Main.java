@@ -54,7 +54,7 @@ public class Main {
 		ConfigReader.read(configFile);
 
 		// clean the output directory
-		cleanOutputDir();
+		cleanOutput();
 
 		// read the model
 		Model model = ModelReader.read();
@@ -94,9 +94,6 @@ public class Main {
 
 	private static void showStats(Map<String, String> generatedTests) {
 		System.out.println("=======================================");
-		for (String gt : generatedTests.keySet()) {
-			System.out.println(gt + ".java");
-		}
 		System.out.println("Total tests generated : " + generatedTests.size());
 		System.out.println("=======================================");
 
@@ -126,15 +123,15 @@ public class Main {
 		return cmd.getOptionValue("config");
 	}
 
-	public static void cleanOutputDir() {
+	public static void cleanOutput() {
 		logger.debug("Cleaning output directory");
-		// clean the output directory
+		// clean output directory
 		try {
 			FileUtils.deleteDirectory(new File(ConfigReader.outputDir));
 		} catch (Exception e) {
 			logger.debug("Error in cleaning directory");
 
-		}
+		}	
 	}
 
 }

@@ -11,6 +11,6 @@ public class InvalidPostSpec extends RuntimeException {
 	}
 
 	public InvalidPostSpec(String s) {
-		super(s);
+		super("COMPILE ERROR: E107 ;" + s + "\nConsult https://github.com/TypesetIO/sphinx/wiki/Error-Codes for more details");
 	}
 }

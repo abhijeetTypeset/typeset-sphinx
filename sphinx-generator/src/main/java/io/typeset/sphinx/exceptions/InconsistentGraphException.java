@@ -27,6 +27,6 @@ public class InconsistentGraphException extends RuntimeException {
 	 * @param s the s
 	 */
 	public InconsistentGraphException(String s) {
-		super(s);
+		super("COMPILE ERROR: E110; " + s + "\nConsult https://github.com/TypesetIO/sphinx/wiki/Error-Codes for more details");
 	}
 }

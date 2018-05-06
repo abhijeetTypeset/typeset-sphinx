@@ -191,7 +191,6 @@ public class GraphGenerator {
 		for (String a : model.getApps().keySet()) {
 			GraphNode appNode = getNodeByKey(a);
 			List<String> controlList = appNode.getControls();
-			System.out.println("app node " + a );
 			List<String> widgetList = appNode.getWidgets();
 
 			if (widgetList != null) {
@@ -204,7 +203,6 @@ public class GraphGenerator {
 
 			if (controlList != null) {
 				for (String c : controlList) {
-					System.out.println("control name " + c);
 					GraphNode controlNode = getNodeByKey(c);
 					logger.info("Adding edge from app " + appNode + " to control " + controlNode);
 					graph.addEdge(appNode, controlNode);

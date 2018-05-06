@@ -145,10 +145,6 @@ public class TestNGGenerator {
 		String filename = outputDir + File.separator +  "testng.xml";
 
 		StreamResult result = new StreamResult(new File(filename));
-
-		// Output to console for testing
-		// StreamResult result = new StreamResult(System.out);
-
 		transformer.transform(source, result);
 	}
 }
