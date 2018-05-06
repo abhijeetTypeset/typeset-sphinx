@@ -43,8 +43,10 @@ public class Main {
 			JClassAlreadyExistsException, ParserConfigurationException, TransformerException, InvalidKeySpecException,
 			CloneNotSupportedException, ClassNotFoundException {
 
+		Params params = getParameters(args);
 		// get path to config file
-		String configFile = getParameters(args);
+		String configFile = params.getConfigFile();
+		
 		if (configFile == null || !new File(configFile).isFile()) {
 			logger.error("Config file invalid");
 			throw new InvalidConfigException("Config file invalid");
@@ -80,7 +82,7 @@ public class Main {
 		classGenerator.generateClasses();
 
 		// covert specification to feasible paths; and then eventually into classes
-		TestGenerator testGenerator = new TestGenerator(tgraph, graphGenerator, classGenerator);
+		TestGenerator testGenerator = new TestGenerator(tgraph, graphGenerator, classGenerator, params);
 		List<Spec> specList = testGenerator.getSpecs();
 		Map<String, String> generatedTests = testGenerator.generateTest(specList);
 
@@ -99,7 +101,7 @@ public class Main {
 
 	}
 
-	private static String getParameters(String[] args) {
+	private static Params getParameters(String[] args) {
 		Options options = new Options();
 		logger.debug("getting parameters");
 
@@ -107,12 +109,16 @@ public class Main {
 		input.setRequired(true);
 		options.addOption(input);
 
+		Option selection = new Option("s", "selection", true, "spec selection");
+		options.addOption(selection);
+
 		CommandLineParser parser = new DefaultParser();
 		HelpFormatter formatter = new HelpFormatter();
 		CommandLine cmd;
-
+		Params params = new Params();
 		try {
 			cmd = parser.parse(options, args);
+			params.setConfigFile(cmd.getOptionValue("config"));
 		} catch (ParseException e) {
 			logger.info(e.getMessage());
 			formatter.printHelp("Sphinx", options);
@@ -120,7 +126,9 @@ public class Main {
 			return null;
 		}
 
-		return cmd.getOptionValue("config");
+		params.setEnabledSpec(cmd.getOptionValue("selection"));
+
+		return params;
 	}
 
 	public static void cleanOutput() {
@@ -131,7 +139,7 @@ public class Main {
 		} catch (Exception e) {
 			logger.debug("Error in cleaning directory");
 
-		}	
+		}
 	}
 
 }

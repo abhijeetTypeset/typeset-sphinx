@@ -1,8 +1,10 @@
 package io.typeset.sphinx.generators;
 
+import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -17,6 +19,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.Stack;
+import java.util.TreeSet;
 
 import io.typeset.sphinx.generators.ds.ScaffolingData;
 import io.typeset.sphinx.generators.util.GeneratorUtilities;
@@ -59,6 +62,7 @@ import io.typeset.sphinx.model.assertions.ExplicitAssertion;
 import io.typeset.sphinx.model.assertions.Literal;
 import io.typeset.sphinx.readers.ConfigReader;
 import io.typeset.sphinx.readers.SpecReader;
+import io.typeset.sphinx.Params;
 
 public class TestGenerator {
 	private String outputDir;
@@ -86,30 +90,53 @@ public class TestGenerator {
 	// TODO: get this some other way
 	private int MAX_LENGTH = 25;
 	private String defaultElementNumber = "0";
+	private Params params;
 
 	private Set<String> getEnabledSpecs() {
 		Set<String> enabledSpecs = new HashSet<String>();
-		String enabledSpecsDir = inputDir + File.separator + "specs-enabled";
-		File folder = new File(enabledSpecsDir);
-    System.out.println("enabledSpecsDir..." + enabledSpecsDir);
-		for (final File file : folder.listFiles()) {
-			if (file.getAbsolutePath().endsWith(".yml")) {
-				logger.info(file.getName() + ":" + file.getAbsolutePath());
-				enabledSpecs.add(file.getName());
+		// String enabledSpecsDir = inputDir + File.separator + "specs-enabled";
+		// File folder = new File(enabledSpecsDir);
+		// System.out.println("enabledSpecsDir..." + enabledSpecsDir);
+		// for (final File file : folder.listFiles()) {
+		// if (file.getAbsolutePath().endsWith(".yml")) {
+		// logger.info(file.getName() + ":" + file.getAbsolutePath());
+		// enabledSpecs.add(file.getName());
+		// }
+		// }
+		// logger.info("Found the following enabled specs: " + enabledSpecs);
+		// return enabledSpecs;
+
+		if (this.params.getEnabledSpec() != null) {
+			String enabledSpecsFile = inputDir + File.separator + "specs-selection" + File.separator
+					+ this.params.getEnabledSpec();
+			Set<String> specLines = new TreeSet<String>();
+			try {
+				File f = new File(enabledSpecsFile);
+				BufferedReader b = new BufferedReader(new FileReader(f));
+				String line = "";
+				while ((line = b.readLine()) != null) {
+					specLines.add(line);
+				}
+				System.out.println("Enabled specs " + specLines);
+				return specLines;
+			} catch (Exception e) {
+				e.printStackTrace();
 			}
 		}
-		logger.info("Found the following enabled specs: " + enabledSpecs);
-		return enabledSpecs;
+		System.out.println("exception while checking enabled specs, will run all ");
+
+		return null;
 	}
 
 	public TestGenerator(DefaultDirectedGraph<GraphNode, DefaultEdge> graph, GraphGenerator graphGenerator,
-			ModelGenerator classGenerator) {
+			ModelGenerator classGenerator, Params params) {
 		this.graph = graph;
 		this.graphGenerator = graphGenerator;
 		this.inputDir = ConfigReader.inputDir;
 		this.outputDir = ConfigReader.outputDir;
 		this.classGenerator = classGenerator;
 		this.allDirectedPath = new AllDirectedPaths<>(graph);
+		this.params = params;
 		this.enabledSpecs = getEnabledSpecs();
 	}
 
@@ -195,7 +222,10 @@ public class TestGenerator {
 	 * @return whether spec is enabled or not
 	 */
 	private boolean isSpecEnabled(String specFileName) {
-		return enabledSpecs.contains(specFileName);
+		if (enabledSpecs != null) {
+			return enabledSpecs.contains(specFileName);
+		}
+		return true;
 	}
 
 	private boolean isTopLevelTest(String sf) {
@@ -372,17 +402,17 @@ public class TestGenerator {
 		method._throws(IOException.class);
 		JVar assertVar = null;
 		JBlock block = method.body();
-		
+
 		if (addAssert) {
 			assertVar = block.decl(codeModel._ref(org.testng.asserts.SoftAssert.class), "sAssert");
 			JExpression init = JExpr._new(codeModel._ref(org.testng.asserts.SoftAssert.class));
 			assertVar.init(init);
 		}
 
-		ScaffolingData sdata  = new ScaffolingData(method, block, assertVar);
+		ScaffolingData sdata = new ScaffolingData(method, block, assertVar);
 		String metaMsg = "SPEC_NAME:" + specName + ";METHOD_NAME:" + sdata.getMethod().name();
 		sdata.getBlock().invoke(outVar, "println").arg("[FUNCTION_START]" + metaMsg);
-		
+
 		return sdata;
 	}
 
@@ -622,8 +652,7 @@ public class TestGenerator {
 		if (!classGenerator.containsGetter(lastNodePoped, getterName)) {
 			String message = lastNodePoped.getName() + " does not have any getter named " + getterName;
 			throw new InvalidPathException(message);
-		} 
-
+		}
 
 	}
 
@@ -632,7 +661,7 @@ public class TestGenerator {
 		if (!classGenerator.containsGetter(activeNode, getterName)) {
 			String message = activeNode.getName() + " does not have any getter named " + getterName;
 			throw new InvalidPathException(message);
-		} 
+		}
 
 	}
 
@@ -821,7 +850,8 @@ public class TestGenerator {
 		if (specChainCounter > 0) {
 			methodName += "_" + specChainCounter;
 		}
-		ScaffolingData whenSdata = generateSpecActions(codeModel, definedClass, spec.getWhen(), methodName, spec.getName());
+		ScaffolingData whenSdata = generateSpecActions(codeModel, definedClass, spec.getWhen(), methodName,
+				spec.getName());
 
 		call(sdata, whenSdata);
 		logger.info("=========== action generated ===========");
@@ -847,7 +877,7 @@ public class TestGenerator {
 			String post, State thenState)
 			throws InvalidKeySpecException, IllegalAccessException, InvocationTargetException,
 			JClassAlreadyExistsException, CloneNotSupportedException, ClassNotFoundException, IOException {
-		
+
 		Spec postSpec = specMap.get(post);
 
 		if (postSpec == null) {
@@ -993,7 +1023,8 @@ public class TestGenerator {
 
 		// add testng annotation
 		JMethod method = sdata.getMethod();
-		method.annotate(org.testng.annotations.Test.class).param("retryAnalyzer", classGenerator.getRetryClass());;
+		method.annotate(org.testng.annotations.Test.class).param("retryAnalyzer", classGenerator.getRetryClass());
+		;
 
 		// generate GIVEN
 		ScaffolingData givenSdata = generatePrecondition(spec, codeModel, definedClass, path, "given");
