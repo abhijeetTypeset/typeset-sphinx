@@ -38,7 +38,7 @@ public class ExtentReporterNG implements IReporter {
 	String testName = "Required Test Name";
 	String screenShotName = "Screenshot can be found at";
 	private static final String S3_BUCKET_NAME = "typeset-sphinx-output";
-	private static final String SLACK_CHANNEL = "bot-test";
+	private static final String SLACK_CHANNEL = "editor-tech";
 	private static final String S3_LINK = "https://s3.console.aws.amazon.com/s3/buckets/";
 
 	private List<String> readLogs(String filename) {

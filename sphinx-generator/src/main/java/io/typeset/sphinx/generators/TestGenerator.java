@@ -121,10 +121,11 @@ public class TestGenerator {
 				return specLines;
 			} catch (Exception e) {
 				e.printStackTrace();
+				
 			}
 		}
 		System.out.println("exception while checking enabled specs, will run all ");
-
+		System.exit(1);
 		return null;
 	}
 
