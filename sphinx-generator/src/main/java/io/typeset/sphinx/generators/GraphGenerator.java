@@ -29,6 +29,7 @@ import org.jgrapht.io.StringComponentNameProvider;
 import io.typeset.sphinx.exceptions.InvalidClauseException;
 import io.typeset.sphinx.exceptions.InvalidLiteralException;
 import io.typeset.sphinx.exceptions.InvalidModelException;
+import io.typeset.sphinx.exceptions.InvalidKeyException;
 
 import io.typeset.sphinx.model.App;
 import io.typeset.sphinx.model.Control;
@@ -97,7 +98,7 @@ public class GraphGenerator {
 			return node;
 		}
 		logger.error("No such symbol as " + key);
-		throw new InvalidLiteralException("No such symbol as " + key);
+		throw new InvalidKeyException("Mapping not found for key " + key);
 	}
 
 	/**

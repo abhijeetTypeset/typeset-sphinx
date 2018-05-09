@@ -207,6 +207,7 @@ public class ModelGenerator {
 		String packageName = BASE_PACKAGE_NAME + ".model" + "." + gnode.getNodeType() + "s";
 		String className = packageName + "." + GeneratorUtilities.firstLetterCaptial(gnode.getName());
 
+
 		JDefinedClass definedClass = cm._class(className);
 		definedClass._extends(definedAbstractNode);
 
@@ -332,7 +333,13 @@ public class ModelGenerator {
 		// logger.info("writing file to "+filepath);
 		File file = new File(filepath);
 		file.mkdirs();
+try{
 		cm.build(file);
+}catch(Exception e){
+System.out.println("Error while generating " + className);
+System.exit(1);
+}
+
 	}
 
 	private void addGetter(GraphNode gnode, String getterName) {

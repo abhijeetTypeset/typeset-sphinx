@@ -754,9 +754,12 @@ public class TestGenerator {
 			}
 		}
 		String lastScreen = spec.getThen().getScreen();
+System.out.println("last screen is " + lastScreen);
+
 		String lastPage = graphGenerator.getScreenToPage().get(lastScreen);
 
 		logger.info("last page node is " + lastPage);
+System.out.println("last page is " + lastPage);
 		usedPages.put(graphGenerator.getNodeByKey(lastScreen).getName(), graphGenerator.getNodeByKey(lastPage));
 
 		for (String screen : usedPages.keySet()) {
