@@ -20,6 +20,6 @@ then:
   - control_editor_table-caption%as%canSee
   - widget_editor_table-properties%as%canSee
 post:
- - spec_tableProperties_1.yml
- - spec_tableProperties_11.yml
+ - spec_T7_tableProperties_1.yml
+ - spec_T7_tableProperties_11.yml
  

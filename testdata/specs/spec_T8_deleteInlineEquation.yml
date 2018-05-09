@@ -1,0 +1,12 @@
+name: deleteInlineFormula
+given:
+ screen: screen_5
+when:
+ action_1:
+  action_name: control_formula-delete-btn
+  action_type: click
+wait: no
+then:
+ screen: screen_5
+ assertions:
+  - control_editor_inline-formula%not%canSee

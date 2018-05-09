@@ -15,4 +15,4 @@ then:
   - control_table-position_toggle%as%enabled
   - control_table-position_toggle%as%toggled
 post:
- - spec_tableProperties_5.yml
+ - spec_T7_tableProperties_5.yml

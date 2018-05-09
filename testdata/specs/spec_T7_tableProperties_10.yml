@@ -16,4 +16,4 @@ then:
   - control_table-auto-break_toggle%as%toggled
   - control_table-header-repeat_toggle%as%enabled
 post:
- - spec_tableProperties_13.yml
+ - spec_T7_tableProperties_13.yml

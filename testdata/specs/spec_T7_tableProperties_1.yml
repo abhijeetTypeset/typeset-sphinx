@@ -11,11 +11,11 @@ then:
  assertions:
   - control_table-width_twocolumn%as%canSee
 post:
- - spec_tableProperties_3.yml
- - spec_tableProperties_4.yml
- - spec_tableProperties_6.yml
- - spec_tableProperties_7.yml
- - spec_tableProperties_8.yml
- - spec_tableProperties_9.yml
- - spec_tableProperties_10.yml
+ - spec_T7_tableProperties_3.yml
+ - spec_T7_tableProperties_4.yml
+ - spec_T7_tableProperties_6.yml
+ - spec_T7_tableProperties_7.yml
+ - spec_T7_tableProperties_8.yml
+ - spec_T7_tableProperties_9.yml
+ - spec_T7_tableProperties_10.yml
  

@@ -1,0 +1,21 @@
+name: useInlineEquationLatexEditor
+given:
+ screen: screen_insert-equation_modal
+when:
+ action_0: 
+  action_name: control_tab__latex-editor__btn
+  action_type: click
+ action_2: 
+  action_name: control_update-formula__btn
+  action_type: click
+ action_3:
+  action_name: control_9;0
+  action_type: click
+wait: short
+then:
+ screen: screen_5
+ assertions:
+  - control_editor_inline-formula%as%canSee
+  - widget_formula-actions-dropdown%as%canSee
+post:
+ - spec_T8_openInlineEquationActionsDropdown.yml

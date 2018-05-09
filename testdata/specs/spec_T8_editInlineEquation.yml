@@ -1,0 +1,16 @@
+name: editInlineFormula
+given:
+ screen: screen_5
+when:
+ action_1:
+  action_name: control_formula-edit-btn
+  action_type: click
+wait: no
+then:
+ screen: screen_insert-equation_modal
+ assertions:
+  - control_tab__wiris-editor__btn%as%canSee
+post:
+ - spec_T8_insertInlineEquation.yml
+ - spec_T8_useInlineEquationLatexEditor.yml
+ 

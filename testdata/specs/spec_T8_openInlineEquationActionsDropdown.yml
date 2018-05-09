@@ -1,0 +1,16 @@
+name: openInlineFormulaActionsDropdown
+given:
+ screen: screen_5
+when:
+ action_1:
+  action_name: widget_formula-actions-dropdown
+  action_type: click
+wait: no
+then:
+ screen: screen_5
+ assertions:
+  - control_formula-edit-btn%as%canSee
+post:
+ - spec_T8_editInlineEquation.yml
+ - spec_T8_deleteInlineEquation.yml
+ 

@@ -1,0 +1,30 @@
+name: openInlineFormulaModal
+given:
+ screen: screen_5
+when:
+ action_0: 
+  action_name: control_9;0
+  action_type: click
+ action_1a:  
+  action_name: control_29
+  action_type: type
+  action_data: hey\n
+ action_1:
+  action_name: widget_4
+  action_type: click
+ action_2:
+  action_name: control_insert-dropdown_equation
+  action_type: click
+ action_3:
+  action_name: control_insert-equation_inline
+  action_type: click
+wait: no
+then:
+ screen: screen_insert-equation_modal
+ assertions:
+  - control_tab__wiris-editor__btn%as%canSee
+  - control_update-formula__btn%as%canSee
+post:
+ - spec_T8_insertInlineEquation.yml
+ - spec_T8_useInlineEquationLatexEditor.yml
+ 
