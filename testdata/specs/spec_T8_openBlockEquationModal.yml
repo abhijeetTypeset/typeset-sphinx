@@ -26,5 +26,5 @@ then:
   - control_update-formula__btn%as%canSee
 post:
  - spec_T8_insertBlockEquation.yml
-#  - spec_T8_useBlockEquationLatexEditor.yml
+ - spec_T8_useBlockEquationLatexEditor.yml
  

@@ -1,6 +1,8 @@
 name: insertInlineEquation
 given:
  screen: screen_insert-equation_modal
+ assertions:
+  - control_wiris-editor%as%canSee
 when:
  action_0: 
   action_name: control_tab__wiris-editor__btn
@@ -18,4 +20,5 @@ then:
   - control_editor_inline-formula%as%canSee
   - widget_formula-actions-dropdown%as%canSee
 post:
- - spec_T8_openInlineEquationActionsDropdown.yml
+ - spec_T8_editInlineEquation.yml
+ - spec_T8_deleteInlineEquation.yml

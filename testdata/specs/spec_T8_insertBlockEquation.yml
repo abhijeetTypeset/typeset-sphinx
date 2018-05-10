@@ -1,6 +1,8 @@
 name: insertBlockEquation
 given:
  screen: screen_insert-equation_modal
+ assertions:
+  - control_wiris-editor%as%canSee
 when:
  action_0: 
   action_name: control_tab__wiris-editor__btn
@@ -17,5 +19,6 @@ then:
  assertions:
   - control_editor_standalone-formula%as%canSee
   - widget_formula-actions-dropdown%as%canSee
-# post:
-#  - spec_T8_openBlockEquationActionsDropdown.yml
+post:
+ - spec_T8_editBlockEquation.yml
+ - spec_T8_deleteBlockEquation.yml

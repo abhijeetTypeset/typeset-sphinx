@@ -5,6 +5,10 @@ when:
  action_0: 
   action_name: control_tab__latex-editor__btn
   action_type: click
+ action_1: 
+  action_name: control_latex-editor_user-input
+  action_type: type
+  action_data: a + b
  action_2: 
   action_name: control_update-formula__btn
   action_type: click
@@ -17,5 +21,3 @@ then:
  assertions:
   - control_editor_inline-formula%as%canSee
   - widget_formula-actions-dropdown%as%canSee
-post:
- - spec_T8_openInlineEquationActionsDropdown.yml
