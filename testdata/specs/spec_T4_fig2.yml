@@ -34,3 +34,4 @@ then:
   - control_68;0%as%canSee
 post:
  - spec_T5_figProperties_1.yml
+ - spec_T5_figProperties_6.yml
