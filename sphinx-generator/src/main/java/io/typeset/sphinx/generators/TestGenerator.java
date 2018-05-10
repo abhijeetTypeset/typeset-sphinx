@@ -101,7 +101,7 @@ public class TestGenerator {
       } else {
         specsToRun = this.getAllTests();
       }
-      System.out.println("About to run following " + specsToRun.size() + " specs");
+      System.out.println("Enabled specs :" + specsToRun.size());
       for (final String specName : specsToRun) {
         System.out.println("\t - " + specName);
       }
