@@ -25,6 +25,6 @@ then:
   - control_tab__latex-editor__btn%as%canSee
   - control_update-formula__btn%as%canSee
 post:
-#  - spec_T8_insertInlineEquation.yml
+ - spec_T8_insertInlineEquation.yml
  - spec_T8_useInlineEquationLatexEditor.yml
  
