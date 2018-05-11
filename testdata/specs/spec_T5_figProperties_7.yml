@@ -1,0 +1,21 @@
+name: FiguresAddCaptionTest
+given:
+  screen: screen_5
+  assertions:
+    - control_68%as%canSee
+    - control_editor_caption%not%canSee
+when:
+  action_0:
+    action_name: widget_editor_figure-properties
+    action_type: click
+  action_1:
+    action_name: control_editor_figure-properties_caption_toggle_button
+    action_type: click
+  action_2:
+    action_name: control_9;0
+    action_type: click
+wait: 'no'
+then:
+  screen: screen_5
+  assertions:
+    - control_editor_caption%as%canSee
