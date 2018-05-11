@@ -86,10 +86,10 @@ public class ExtentReporterNG implements IReporter {
 			String folderName = UUID.randomUUID().toString();
 			uploadToS3(folderName, logFile, screenshotDir, allScreenshots);
 
-			String slackMsg = "*#channel Errors have occured in Sphinx " + jobName + ".*\n";
+			String slackMsg = "*<!channel> Errors have occured in Sphinx " + jobName + ".*\n";
 			
 			if (buildURL != null) {
-				slackMsg += "Jenkins logs can be found at " + buildURL + "/console \n";
+				slackMsg += "Jenkins logs can be found at " + buildURL + "console \n";
 			}
 
 			slackMsg += "Maven logs and screenshots can be found at\n" + S3_LINK + S3_BUCKET_NAME + "/" + folderName

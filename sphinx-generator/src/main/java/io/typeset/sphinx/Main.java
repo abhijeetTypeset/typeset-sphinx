@@ -60,6 +60,8 @@ public class Main {
 		if (params.getSlackChannel() != null) {
 			slackChannel = params.getSlackChannel();
 		}
+		System.out.println("Slack notification channel set to " + slackChannel);
+		
 
 		// clean the output directory
 		cleanOutput();
