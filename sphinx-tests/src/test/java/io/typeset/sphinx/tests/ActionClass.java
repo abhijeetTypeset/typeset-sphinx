@@ -16,7 +16,6 @@ import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import org.openqa.selenium.InvalidElementStateException;
 
-
 import org.openqa.selenium.JavascriptExecutor;
 
 import io.typeset.sphinx.tests.ConfigClass;
@@ -36,9 +35,15 @@ public class ActionClass extends ConfigClass {
 	}
 
 	public boolean atPage(String url) {
+		try {
+			Thread.sleep(10000);
+		} catch (final InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		String pageUrl = driver.getCurrentUrl().replace("https://", "").replace("http://", "").replace("www.", "");
-		//if (pageUrl.startsWith(url)) {
-		if(pageUrl.contains(url)) {
+		// if (pageUrl.startsWith(url)) {
+		if (pageUrl.contains(url)) {
 			System.out.println("At page " + url);
 			return true;
 		} else {
@@ -54,6 +59,12 @@ public class ActionClass extends ConfigClass {
 		final WebDriverWait wait = new WebDriverWait(driver, 15);
 		final WebElement element = wait.until(ExpectedConditions.elementToBeClickable(locator));
 		driver.findElements(locator).get(eNo).click();
+		try {
+			Thread.sleep(5000);
+		} catch (final InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
 	public boolean contains(By locator, String expectedContent, String elementNumber) {
@@ -100,59 +111,55 @@ public class ActionClass extends ConfigClass {
 
 	public void scroll_down_vertical(By locator, String byPixles, String elementNumber) throws InterruptedException {
 		final WebDriverWait wait = new WebDriverWait(driver, 15);
-		JavascriptExecutor jse = (JavascriptExecutor)driver;
+		JavascriptExecutor jse = (JavascriptExecutor) driver;
 		int scrollY = 250;
 		int scrollX = 0;
 		try {
 			scrollY = Integer.parseInt(byPixles);
-		}catch(Exception e) {
-			System.out.println("scroll length not integer, using default:W"
-					+ "");
+		} catch (Exception e) {
+			System.out.println("scroll length not integer, using default:W" + "");
 		}
 		String scrollCmd = "window.scrollBy(" + scrollX + "," + scrollY + ")";
 		jse.executeScript(scrollCmd, "");
 	}
-	
+
 	public void scroll_up_vertical(By locator, String byPixles, String elementNumber) throws InterruptedException {
 		final WebDriverWait wait = new WebDriverWait(driver, 15);
-		JavascriptExecutor jse = (JavascriptExecutor)driver;
+		JavascriptExecutor jse = (JavascriptExecutor) driver;
 		int scrollY = -250;
 		int scrollX = 0;
 		try {
 			scrollY = Integer.parseInt(byPixles);
-		}catch(Exception e) {
-			System.out.println("scroll length not integer, using default:W"
-					+ "");
+		} catch (Exception e) {
+			System.out.println("scroll length not integer, using default:W" + "");
 		}
 		String scrollCmd = "window.scrollBy(" + scrollX + "," + scrollY + ")";
 		jse.executeScript(scrollCmd, "");
 	}
-	
+
 	public void scroll_up_horizontal(By locator, String byPixles, String elementNumber) throws InterruptedException {
 		final WebDriverWait wait = new WebDriverWait(driver, 15);
-		JavascriptExecutor jse = (JavascriptExecutor)driver;
+		JavascriptExecutor jse = (JavascriptExecutor) driver;
 		int scrollX = -250;
 		int scrollY = 0;
 		try {
 			scrollX = Integer.parseInt(byPixles);
-		}catch(Exception e) {
-			System.out.println("scroll length not integer, using default:W"
-					+ "");
+		} catch (Exception e) {
+			System.out.println("scroll length not integer, using default:W" + "");
 		}
 		String scrollCmd = "window.scrollBy(" + scrollX + "," + scrollY + ")";
 		jse.executeScript(scrollCmd, "");
 	}
-	
+
 	public void scroll_down_horizontal(By locator, String byPixles, String elementNumber) throws InterruptedException {
 		final WebDriverWait wait = new WebDriverWait(driver, 15);
-		JavascriptExecutor jse = (JavascriptExecutor)driver;
+		JavascriptExecutor jse = (JavascriptExecutor) driver;
 		int scrollX = 250;
 		int scrollY = 0;
 		try {
 			scrollX = Integer.parseInt(byPixles);
-		}catch(Exception e) {
-			System.out.println("scroll length not integer, using default:W"
-					+ "");
+		} catch (Exception e) {
+			System.out.println("scroll length not integer, using default:W" + "");
 		}
 		String scrollCmd = "window.scrollBy(" + scrollX + "," + scrollY + ")";
 		jse.executeScript(scrollCmd, "");
@@ -162,10 +169,10 @@ public class ActionClass extends ConfigClass {
 		String timestamp = System.currentTimeMillis() + "";
 
 		String rep_data = data.replace("{{t}}", timestamp);
-		
+
 		return rep_data;
 	}
-	
+
 	public void type(By locator, String data) throws InterruptedException {
 		data = replaceTemplates(data);
 		System.out.println("locator " + locator.toString());
@@ -272,8 +279,7 @@ public class ActionClass extends ConfigClass {
 
 			try {
 				parent = getParent(parent);
-			}
-			catch (NoSuchElementException e) {
+			} catch (NoSuchElementException e) {
 				parent = null;
 			}
 
@@ -336,7 +342,7 @@ public class ActionClass extends ConfigClass {
 		}
 		int eNo = getElementNumber(elementNumber);
 		List<WebElement> elements = driver.findElements(locator);
-		if(eNo > elements.size()){
+		if (eNo > elements.size()) {
 			System.out.println("element index higher than present at the moment");
 			return false;
 		}
@@ -352,13 +358,13 @@ public class ActionClass extends ConfigClass {
 
 	}
 
-  public boolean toggled(By locator, String elementNumber) {
+	public boolean toggled(By locator, String elementNumber) {
 		if (locator == null) {
 			return false;
 		}
 		int eNo = getElementNumber(elementNumber);
 		List<WebElement> elements = driver.findElements(locator);
-		if(eNo > elements.size()){
+		if (eNo > elements.size()) {
 			System.out.println("element index higher than present at the moment");
 			return false;
 		}
@@ -378,13 +384,13 @@ public class ActionClass extends ConfigClass {
 		int eNo = getElementNumber(elementNumber);
 		final WebDriverWait wait = new WebDriverWait(driver, 15);
 		data = substituteKeys(data);
-		System.out.println("Typing "+data);
+		System.out.println("Typing " + data);
 
 		final WebElement element = driver.findElements(locator).get(eNo);
 
 		int length = element.getSize().getWidth();
-		String [] movement = new String[length/2];
-		for(int idx = 0; idx<length/2; idx++) {
+		String[] movement = new String[length / 2];
+		for (int idx = 0; idx < length / 2; idx++) {
 			movement[idx] = Keys.ARROW_LEFT + "";
 		}
 		new Actions(driver).moveToElement(element).sendKeys(movement).sendKeys(data).perform();
@@ -394,13 +400,13 @@ public class ActionClass extends ConfigClass {
 		int eNo = getElementNumber(elementNumber);
 		final WebDriverWait wait = new WebDriverWait(driver, 15);
 		data = substituteKeys(data);
-		System.out.println("Typing "+data);
+		System.out.println("Typing " + data);
 
 		final WebElement element = driver.findElements(locator).get(eNo);
 
 		int length = element.getSize().getWidth();
-		String [] movement = new String[length/2];
-		for(int idx = 0; idx<length/2; idx++) {
+		String[] movement = new String[length / 2];
+		for (int idx = 0; idx < length / 2; idx++) {
 			movement[idx] = Keys.ARROW_RIGHT + "";
 		}
 		new Actions(driver).moveToElement(element).sendKeys(movement).sendKeys(data).perform();
@@ -431,7 +437,7 @@ public class ActionClass extends ConfigClass {
 		while (textData.contains("\\t")) {
 			textData = textData.replace("\\n", Keys.TAB);
 		}
-		
+
 		while (textData.contains("\\b")) {
 			textData = textData.replace("\\b", Keys.BACK_SPACE);
 		}
@@ -493,7 +499,6 @@ public class ActionClass extends ConfigClass {
 		System.out.println("Type " + data);
 		new Actions(driver).sendKeys(caption, data).perform();
 
-
 	}
 
 	public boolean componentCaptionContains(By locator, String expectedContent, String elementNumber) {
@@ -520,23 +525,20 @@ public class ActionClass extends ConfigClass {
 		return false;
 	}
 
-
-	public boolean hasElementsTotal(By locator, String totalCount, String notUsed)
-	{
+	public boolean hasElementsTotal(By locator, String totalCount, String notUsed) {
 		System.out.println("checking count for " + locator.toString());
 		final WebDriverWait wait = new WebDriverWait(driver, 15);
 		final WebElement element = wait.until(ExpectedConditions.elementToBeClickable(locator));
 		int elementsFound = driver.findElements(locator).size();
 		int expectedCount = getElementNumber(totalCount);
 		System.out.println("expecting " + expectedCount + ", found " + elementsFound);
-		
+
 		if (elementsFound == expectedCount) {
 			return true;
-		}else {
+		} else {
 			return false;
 		}
 	}
-
 
 	public void waitForALongWhile() {
 		try {
