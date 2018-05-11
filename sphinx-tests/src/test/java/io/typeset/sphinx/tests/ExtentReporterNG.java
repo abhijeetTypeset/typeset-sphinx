@@ -69,6 +69,10 @@ public class ExtentReporterNG implements IReporter {
 		String screenshotDir = sphinxDir + File.separator + "Screenshots";
 
 		System.out.println("Screenshots " + logFile + " -- " + screenshotDir);
+		
+		if(!new File(screenshotDir).exists()) {
+			return;
+		}
 
 		List<String> allScreenshots = getAllScreenshots(screenshotDir);
 
