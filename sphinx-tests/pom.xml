@@ -69,7 +69,6 @@
                             <suiteXmlFiles>
                                 <suiteXmlFile>${project.build.directory}/generated-test-sources/testng.xml</suiteXmlFile>
                             </suiteXmlFiles>
-			     <redirectTestOutputToFile>true</redirectTestOutputToFile>
                         </configuration>
                     </execution>
                 </executions>

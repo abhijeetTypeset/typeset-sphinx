@@ -30,6 +30,8 @@ import com.ullink.slack.simpleslackapi.SlackChannel;
 import com.ullink.slack.simpleslackapi.SlackSession;
 import com.ullink.slack.simpleslackapi.impl.SlackSessionFactory;
 
+import io.typeset.sphinx.Main;
+
 public class ExtentReporterNG implements IReporter {
 
 	String functionStart = "[FUNCTION_START]";
@@ -38,7 +40,6 @@ public class ExtentReporterNG implements IReporter {
 	String testName = "Required Test Name";
 	String screenShotName = "Screenshot can be found at";
 	private static final String S3_BUCKET_NAME = "typeset-sphinx-output";
-	private static final String SLACK_CHANNEL = "bot-test";
 	private static final String S3_LINK = "https://s3.console.aws.amazon.com/s3/buckets/";
 
 	private List<String> readLogs(String filename) {
@@ -57,10 +58,60 @@ public class ExtentReporterNG implements IReporter {
 	}
 
 	public void generateReport(List<XmlSuite> xmlSuites, List<ISuite> suites, String outputDirectory) {
-		String outputFile = System.getProperty("user.dir") + File.separator + "target" + File.separator
-				+ "surefire-reports" + File.separator + "TestSuite-output.txt";
-		List<String> logLines = readLogs(outputFile);
-		processFiles(logLines, outputFile);
+		// String outputFile = System.getProperty("user.dir") + File.separator +
+		// "target" + File.separator
+		// + "surefire-reports" + File.separator + "TestSuite-output.txt";
+		// List<String> logLines = readLogs(outputFile);
+		// processFiles(logLines, outputFile);
+
+		File sphinxDir = new File(System.getProperty("user.dir")).getParentFile();
+		String logFile = sphinxDir + File.separator + "sphinx.log";
+		String screenshotDir = sphinxDir + File.separator + "Screenshots";
+
+		System.out.println("Screenshots " + logFile + " -- " + screenshotDir);
+
+		List<String> allScreenshots = getAllScreenshots(screenshotDir);
+
+		String jobName = System.getenv("JOB_NAME");
+		if (jobName == null) {
+			jobName = "local";
+		}
+		String buildURL = System.getenv("BUILD_URL");
+
+		if (allScreenshots.size() > 0) {
+			String folderName = UUID.randomUUID().toString();
+			uploadToS3(folderName, logFile, screenshotDir, allScreenshots);
+
+			String slackMsg = "*#channel Errors have occured in Sphinx " + jobName + ".*\n";
+			
+			if (buildURL != null) {
+				slackMsg += "Jenkins logs can be found at " + buildURL + "/console \n";
+			}
+
+			slackMsg += "Maven logs and screenshots can be found at\n" + S3_LINK + S3_BUCKET_NAME + "/" + folderName
+					+ "/?region=us-west-2&tab=overview";
+			sendSlackMessage(slackMsg);
+		}
+
+	}
+
+	private List<String> getAllScreenshots(String screenshotDir) {
+		File folder = new File(screenshotDir);
+		File[] listOfFiles = folder.listFiles();
+
+		List<String> allScreenshots = new ArrayList<String>();
+		for (int i = 0; i < listOfFiles.length; i++) {
+			if (listOfFiles[i].isFile()) {
+				System.out.println("File " + listOfFiles[i].getName());
+
+				String fileName = listOfFiles[i].getName();
+				if (fileName.endsWith(".png")) {
+					allScreenshots.add(fileName);
+				}
+
+			}
+		}
+		return allScreenshots;
 	}
 
 	private void writeProcessedOutput(List<List> content, String processedFilename, String outputFile) {
@@ -156,7 +207,7 @@ public class ExtentReporterNG implements IReporter {
 		writeProcessedOutput(allTtestLogs, processedFilename, outputFile);
 		if (foundErrors) {
 			String folderName = UUID.randomUUID().toString();
-			uploadToS3(folderName, processedFilename, outputFile, imageList);
+			// uploadToS3(folderName, processedFilename, outputFile, imageList);
 			String failingSpecString = "";
 			for (String s : failingSpecs) {
 				failingSpecString += s + ", ";
@@ -201,7 +252,7 @@ public class ExtentReporterNG implements IReporter {
 					.createWebSocketSlackSession("xoxb-276710034624-GyYuox2vRUJ2zbfc0l3BE6Qe");
 
 			session.connect();
-			SlackChannel channel = session.findChannelByName(SLACK_CHANNEL);
+			SlackChannel channel = session.findChannelByName(Main.slackChannel);
 
 			SlackAttachment arg2 = null;
 			session.sendMessage(channel, slackMsg, arg2);
@@ -224,24 +275,19 @@ public class ExtentReporterNG implements IReporter {
 		client.putObject(putObjectRequest);
 	}
 
-	private String uploadToS3(String folderName, String processedFilename, String outputFile, List<String> imageList) {
+	private String uploadToS3(String folderName, String mavenLog, String screenshotDir, List<String> imageList) {
 		AWSCredentials credentials = new BasicAWSCredentials("AKIAJJAUVBYLZ7H2JJRQ",
 				"Bq1wg1OLSLwClcnYIBDIwl6H1ZGLsEtIbksp3cD9");
 		AmazonS3 s3client = new AmazonS3Client(credentials);
 
 		createFolder(folderName, s3client);
 
-		s3client.putObject(new PutObjectRequest(S3_BUCKET_NAME, folderName + "/processed_output.txt",
-				new File(processedFilename)));
+		s3client.putObject(new PutObjectRequest(S3_BUCKET_NAME, folderName + "/maven_log.txt", new File(mavenLog)));
 
-		s3client.putObject(new PutObjectRequest(S3_BUCKET_NAME, folderName + "/full_output.txt", new File(outputFile)));
-
-		int idx = 0;
 		for (String image : imageList) {
-			String imageName = folderName + "/image_" + idx + ".png";
-			idx++;
-			System.out.println("uploading image " + image);
-			s3client.putObject(new PutObjectRequest(S3_BUCKET_NAME, imageName, new File(image)));
+			String imageName = folderName + "/" + image;
+			s3client.putObject(
+					new PutObjectRequest(S3_BUCKET_NAME, imageName, new File(screenshotDir + File.separator + image)));
 		}
 
 		return folderName;
