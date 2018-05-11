@@ -39,7 +39,7 @@ import io.typeset.sphinx.readers.ModelReader;
 public class Main {
 	private static final Logger logger = LogManager.getLogger("Log");
 
-	public static String slackChannel = "bot-test";
+	public static String slackChannel = "editor-tech";
 
 	public static void main(String[] args) throws IOException, IllegalAccessException, InvocationTargetException,
 			JClassAlreadyExistsException, ParserConfigurationException, TransformerException, InvalidKeySpecException,
