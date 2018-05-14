@@ -12,6 +12,3 @@ then:
   - widget_wiris-editor%as%canSee
   - widget_latex-editor%as%canSee
 post:
- - spec_T4_eqn_block_5.yml
- # - spec_T4_eqn_block_5-b.yml
- 

@@ -77,12 +77,14 @@ public class ExtentReporterNG implements IReporter {
 		List<String> allScreenshots = getAllScreenshots(screenshotDir);
 
 		String jobName = System.getenv("JOB_NAME");
+		boolean postToSlack = true;
 		if (jobName == null) {
 			jobName = "local";
+			postToSlack = false;
 		}
 		String buildURL = System.getenv("BUILD_URL");
 
-		if (allScreenshots.size() > 0) {
+		if (allScreenshots.size() > 0 && postToSlack) {
 			String folderName = UUID.randomUUID().toString();
 			uploadToS3(folderName, logFile, screenshotDir, allScreenshots);
 

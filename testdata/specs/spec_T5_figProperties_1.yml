@@ -11,6 +11,5 @@ then:
  assertions:
   - control_figure-width_twocolumn%as%canSee
 post:
- - spec_T5_figProperties_2.yml
  - spec_T5_figProperties_3.yml
  - spec_T5_figProperties_4.yml

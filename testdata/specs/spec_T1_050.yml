@@ -27,4 +27,4 @@ wait: no
 then:
  screen: screen_5
  assertions: 
-post: [spec_T1_05.yml]
+post:

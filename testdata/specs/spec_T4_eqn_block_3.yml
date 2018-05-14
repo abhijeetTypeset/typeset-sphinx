@@ -11,4 +11,3 @@ then:
  assertions:
   - control_editor_standalone-formula%as%canSee
 post:
- - spec_T4_eqn_block_4.yml 

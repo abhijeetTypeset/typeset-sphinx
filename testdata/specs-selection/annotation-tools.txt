@@ -7,7 +7,6 @@ spec_T3_020.yml
 spec_T3_030.yml
 spec_T3_040.yml
 spec_T3_050.yml
-spec_T3_060.yml
 spec_T3_070.yml
 spec_T3_080.yml
 spec_T3_090.yml
