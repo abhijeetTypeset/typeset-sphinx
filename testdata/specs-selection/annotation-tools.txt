@@ -16,7 +16,6 @@ spec_T3_120.yml
 spec_T1_040.yml
 spec_T1_050.yml
 spec_T1_060.yml
-spec_T1_070.yml
 spec_T1_080.yml
 spec_T1_090.yml
 spec_T1_100.yml
