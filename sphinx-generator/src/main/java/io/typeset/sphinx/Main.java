@@ -39,6 +39,8 @@ import io.typeset.sphinx.readers.ModelReader;
 public class Main {
 	private static final Logger logger = LogManager.getLogger("Log");
 
+	public static String slackChannel = "editor-tech";
+
 	public static void main(String[] args) throws IOException, IllegalAccessException, InvocationTargetException,
 			JClassAlreadyExistsException, ParserConfigurationException, TransformerException, InvalidKeySpecException,
 			CloneNotSupportedException, ClassNotFoundException {
@@ -46,7 +48,7 @@ public class Main {
 		Params params = getParameters(args);
 		// get path to config file
 		String configFile = params.getConfigFile();
-		
+
 		if (configFile == null || !new File(configFile).isFile()) {
 			logger.error("Config file invalid");
 			throw new InvalidConfigException("Config file invalid");
@@ -54,6 +56,12 @@ public class Main {
 
 		// read configuration
 		ConfigReader.read(configFile);
+
+		if (params.getSlackChannel() != null) {
+			slackChannel = params.getSlackChannel();
+		}
+		System.out.println("Slack notification channel set to " + slackChannel);
+		
 
 		// clean the output directory
 		cleanOutput();
@@ -112,6 +120,9 @@ public class Main {
 		Option selection = new Option("s", "selection", true, "spec selection");
 		options.addOption(selection);
 
+		Option channel = new Option("n", "channel", true, "slack channel");
+		options.addOption(channel);
+
 		CommandLineParser parser = new DefaultParser();
 		HelpFormatter formatter = new HelpFormatter();
 		CommandLine cmd;
@@ -127,7 +138,7 @@ public class Main {
 		}
 
 		params.setEnabledSpec(cmd.getOptionValue("selection"));
-
+		params.setSlackChannel(cmd.getOptionValue("channel"));
 		return params;
 	}
 
@@ -140,6 +151,16 @@ public class Main {
 			logger.debug("Error in cleaning directory");
 
 		}
+
+		logger.debug("Cleaning screenshots directory");
+		// clean output directory
+		try {
+			FileUtils.deleteDirectory(new File("Screenshots"));
+		} catch (Exception e) {
+			logger.debug("Error in cleaning directory");
+
+		}
+
 	}
 
 }

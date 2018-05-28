@@ -1,0 +1,21 @@
+name: AssistiveWritingErrorMarkerTest
+given:
+ screen: screen_5
+ assertions:
+  - control_assistive-writing_status_box%as%enabled
+when:
+ action_1: 
+  action_name: control_9;0
+  action_type: click
+ action_1a:
+  action_name: control_29;0
+  action_type: type
+  action_data: Spelling errore
+wait: short
+then:
+ screen: screen_5
+ assertions:
+  - control_assistive-writing_error_marker%as%canSee
+post:
+ - spec_T8_assistive_writing_2.yml
+ - spec_T8_assistive_writing_4.yml

@@ -12,9 +12,7 @@ import org.testng.TestListenerAdapter;
 import io.typeset.sphinx.tests.ConfigClass;
 
 public class Screenshot extends TestListenerAdapter {
-	private static String fileSeperator = File.separator;
-
-	public static String takeScreenShot(WebDriver driver, String screenShotName, String testName) {
+	public static String takeScreenShot(WebDriver driver, String screenShotName) {
 		try {
 			String directoryName = "Screenshots";
 			final File file = new File(directoryName);
@@ -24,7 +22,7 @@ public class Screenshot extends TestListenerAdapter {
 			}
 
 			final File screenshotFile = ((TakesScreenshot) driver).getScreenshotAs(OutputType.FILE);
-			final File targetFile = new File(directoryName + fileSeperator + testName, screenShotName);
+			final File targetFile = new File(directoryName, screenShotName);
 
 			try {
 				FileUtils.copyFile(screenshotFile, targetFile);
@@ -57,12 +55,10 @@ public class Screenshot extends TestListenerAdapter {
 		this.driver = this.con.driver;
 
 		final String testClassName = getTestClassName(result.getInstanceName()).trim();
-
-		final String testMethodName = result.getName().toString().trim();
-		final String screenShotName = testMethodName + ".png";
+		final String screenShotName = testClassName + ".png";
 
 		if (this.driver != null) {
-			final String imagePath = takeScreenShot(this.driver, screenShotName, testClassName);
+			final String imagePath = takeScreenShot(this.driver, screenShotName);
 			System.out.println("Screenshot can be found at : " + imagePath);
 		}
 	}

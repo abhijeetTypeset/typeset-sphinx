@@ -1,0 +1,16 @@
+name: AssistiveWritingSuggestionTooltipTest
+given:
+ screen: screen_5
+ assertions:
+  - control_assistive-writing_status_box%as%enabled
+  - control_assistive-writing_error_marker%as%canSee
+when:
+ action_1: 
+  action_name: control_assistive-writing_error_marker;0
+  action_type: click
+then:
+ screen: screen_5
+ assertions:
+  - widget_assistive-writing_suggestion_tooltip%as%enabled
+post:
+ - spec_T8_assistive_writing_3.yml

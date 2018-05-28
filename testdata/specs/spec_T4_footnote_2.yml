@@ -10,4 +10,4 @@ then:
  screen: screen_5
  assertions:
   - control_editor_click-footnote%as%canSee
-post: [spec_T4_footnote_3.yml]
+post: 

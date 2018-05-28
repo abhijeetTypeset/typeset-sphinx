@@ -92,42 +92,56 @@ public class TestGenerator {
 	private String defaultElementNumber = "0";
 	private Params params;
 
-	private Set<String> getEnabledSpecs() {
-		Set<String> enabledSpecs = new HashSet<String>();
-		// String enabledSpecsDir = inputDir + File.separator + "specs-enabled";
-		// File folder = new File(enabledSpecsDir);
-		// System.out.println("enabledSpecsDir..." + enabledSpecsDir);
-		// for (final File file : folder.listFiles()) {
-		// if (file.getAbsolutePath().endsWith(".yml")) {
-		// logger.info(file.getName() + ":" + file.getAbsolutePath());
-		// enabledSpecs.add(file.getName());
-		// }
-		// }
-		// logger.info("Found the following enabled specs: " + enabledSpecs);
-		// return enabledSpecs;
+  private Set<String> getEnabledSpecs() {
+    try {
+      Set<String> specsToRun = new HashSet<String>();
+      System.out.println("\n\nExtracting specs...");
+      if(this.params.getEnabledSpec() != null) {
+        specsToRun = this.getEnabledTests();
+      } else {
+        specsToRun = this.getAllTests();
+      }
+      System.out.println("Enabled specs :" + specsToRun.size());
+      for (final String specName : specsToRun) {
+        System.out.println("\t - " + specName);
+      }
+      System.out.println("\n\n");
+      return specsToRun;
+    } catch (Exception e) {
+      e.printStackTrace();
+      System.out.println("Exception while checking specs.");
+      System.exit(1);
+      return null;
+    }
+  }
 
-		if (this.params.getEnabledSpec() != null) {
-			String enabledSpecsFile = inputDir + File.separator + "specs-selection" + File.separator
-					+ this.params.getEnabledSpec();
-			Set<String> specLines = new TreeSet<String>();
-			try {
-				File f = new File(enabledSpecsFile);
-				BufferedReader b = new BufferedReader(new FileReader(f));
-				String line = "";
-				while ((line = b.readLine()) != null) {
-					specLines.add(line);
-				}
-				System.out.println("Enabled specs " + specLines);
-				return specLines;
-			} catch (Exception e) {
-				e.printStackTrace();
-				
-			}
-		}
-		System.out.println("exception while checking enabled specs, will run all ");
-		System.exit(1);
-		return null;
-	}
+  private Set<String> getEnabledTests() throws Exception {
+    Set<String> specLines = new TreeSet<String>();
+    String enabledSpecsFile = inputDir + File.separator + "specs-selection" + File.separator
+    + this.params.getEnabledSpec();
+    System.out.println("Running all specs from " + enabledSpecsFile);
+    File f = new File(enabledSpecsFile);
+    BufferedReader b = new BufferedReader(new FileReader(f));
+    String line = "";
+    while ((line = b.readLine()) != null) {
+      specLines.add(line);
+    }
+    return specLines;
+  }
+
+  private Set<String> getAllTests() throws Exception {
+    String allSpecsDir = inputDir + File.separator + "specs";
+    System.out.println("Running all specs from " + allSpecsDir);
+    File allSpecsFolder = new File(allSpecsDir);
+    Set<String> allSpecs = new TreeSet<String>();
+    for (final File file : allSpecsFolder.listFiles()) {
+      if (file.getAbsolutePath().endsWith(".yml")) {
+        logger.info(file.getName() + ":" + file.getAbsolutePath());
+        allSpecs.add(file.getName());
+      }
+    }
+    return allSpecs;
+  }
 
 	public TestGenerator(DefaultDirectedGraph<GraphNode, DefaultEdge> graph, GraphGenerator graphGenerator,
 			ModelGenerator classGenerator, Params params) {
