@@ -421,9 +421,14 @@ public class ActionClass extends ConfigClass {
 		final WebDriverWait wait = new WebDriverWait(driver, 15);
 
 		final WebElement element = driver.findElement(locator);
+		System.out.println("Clicking " + locator.toString());
+		String paraId = "data-spx-ctl-id=\"editor_paragraph\"";
+		if(locator.toString().contains(paraId)){
+			System.out.println("is paragraph");
+			String textElementClass = "sc-text-property";
+		}
 
 		final int length = element.getSize().getWidth();
-		System.out.println("length : " + length);
 		new Actions(driver).moveToElement(element).moveByOffset(-length / 2, 0).clickAndHold().moveByOffset(length, 0)
 				.release().perform();
 	}
