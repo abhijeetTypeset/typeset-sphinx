@@ -27,4 +27,4 @@ wait:
 then:
  screen: screen_5
  assertions: 
-  - control_47;1%as%canSee
+  - control_47;0%as%canSee
