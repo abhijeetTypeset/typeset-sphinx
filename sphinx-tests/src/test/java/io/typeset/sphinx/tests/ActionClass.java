@@ -6,6 +6,8 @@ import java.net.URL;
 import java.util.Iterator;
 import java.util.List;
 
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.openqa.selenium.By;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.NoSuchElementException;
@@ -15,7 +17,8 @@ import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import org.openqa.selenium.InvalidElementStateException;
-
+import org.openqa.selenium.logging.LogEntries;
+import org.openqa.selenium.logging.LogEntry;
 import org.openqa.selenium.JavascriptExecutor;
 
 import io.typeset.sphinx.tests.ConfigClass;
@@ -31,7 +34,7 @@ public class ActionClass extends ConfigClass {
 		final HttpURLConnection hurcon = (HttpURLConnection) url.openConnection();
 		hurcon.setRequestMethod("GET");
 		hurcon.connect();
-
+    System.out.println("Status code for " + url + " :" + hurcon.getResponseCode());
 	}
 
 	public boolean atPage(String url) {
