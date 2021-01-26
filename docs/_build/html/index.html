@@ -1,0 +1,146 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Typeset Sphinx documentation! &#8212; Typeset Sphinx alpha documentation</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="_static/language_data.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Overview" href="overview.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="typeset-sphinx-documentation">
+<h1>Typeset Sphinx documentation!<a class="headerlink" href="#typeset-sphinx-documentation" title="Permalink to this headline">¶</a></h1>
+<p>The framework would be primarily used by product-owners to specify (and test) different scenarios that may arise during the usage of the product. Such specifications would be referred to “test-scenarios” henceforth. An example of such a test is shown in Snippet 1.</p>
+<div class="highlight-rst notranslate"><div class="highlight"><pre><span></span>Given: the user is logged in and is at the Documents page
+When: the user clicks on the Formats Gallery
+Then: the Format Gallery page opens and 1 or more formats are displayed
+</pre></div>
+</div>
+<p><strong>Snippet</strong> 1</p>
+<p>It is worthwhile to know that product-owners (i.e. that framework’s intended users) may or may not be well versed with programming languages. Therefore, it is imperative that the language for specifying the test-scenarios be intuitive,  free from technical jargon. Additionally, it must be expressive enough to be able to represent all possible behaviors of the product.</p>
+<p>Furthermore, it is important to know that the product-owners may choose to specify partial test scenarios or end-to-end test scenarios. An end-to-end test-scenario implies a scenario that begins at the starting state of the product (<a class="reference external" href="https://typeset.io">Typeset Homepage</a>
+). Whereas a partial test-scenario need not not being at the starting state of the product. Given a product owner provides a partial test-scenario, it is the framework’s responsibility to automatically generate the missing pieces from the from the partial test-scenarios and subsequently generate end-to-end test scenarios.</p>
+<p>The end-to-end test scenarios generated or received by the framework (in the framework’ specific language) would then be converted into machine readable test-cases (for ex. using selenium webdrivers). These machine-readable test cases are then executed by the framework. The execution of the test-cases may happen in a synchronous or asynchronous manner.  The artifacts generated from the test-execution, such as test reports, log files, etc, would be aggregated and presented for review by the framework.</p>
+<div class="section" id="key-benefits">
+<h2>Key benefits<a class="headerlink" href="#key-benefits" title="Permalink to this headline">¶</a></h2>
+<p>Key benefits of the Typeset Sphinx framework are listed down in the following:</p>
+<ol class="arabic simple">
+<li>It works for both single-page and multi-page applications (as compared to page-object-model based frameworks)</li>
+<li>Provides high degree of automation - automatically generates models, test cases</li>
+<li>Provides high level of abstraction - users not well versed with programming languages can also provide test specification</li>
+<li>Provides high level of maintainability - test specifications remain relevant, even if low-level features such as Xpaths or CSSselector change over time</li>
+</ol>
+<div class="section" id="this-documentation-makes-the-most-sense-when-read-in-this-order">
+<h3>This documentation makes the most sense when read in this order<a class="headerlink" href="#this-documentation-makes-the-most-sense-when-read-in-this-order" title="Permalink to this headline">¶</a></h3>
+<div class="toctree-wrapper compound">
+<p class="caption"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="language.html">Model Specification</a></li>
+<li class="toctree-l1"><a class="reference internal" href="test-spec.html">Test Specification</a></li>
+<li class="toctree-l1"><a class="reference internal" href="error.html">Error Codes</a></li>
+</ul>
+</div>
+</div>
+</div>
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="#">Typeset Sphinx</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="language.html">Model Specification</a></li>
+<li class="toctree-l1"><a class="reference internal" href="test-spec.html">Test Specification</a></li>
+<li class="toctree-l1"><a class="reference internal" href="error.html">Error Codes</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="#">Documentation overview</a><ul>
+      <li>Next: <a href="overview.html" title="next chapter">Overview</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2021, Abhijeet Banerjee.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.8.5</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="_sources/index.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>
