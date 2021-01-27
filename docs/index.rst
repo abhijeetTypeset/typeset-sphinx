@@ -10,7 +10,7 @@ The framework would be primarily used by product-owners to specify (and test) di
   When: the user clicks on the Formats Gallery
   Then: the Format Gallery page opens and 1 or more formats are displayed
 
-**Snippet** 1
+**Snippet 1** 
 
 It is worthwhile to know that product-owners (i.e. that framework’s intended users) may or may not be well versed with programming languages. Therefore, it is imperative that the language for specifying the test-scenarios be intuitive,  free from technical jargon. Additionally, it must be expressive enough to be able to represent all possible behaviors of the product.
 
@@ -46,3 +46,11 @@ This documentation makes the most sense when read in this order
    language
    test-spec
    error
+
+
+About
+---------------------------------------------------------------
+
+This repository has been created and maintained by the Typeset team.
+Typeset.io is a platform to write and submit better research papers. It takes the best part of `online LaTeX Editor and Ms-Word Editor <https://typeset.io>`.
+
