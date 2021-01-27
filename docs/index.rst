@@ -52,5 +52,6 @@ About
 ---------------------------------------------------------------
 
 This repository has been created and maintained by the Typeset team.
-Typeset.io is a platform to write and submit better research papers. It takes the best part of `online LaTeX Editor and Ms-Word Editor <https://typeset.io>`.
+Typeset.io is a platform to write and submit better research papers. It takes the best part of (`online LaTeX Editor and Ms-Word Editor <https://typeset.io>`_
+)`.
 
